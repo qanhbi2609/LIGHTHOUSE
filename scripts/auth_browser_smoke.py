@@ -35,6 +35,12 @@ def main():
                         page.on('pageerror', lambda error: errors.append(str(error)))
                         page.goto(f'http://127.0.0.1:{port}', wait_until='networkidle')
                         card = page.locator('.auth-card').bounding_box()
+                        page.evaluate('document.fonts.ready')
+                        assert page.locator('.auth-brand').evaluate("el => getComputedStyle(el).fontFamily").startswith('Ribeye')
+                        assert page.evaluate("document.fonts.check('48px Ribeye')"), 'Ribeye font did not load'
+                        font_response = page.request.get(f'http://127.0.0.1:{port}/assets/fonts/ribeye-latin-400-normal.woff2')
+                        assert font_response.status == 200
+                        assert font_response.body()[:4] == b'wOF2'
                         if width == 1920:
                             assert card == {'x': 1270, 'y': 77, 'width': 540, 'height': 960}, card
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
