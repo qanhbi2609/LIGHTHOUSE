@@ -75,9 +75,11 @@ def main():
                         expect(page.locator('#login-form')).to_be_visible()
                         page.screenshot(path=str(OUT / f'login-{width}.png'))
                         # Verify the actual form, including its error path.
+                        page.locator('input[name="email"]').fill('quanly@lighthouse.test')
                         page.locator('input[name="password"]').fill('incorrect')
                         page.locator('#login-form button[type="submit"]').click()
-                        expect(page.locator('#toast')).to_contain_text('Email hoặc mật khẩu sai')
+                        expect(page.locator('.auth-notice')).to_contain_text('Email hoặc mật khẩu sai')
+                        page.locator('.auth-notice-layer').click(position={'x': 10, 'y': 10})
                         login(page, 'quanly@lighthouse.test')
                         sidebar_layout(page)
                         expect(page.locator('#toast')).not_to_be_visible()

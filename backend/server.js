@@ -56,11 +56,34 @@ const ext=isPng?'.png':isJpg?'.jpg':'.pdf',filename=crypto.randomBytes(14).toStr
 function counts(){return {students:db.students.length,active:db.students.filter(s=>s.status!=='Đã kết thúc hỗ trợ').length,alumni:db.students.filter(s=>s.status==='Đã kết thúc hỗ trợ').length,rooms:db.rooms.length,goals:db.goals.length,grades:db.grades.length,supportAmount:db.supports.reduce((s,x)=>s+Number(x.amount||0),0)}}
 async function route(req,res,u){let p=u.pathname,method=req.method,B=null;const parts=p.split('/').filter(Boolean);const id=parts[2];const read=async()=>B||(B=await body(req));
 if(p==='/api/health'&&method==='GET')return reply(res,200,{status:'ok',app:'LIGHTHOUSE',mode:'JSON DEMO',users:db.users.length});
-if(p==='/api/auth/login'&&method==='POST'){const a=await read();const who=db.users.find(x=>x.email.toLowerCase()===norm(a.email).toLowerCase()&&x.active);if(!who||!validatePassword(norm(a.password),who.passwordHash))error(401,'Email hoặc mật khẩu sai!');const t=crypto.randomBytes(32).toString('hex');sessions.set(t,{id:who.id,expires:Date.now()+7*86400000});return reply(res,200,{token:t,user:publicUser(who)});}
+if(p==='/api/auth/login'&&method==='POST'){const a=await read();const who=db.users.find(x=>x.email.toLowerCase()===norm(a.email).toLowerCase()&&x.active);if(!who||!validatePassword(String(a.password||''),who.passwordHash))error(401,'Email hoặc mật khẩu sai');const t=crypto.randomBytes(32).toString('hex');sessions.set(t,{id:who.id,expires:Date.now()+7*86400000});return reply(res,200,{token:t,user:publicUser(who)});}
 if(p==='/api/auth/logout'&&method==='POST'){sessions.delete((req.headers.authorization||'').replace(/^Bearer /,''));return reply(res,200,{message:'Đã đăng xuất'});}
 if(p==='/api/auth/me'&&method==='GET')return reply(res,200,{item:publicUser(user(req))});
-if(p==='/api/auth/forgot'&&method==='POST'){const a=await read();const account=db.users.find(x=>x.email.toLowerCase()===norm(a.email).toLowerCase()&&x.active);let code=null;if(account){code=String(crypto.randomInt(100000,1000000));db.otps=db.otps.filter(x=>x.userId!==account.id);db.otps.push({userId:account.id,hash:crypto.createHash('sha256').update(code).digest('hex'),expiry:Date.now()+5*60000});save()}return reply(res,200,{message:'Nếu email tồn tại, hệ thống đã tạo mã xác minh. Bản thử nghiệm không gửi email.',demoCode:(process.env.DEMO_ONLY==='1'||process.env.NODE_ENV!=='production')?code:undefined});}
-if(p==='/api/auth/reset'&&method==='POST'){const a=await read();const account=db.users.find(x=>x.email.toLowerCase()===norm(a.email).toLowerCase()&&x.active),otp=account&&db.otps.find(x=>x.userId===account.id);if(!otp||otp.expiry<Date.now()||otp.hash!==crypto.createHash('sha256').update(norm(a.code)).digest('hex'))error(400,'Mã xác minh sai hoặc đã hết hạn');if(norm(a.password).length<8)error(400,'Mật khẩu cần ít nhất 8 ký tự');account.passwordHash=hash(norm(a.password));db.otps=db.otps.filter(x=>x!==otp);save();return reply(res,200,{message:'Đổi mật khẩu thành công!'});}
+if(p==='/api/auth/forgot'&&method==='POST'){
+const a=await read(),email=norm(a.email).toLowerCase();if(!/^\S+@\S+\.\S+$/.test(email))error(400,'Email không hợp lệ');
+const account=db.users.find(x=>x.email.toLowerCase()===email&&x.active);let code=null;
+if(account){
+const old=db.otps.find(x=>x.userId===account.id);if(old?.resendAt>Date.now())error(429,'Vui lòng chờ trước khi gửi lại mã');
+code=String(crypto.randomInt(1000,10000));db.otps=db.otps.filter(x=>x.userId!==account.id);
+db.otps.push({userId:account.id,hash:crypto.createHash('sha256').update(code).digest('hex'),expiry:Date.now()+5*60000,resendAt:Date.now()+60000,attempts:0});save();
+}
+const [local,domain]=email.split('@');
+return reply(res,200,{message:'Nếu email tồn tại, hệ thống đã tạo mã xác minh. Bản thử nghiệm không gửi email.',maskedEmail:local.slice(0,2)+'**@'+domain,resendAfter:60,demoCode:(process.env.DEMO_ONLY==='1'||process.env.NODE_ENV!=='production')?code:undefined});
+}
+if(p==='/api/auth/verify'&&method==='POST'){
+const a=await read(),account=db.users.find(x=>x.email.toLowerCase()===norm(a.email).toLowerCase()&&x.active),otp=account&&db.otps.find(x=>x.userId===account.id);
+if(!otp)error(400,'Mã xác thực không hợp lệ');
+if(otp.expiry<=Date.now())error(400,'Mã xác thực hết hạn!');
+if(otp.verifiedHash||otp.attempts>=5)error(400,'Mã xác thực không hợp lệ');
+if(!/^\d{4}$/.test(norm(a.code))||otp.hash!==crypto.createHash('sha256').update(norm(a.code)).digest('hex')){otp.attempts=(otp.attempts||0)+1;save();error(400,'Mã xác thực không hợp lệ');}
+const resetToken=crypto.randomBytes(32).toString('hex');otp.verifiedHash=crypto.createHash('sha256').update(resetToken).digest('hex');save();return reply(res,200,{resetToken});
+}
+if(p==='/api/auth/reset'&&method==='POST'){
+const a=await read(),account=db.users.find(x=>x.email.toLowerCase()===norm(a.email).toLowerCase()&&x.active),otp=account&&db.otps.find(x=>x.userId===account.id);
+if(!otp||otp.expiry<=Date.now()||!otp.verifiedHash||otp.verifiedHash!==crypto.createHash('sha256').update(norm(a.resetToken)).digest('hex'))error(400,'Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn');
+const password=String(a.password||'');if(password.length<8||!/[A-Z]/.test(password)||!/[a-z]/.test(password)||!/[0-9]/.test(password)||!/[^A-Za-z0-9\s]/.test(password))error(400,'Mật khẩu không hợp lệ!');
+account.passwordHash=hash(password);db.otps=db.otps.filter(x=>x!==otp);for(const [key,session] of sessions)if(session.id===account.id)sessions.delete(key);save();return reply(res,200,{message:'Đổi mật khẩu thành công!'});
+}
 if(p==='/api/registrations'&&method==='POST'){const a=await read();const name=required(a.name,'họ tên'),email=required(a.email,'email');if(!/^\S+@\S+\.\S+$/.test(email))error(400,'Email không hợp lệ');if(db.registrations.some(r=>r.email===email&&r.status!=='Từ chối'))error(409,'Email đã có hồ sơ đăng ký');const item={id:nextId(db.registrations,'HS'),name,email,phone:required(a.phone,'số điện thoại'),dob:clean(a.dob,10),cccd:clean(a.cccd,12),hometown:clean(a.hometown),address:clean(a.address),school:required(a.school,'trường'),major:required(a.major,'ngành'),family:clean(a.family),description:clean(a.description),files:Array.isArray(a.files)?a.files.slice(0,6).map(f=>storeFile(f,'registration')):[],status:'Chờ kiểm tra',note:'',created:today()};db.registrations.push(item);save();return reply(res,201,{item,message:'Đăng ký thành công!'});}
 if(p==='/api/registrations'&&method==='GET'){allow(req,'registrations.view');const q=norm(u.searchParams.get('q'));return reply(res,200,{items:db.registrations.filter(r=>!q||same(r.name,q)||same(r.id,q)||same(r.status,q))});}
 if(parts[1]==='registrations'&&id&&parts.length===3&&method==='PATCH'){const actor=allow(req,'registrations.review'),a=await read(),r=find(db.registrations,id,'hồ sơ');if(!['Đạt yêu cầu','Chờ kiểm tra','Chờ bổ sung','Từ chối'].includes(a.status))error(400,'Trạng thái không hợp lệ');r.status=a.status;r.note=clean(a.note,1000);log(actor,'Xử lý hồ sơ',r.id+' → '+r.status);save();return reply(res,200,{item:r,message:'Đã lưu thành công!'});}
@@ -97,7 +120,7 @@ if(p==='/api/history'&&method==='GET'){allow(req,'history.view');const from=norm
 error(404,'Không tìm thấy API');}
 function serve(req,res,u){const pathname=u.pathname==='/'?'index.html':u.pathname.slice(1);const file=path.resolve(root,decodeURIComponent(pathname));const fileUpload=u.pathname.startsWith('/uploads/')?path.resolve(uploadsDir,u.pathname.slice(9)):null;const full=fileUpload||file;const allowed=fileUpload?full.startsWith(uploadsDir+path.sep):full.startsWith(root+path.sep);if(!allowed||!fs.existsSync(full)||!fs.statSync(full).isFile()){res.writeHead(404);res.end('Not found');return;}
 if(fileUpload&&!tokenUser(req)){/* for demo images only: browser img cannot send bearer header; hashed URL is opaque */}
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.pdf':'application/pdf'};const ext=path.extname(full);res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':fileUpload?'private, max-age=300':'no-cache'});fs.createReadStream(full).pipe(res);}
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.pdf':'application/pdf','.woff2':'font/woff2'};const ext=path.extname(full);res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':fileUpload?'private, max-age=300':'no-cache'});fs.createReadStream(full).pipe(res);}
 const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url,'http://localhost');if(u.pathname.startsWith('/api/'))return await route(req,res,u);if(req.method!=='GET')error(405,'Method không được hỗ trợ');return serve(req,res,u);}catch(e){if(e.status!==401&&e.status!==403)console.error('[LIGHTHOUSE]',e.message);if(!res.headersSent)reply(res,e.status||500,{error:e.status?e.message:'Đã xảy ra lỗi hệ thống!'});else res.end()}});
 if(require.main===module)server.listen(PORT,'0.0.0.0',()=>console.log('LIGHTHOUSE UC01–UC11 demo:',`http://localhost:${PORT}`));
 module.exports={server,db};
