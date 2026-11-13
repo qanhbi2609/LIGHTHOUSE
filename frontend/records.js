@@ -1,6 +1,6 @@
 'use strict';
 window.LighthouseRecords={create({api,esc,prettyDate,tag,permitted,put,setTitle,getPage,uploadImage,deleteImage,onBack}){
-let registrations=[],students=[],active=null,section='personal',regQuery='',regStatus='',studentQuery='';
+let registrations=[],students=[],active=null,section='personal',regQuery='',regStatus='',studentQuery='',photoFrom='',photoTo='';
 const $=(s,root=document)=>root.querySelector(s);
 const badge=value=>`<span class="tag records-badge ${/Đạt|Đang hỗ trợ|Hợp lệ/.test(value)?'good':value==='Chờ bổ sung'?'blue':/Chờ/.test(value)?'amber':'other'}">${esc(value||'—')}</span>`;
 const btn=(text,action,id='',style='secondary')=>`<button type="button" class="${style} small" data-action="${action}" data-id="${esc(id)}">${text}</button>`;
@@ -80,7 +80,7 @@ async function studentsView(){
 const tabs=[['personal','Thông tin cá nhân'],['grades','Học tập'],['goals','Mục tiêu 6 tháng'],['supports','Hỗ trợ'],['images','Hình ảnh']];
 function heading(s,editing=false){return `<div class="student-profile-heading"><div><h2>${esc(s.name)} · ${esc(s.id)}</h2><small>${esc(String(s.school||'').replace(/^Trường /,'').replaceAll('Đại học','ĐH'))} · ${esc(s.major)} · Niên khóa ${esc(s.cohort||'')}</small></div>${badge(s.status)}<span>Phòng hiện tại: ${esc(s.room||'Chưa có')}</span></div><div class="student-tabbar">${tabs.map(([key,label])=>`<button type="button" class="tab ${section===key?'selected':''}" data-tab="${key}">${label}</button>`).join('')}</div>`;}
 function profileTable(head,rows,widths){return `<div class="profile-table-scroll"><table>${widths?`<colgroup>${widths.map(w=>`<col style="width:${w}%">`).join('')}</colgroup>`:''}<thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')||`<tr><td colspan="${head.length}" class="empty">Chưa có dữ liệu.</td></tr>`}</tbody></table></div>`;}
-async function studentDetail(id){active=(await api('students/'+id)).item;section='personal';showSection();}
+async function studentDetail(id){if(active?.id!==id){photoFrom='';photoTo='';}active=(await api('students/'+id)).item;section='personal';showSection();}
 function showSection(){
  const s=active;if(!s)return;setTitle(getPage()==='alumni'?'Quản lý sinh viên kết thúc hỗ trợ':'Quản lý hồ sơ sinh viên · Xem hồ sơ');
  const personal=[['Họ tên',s.name],['CCCD',s.cccd],['Ngày sinh',prettyDate(s.dob)],['Quê quán',s.hometown],['Số điện thoại',s.phone],['Địa chỉ thường trú',s.address],['Email',s.email],['Hoàn cảnh gia đình',s.family],['Trường',s.school],['Ngành',s.major]];
@@ -89,11 +89,17 @@ function showSection(){
  if(section==='grades')content=`<h3>Quá trình học tập</h3>${profileTable(['NĂM HỌC','HỌC KỲ','GPA','XẾP LOẠI','Chứng chỉ','SỐ MÔN NỢ',''],(s.grades||[]).map(g=>`<tr><td>${esc(g.year)}</td><td>${esc(g.term)}</td><td>${esc(g.gpa)}</td><td>${esc(g.rank)}</td><td>${esc(g.certificates||'—')}</td><td>${esc(g.debts)}</td><td>${link('Xem bảng điểm',{url:g.evidence,previewRegion:g.previewRegion})}</td></tr>`))}`;
  if(section==='goals')content=`<h3>Quá trình đặt mục tiêu</h3>${profileTable(['NGÀY LẬP','MỤC TIÊU','NỘI DUNG CHI TIẾT','ĐÁNH GIÁ',''],(s.goals||[]).map(g=>`<tr><td>${prettyDate(g.sent)}</td><td>${esc(g.name)}</td><td><span class="profile-truncate">${esc(g.detail)}</span></td><td>${badge(g.status)}</td><td><button class="records-link" data-goal="${esc(g.id)}">Xem chi tiết</button></td></tr>`),[13,18,29,20,20])}`;
  if(section==='supports')content=`<h3>Các khoản hỗ trợ</h3>${profileTable(['TÊN HỖ TRỢ','LOẠI','THỜI GIAN','SỐ TIỀN',''],(s.supports||[]).map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${x.endDate?esc(x.date.slice(8,10)+'/'+x.date.slice(5,7)+'–'+prettyDate(x.endDate)):prettyDate(x.date)}</td><td>${Number(x.amount||0).toLocaleString('vi-VN')} đ</td><td>${link('Xem hóa đơn',{url:x.evidence,previewRegion:x.previewRegion})}</td></tr>`))}`;
- if(section==='images')content=`<div class="student-photo-gallery">${(s.images||[]).map(i=>`<div><button class="profile-photo" data-preview="${esc(i.url)}"><img src="${esc(i.url)}" alt="Hình ảnh sinh viên"></button><small>${prettyDate(i.created)}</small>${permitted('students.edit')?btn('Xóa','delete-image',i.id):''}</div>`).join('')}</div>${permitted('students.edit')?'<label class="add-photo-button">Thêm ảnh mới<input id="profile-upload" type="file" accept="image/jpeg,image/png" hidden></label>':''}`;
+ if(section==='images'){
+  const invalid=photoFrom&&photoTo&&photoFrom>photoTo,images=invalid?[]:(s.images||[]).filter(i=>(!photoFrom||i.created.slice(0,7)>=photoFrom)&&(!photoTo||i.created.slice(0,7)<=photoTo));
+  const groups=new Map();for(const i of [...images].sort((a,b)=>b.created.localeCompare(a.created))){const month=i.created.slice(0,7);if(!groups.has(month))groups.set(month,[]);groups.get(month).push(i);}
+  content=`<div class="profile-image-tools"><input type="month" id="photo-from" aria-label="Từ tháng" value="${esc(photoFrom)}"><input type="month" id="photo-to" aria-label="Đến tháng" value="${esc(photoTo)}">${permitted('students.edit')?'<label class="add-photo-button">＋ Thêm ảnh mới<input id="profile-upload" type="file" accept="image/jpeg,image/png" hidden></label>':''}</div><p class="records-error" role="alert">${invalid?'Khoảng thời gian không hợp lệ!':''}</p><h3>Danh mục hình ảnh</h3>${[...groups].map(([month,rows])=>`<h4>${Number(month.slice(5))}/${month.slice(0,4)}</h4><div class="student-photo-gallery">${rows.map(i=>`<div><button class="profile-photo" data-preview="${esc(i.url)}"><img src="${esc(i.url)}" alt="Hình ảnh sinh viên"></button><small>${prettyDate(i.created)}</small>${permitted('students.edit')?btn('Xóa','delete-image',i.id):''}</div>`).join('')}</div>`).join('')||'<p>Chưa có dữ liệu.</p>'}`;
+ }
+
  put(`<div class="records-workspace records-profile-view" data-profile-section="${section}"><section class="panel student-profile ${section==='goals'||section==='grades'?'profile-tall':''}">${heading(s)}<div class="student-tab-body records-profile-scroll">${content}</div>${section==='personal'?`<div class="student-profile-actions">${btn('Quay lại','back')}${getPage()!=='alumni'&&permitted('students.edit')?btn('Sửa','edit',s.id,'primary'):''}</div>`:''}</section></div>`);
  const root=$('.records-workspace');root.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{section=b.dataset.tab;showSection();});bindPreviews(root);
  root.querySelectorAll('[data-goal]').forEach(b=>b.onclick=()=>goal(s.goals.find(g=>g.id===b.dataset.goal)));
- root.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>b.dataset.action==='back'?onBack():b.dataset.action==='edit'?editStudent(s.id):deleteImage(b.dataset.id));
+ root.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>b.dataset.action==='back'?onBack():b.dataset.action==='edit'?editStudent(s.id):deleteImage(b.dataset.id,s.id));
+ $('#photo-from',root)?.addEventListener('change',e=>{photoFrom=e.target.value;showSection();});$('#photo-to',root)?.addEventListener('change',e=>{photoTo=e.target.value;showSection();});
  $('#profile-upload',root)?.addEventListener('change',e=>uploadImage(s.id,e.target));
 }
 function goal(g){if(!g)return;layer(`<section class="records-goal" role="dialog" aria-modal="true" aria-label="Chi tiết mục tiêu"><header><h2>Chi tiết mục tiêu</h2><button type="button" data-close aria-label="Đóng">×</button></header><div class="goal-summary"><strong>Ngày gửi</strong><span>${prettyDate(g.sent)}</span><strong>Mục tiêu</strong><div class="review-value">${esc(g.name)}</div></div><strong>Chi tiết nội dung</strong><div class="review-value goal-description">${esc(g.detail)}</div><strong>Đánh giá</strong><div>${badge(g.status)}</div></section>`,'records-goal-layer');}
@@ -116,5 +122,5 @@ async function editStudent(id){
  confirm('Xác nhận lưu thông tin?',async()=>{const d=await api('students/'+id,{method:'PATCH',body:data});active={...s,...d.item};notice('Lưu hồ sơ thành công!');});
  };
 }
-return {registrations:registrationsView,students:studentsView,review,accept,studentDetail,studentTab:key=>{section=key;showSection();},editStudent,filterRegistrations:value=>{regStatus=value==='Trạng thái'?'':value;return registrationsView();}};
+return {ui:{layer,notice,confirm,preview,gridTable,alignColumns},registrations:registrationsView,students:studentsView,review,accept,studentDetail,studentTab:key=>{section=key;showSection();},editStudent,filterRegistrations:value=>{regStatus=value==='Trạng thái'?'':value;return registrationsView();}};
 }};

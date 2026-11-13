@@ -25,7 +25,7 @@ Chưa nghiệm thu Final, chưa triển khai Production.
 
 4. Open **http://localhost:3000** in Chrome.
 5. Changes are stored in `backend/data/figma-demo-v1.json` by default, using
-   the supplied UC03/UC04 screenshot data. The previous `lighthouse.json` is kept.
+   the supplied UC03–UC06 screenshot data. The previous `lighthouse.json` is kept.
    After testing, reset the selected sample dataset with `node seed.js --reset`
    while the server is **stopped**. See [data and scrollbar details](docs/UC03-UC04.md).
 
@@ -63,7 +63,11 @@ cd backend
 npm test
 ```
 
-28 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
+34 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
+
+See [UC05/UC06 screens and scrolling](docs/UC05-UC06.md) and the
+[UC01–UC06 notification audit](docs/UC01-UC06-NOTIFICATIONS.md). Six browser suites
+run in CI at 1920×1080 and 1366×768.
 
 ## Architecture
 

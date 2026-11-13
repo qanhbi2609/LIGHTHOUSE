@@ -44,7 +44,7 @@ async function submit(e){
  try{
   if(state.view==='login'){const d=await api('auth/login',{method:'POST',body:values});await onLogin(d,Boolean(values.remember));}
   else if(state.view==='forgot'){
-   const d=await api('auth/forgot',{method:'POST',body:values});state.email=values.email;state.maskedEmail=d.maskedEmail;state.resendAt=Date.now()+d.resendAfter*1000;show('verify');
+   const d=await api('auth/forgot',{method:'POST',body:values});if(Object.hasOwn(d,'demoCode')&&d.demoCode===null){notice('Kiểm tra lại địa chỉ Email');return;}state.email=values.email;state.maskedEmail=d.maskedEmail;state.resendAt=Date.now()+d.resendAfter*1000;show('verify');
   }else if(state.view==='verify'){
    const code=[0,1,2,3].map(i=>values['digit'+i]).join('');
    const d=await api('auth/verify',{method:'POST',body:{email:state.email,code}});state.resetToken=d.resetToken;show('reset');

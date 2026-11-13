@@ -81,7 +81,7 @@ def main():
                         page.locator('.review-cancel').click()
                         page.locator('.records-notice-layer').click(position={'x': 5,'y': 5})
                         page.evaluate("L.go('students')")
-                        expect(page.locator('.student-data tbody tr')).to_have_count(32)
+                        expect(page.locator('.student-data tbody tr')).to_have_count(33)
                         scroll_contract('uc04-list')
                         page.locator('#student-search').fill('Marketing')
                         expect(page.locator('.student-data tbody tr')).to_have_count(1)

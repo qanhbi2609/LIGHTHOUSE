@@ -18,6 +18,12 @@ before(async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve)
 beforeEach(()=>{db.otps=[];});
 after(async()=>{await new Promise(resolve=>server.close(resolve));fs.rmSync(dir,{recursive:true,force:true});});
 
+test('UC01 missing recovery email shows the Design notice without creating a code',async()=>{
+ const before=fs.readFileSync(path.join(process.env.LIGHTHOUSE_DATA_DIR,'lighthouse.json'),'utf8');
+ const result=await post('forgot',{email:'missing@example.test'});assert.equal(result.status,404);assert.equal(result.data.error,'Kiểm tra lại địa chỉ Email');
+ assert.equal(fs.readFileSync(path.join(process.env.LIGHTHOUSE_DATA_DIR,'lighthouse.json'),'utf8'),before);assert.equal(db.otps.length,0);
+});
+
 test('UC01 issues four digits, masks recipient and enforces resend cooldown',async()=>{
  const issued=await post('forgot',{email});assert.equal(issued.status,200);assert.match(issued.data.demoCode,/^\d{4}$/);
  assert.equal(issued.data.maskedEmail,'si**@lighthouse.test');assert.equal(issued.data.resendAfter,60);

@@ -98,24 +98,24 @@ def main():
                             ready(page)
                             page.screenshot(path=str(OUT / f'{screen}-{width}.png'))
                             if screen == 'rooms':
-                                page.get_by_role('button', name='＋ Tạo phòng', exact=True).click()
+                                page.locator('#room-new').click()
                                 capacity = page.locator('input[name="capacity"]')
                                 expect(capacity).to_have_value('6')
                                 expect(capacity).to_have_attribute('readonly', '')
-                                page.locator('.dialog .cancel').click()
+                                page.locator('.room-picker .cancel').click()
                                 page.locator('.room-card').filter(has=page.locator('h3', has_text='A101')).get_by_role('button', name='Sửa', exact=True).click()
-                                checks = page.locator('.dialog input[type="checkbox"]')
+                                checks = page.locator('.room-picker input[type="checkbox"]')
                                 expect(checks).to_have_count(7)
                                 for check in checks.all():
-                                    if page.locator('.dialog input:checked').count() == 6:
+                                    if page.locator('.room-picker input:checked').count() == 6:
                                         break
                                     if not check.is_checked():
                                         check.check()
-                                expect(page.locator('.dialog input:checked')).to_have_count(6)
-                                expect(page.locator('.dialog input:not(:checked):disabled')).to_have_count(1)
-                                page.locator('.dialog input:checked').first.uncheck()
-                                expect(page.locator('.dialog input:disabled')).to_have_count(0)
-                                page.locator('.dialog .cancel').click()
+                                expect(page.locator('.room-picker input:checked')).to_have_count(6)
+                                expect(page.locator('.room-picker input:not(:checked):disabled')).to_have_count(1)
+                                page.locator('.room-picker input:checked').first.uncheck()
+                                expect(page.locator('.room-picker input:disabled')).to_have_count(0)
+                                page.locator('.room-picker .cancel').click()
                         page.get_by_text('Đăng xuất', exact=True).click()
                         expect(page.locator('#login-form')).to_be_visible()
                         login(page, 'sinhvien@lighthouse.test')

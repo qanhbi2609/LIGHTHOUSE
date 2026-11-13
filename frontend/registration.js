@@ -5,7 +5,7 @@ const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const uploadIcon='<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v11m-4-4 4 4 4-4M3 12v5h14v-5" stroke="currentColor" stroke-width="1.5"/></svg>';
 function field(label,name,placeholder,type='text',extra=''){return `<div class="registration-field ${type==='date'?'registration-date':''}"><label for="registration-${name}">${label}</label><input id="registration-${name}" name="${name}" type="${type}" placeholder="${placeholder}" ${type==='date'?'data-empty="true"':''} ${extra}>${type==='date'?'<span class="registration-date-hint" aria-hidden="true">dd/mm/yyyy</span>':''}<small class="registration-error" id="error-${name}"></small></div>`;}
 function upload(label,name,id){return `<div class="registration-field"><label for="${id}">${label}</label><label class="registration-upload">${uploadIcon}<span>Tải lên từ thiết bị</span><input type="file" id="${id}" name="${name}" accept="image/jpeg,image/png,application/pdf" multiple aria-label="${label}"></label><small class="registration-file-names"></small><small class="registration-error" id="error-${name}"></small></div>`;}
-function mount({api,encodeFiles,onLogin}){
+function mount({api,encodeFiles,onLogin,notify=()=>{}}){
 document.querySelector('#app').innerHTML=`<main class="registration-shell"><form id="registration-form" novalidate><h1>Đăng ký vào Lighthouse</h1><section class="registration-personal"><h2>Thông tin cá nhân</h2><div class="registration-personal-grid">
 ${field('Họ tên:','name','Nhập họ tên','text','autocomplete="name"')}
 ${field('Ngày sinh:','dob','dd/mm/yyyy','date',`max="${new Date().toISOString().slice(0,10)}"`)}
@@ -41,7 +41,7 @@ if(!files.length)fail(name,'Vui lòng tải lên giấy tờ minh chứng.');
 if([...files].some(f=>!['image/png','image/jpeg','application/pdf'].includes(f.type)||f.size===0||f.size>1500000))fail(name,'Chỉ nhận PNG, JPG, PDF; tối đa 1,5 MB/tệp.');
 }
 if(family.length+school.length>6){status.textContent='Chỉ được tải lên tối đa 6 tệp.';return;}
-if(invalid.length){status.textContent='Vui lòng điền đầy đủ và chính xác các thông tin!';invalid[0].focus();return;}
+if(invalid.length){status.textContent='Vui lòng cung cấp đầy đủ và chính xác tất cả các thông tin!';notify(status.textContent);invalid[0].focus();return;}
 const button=form.querySelector('[type=submit]');button.disabled=true;
 try{
 data.familyFiles=await encodeFiles(family);data.schoolFiles=await encodeFiles(school);

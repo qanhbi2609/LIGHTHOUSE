@@ -32,6 +32,8 @@ def main():
                 note='', description='Kế hoạch học tập giả lập.\n' * 7))
             db['students'].append(dict(db['students'][0], id=f'QAS{i:03}', userId=None, registrationId=None,
                 name=f'Sinh viên kiểm thử {i}', room=None))
+        db['goals'][0]['status'] = 'Đạt'
+        db['grades'][0]['status'] = 'Hợp lệ'
         db['grades'][0]['evidence'] = '/uploads/test-proof.png'
         db['supports'][0]['evidence'] = '/uploads/test-proof.png'
         db_file.write_text(json.dumps(db))

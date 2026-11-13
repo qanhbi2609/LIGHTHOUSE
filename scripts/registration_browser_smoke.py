@@ -45,7 +45,9 @@ def main():
                         page.screenshot(path=str(OUT / f'form-{width}.png'), full_page=True)
                         submit = form.get_by_role('button', name='Nộp hồ sơ', exact=True)
                         submit.click()
-                        expect(form.locator('.registration-status')).to_contain_text('Vui lòng điền đầy đủ')
+                        expect(form.locator('.registration-status')).to_contain_text('Vui lòng cung cấp đầy đủ')
+                        expect(page.locator('.records-notice')).to_have_text('Vui lòng cung cấp đầy đủ và chính xác tất cả các thông tin!')
+                        page.locator('.records-notice-layer').click(position={'x':5,'y':5})
                         expect(form.locator('[name=name]')).to_have_attribute('aria-invalid', 'true')
                         values = dict(name='Sinh viên kiểm thử', dob='2006-01-15', address='Địa chỉ thử nghiệm',
                                       phone='0901234567', email=f'uc02-{width}@example.test', cccd='001001000001',
@@ -59,6 +61,7 @@ def main():
                         form.locator('[name=schoolFiles]').set_input_files(dict(name='hoc-ba.png', mimeType='image/png', buffer=PNG))
                         submit.click()
                         expect(form.locator('#error-familyFiles')).to_contain_text('Chỉ nhận PNG, JPG, PDF')
+                        page.locator('.records-notice-layer').click(position={'x':5,'y':5})
                         form.locator('[name=familyFiles]').set_input_files(dict(name='minh-chung.png', mimeType='image/png', buffer=PNG))
                         # A rejected server request must leave the entered form intact.
                         page.route('**/api/registrations', lambda route: route.fulfill(status=503, json={'error': 'Không thể lưu hồ sơ lúc này.'}))

@@ -10,7 +10,7 @@ trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại t
 
 ## Kết quả đã chạy
 
-- 28/28 tests đạt, không skip: 13 integration tests API, 4 kiểm tra UC01, 3 kiểm tra UC02, 3 kiểm tra UC03/UC04, 3 kiểm tra dữ liệu theo ảnh và 2 kiểm tra chuyển đổi sức chứa.
+- 34/34 tests đạt, không skip: 13 integration tests API, 5 kiểm tra UC01, 3 kiểm tra UC02, 3 kiểm tra UC03/UC04, 3 kiểm tra dữ liệu theo ảnh, 5 kiểm tra UC04–UC06 và 2 kiểm tra chuyển đổi sức chứa.
 - Browser smoke đạt ở 1920×1080 và 1366×768: đăng nhập sai/đúng, các trang quản lý,
   đăng xuất, menu sinh viên, mục tiêu/kết quả học tập và tải lại trang.
 - 24 ảnh chụp trong `artifacts/browser/`, kèm `results.json`. Chỉ là ảnh hiện trạng;
@@ -24,6 +24,9 @@ trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại t
 - Bản demo có dữ liệu nhìn thấy theo ảnh UC03/UC04 và thêm các dòng mẫu ngoài ảnh
   để kiểm tra scrollbar. Bộ browser dữ liệu riêng kiểm tra bộ đếm, nội dung các tab,
   ảnh minh chứng tham chiếu, scrollbar bắt đầu dưới đầu cột và căn cột khi có thanh cuộn.
+- Đã chỉnh 25 trạng thái UC05/UC06, tạo 52 ảnh kiểm tra tại hai viewport; xem
+  `UC05-UC06.md`. Đã rà lại thông báo UC01–UC06 theo phần đặc tả màn hình Design,
+  gồm banner nằm trong hình nhỏ; bảng đối chiếu tại `UC01-UC06-NOTIFICATIONS.md`.
 - Phòng có sức chứa cố định 6: UI khóa lựa chọn tiếp khi đủ 6, API từ chối người thứ 7;
   kiểm thử xác nhận chuyển đổi dữ liệu cũ không mất hồ sơ và có thể chạy lại.
 - Đã thêm workflow CI; chưa có bằng chứng GitHub Actions chạy thành công trên remote.
@@ -35,7 +38,7 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 
 | UC / màn hình | Hiện trạng | Phần còn thiếu hoặc cần xác minh |
 | --- | --- | --- |
-| UC01 đăng nhập | Có demo, API và browser smoke | Ghi nhớ đăng nhập thực; phiên bền vững; kiểm tra độ khớp Frame đầy đủ (đã có asset gốc và nút hiện mật khẩu) |
+| UC01 đăng nhập | Đã kiểm tra ghi nhớ phiên trên thiết bị, đăng nhập/đăng xuất và lỗi theo Design | Phiên qua restart còn thiếu; kiểm tra độ khớp Frame đầy đủ |
 | UC01 quên mật khẩu, nhập mã, gửi lại, tạo mật khẩu, lỗi/thành công | Đã tách các màn hình, mã 4 số và validation theo ảnh; xem `UC01.md` | Email thật và đối chiếu pixel còn thiếu; ảnh nền/logo gốc đã bổ sung từ Downloads.zip |
 | UC02 đăng ký, tỉnh/thành, lỗi/thành công | Đã chỉnh hai màn hình theo `uc02.zip`, có hai nhóm minh chứng và validation từng trường; xem `UC02.md` | Còn nghiệm thu đặc tả đầy đủ và môi trường lưu bền vững |
 | UC03.1 kiểm tra, đạt/chờ bổ sung/từ chối | Đã chỉnh theo ảnh, ghi chú bổ sung bắt buộc, xác nhận/hủy được kiểm tra | Email thông báo, link form bổ sung có hạn và cập nhật lại hồ sơ |
@@ -43,14 +46,14 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 | UC04.1 tra cứu / rỗng | Đã chỉnh theo ảnh và kiểm tra tìm/rỗng, cuộn dữ liệu riêng | Nghiệm thu đầy đủ tiêu chí theo SRS |
 | UC04.2 chi tiết / tab / xem minh chứng | Đã chỉnh các tab và hộp thoại theo ảnh, xem giấy tờ gốc từ UC02 | Quyền tải tệp riêng tư và nghiệm thu dữ liệu đầy đủ |
 | UC04.3 sửa / xác nhận / hủy / lỗi | Validation tại trường/API, kiểm thử hủy, lưu bản cũ và audit trong JSON | Lưu bản cũ và audit trên SQL bền vững |
-| UC04.4 thêm ảnh / lỗi định dạng | Có local upload | Kho file riêng tư và timeline tháng/năm đúng SDD |
-| UC05.1 tra cứu theo sinh viên / chưa có phòng / không tìm thấy | Có demo | Đối chiếu ba trạng thái và văn bản thông báo |
-| UC05.2 chi tiết phòng | Có demo | Số người, sức chứa, còn chỗ và trạng thái phải nhất quán |
-| UC05.3 sửa bố trí / phòng đầy / chuyển phòng / bỏ chọn | API có demo và tests | Đã chốt 6 sinh viên/phòng; còn SQL transaction và kiểm thử đồng thời |
-| UC05.4 tạo / trùng tên / sức chứa sai | API có demo và tests | Chọn sinh viên ngay lúc tạo, lỗi dưới từng trường theo SDD |
-| UC05.5 xóa / xác nhận / hủy | Có demo, API trả sinh viên về chưa bố trí | Dialog và bằng chứng hủy, audit SQL |
-| UC06.1 đánh giá mục tiêu / xác nhận / hủy | Có demo | Radio Đạt/Chưa đạt, giai đoạn 6 tháng, lọc ngày/trạng thái đúng SDD |
-| UC06.2 duyệt kết quả / yêu cầu gửi lại / xác nhận / hủy | Có demo và API tests | Hai nút thao tác riêng theo SDD, minh chứng bảo vệ quyền |
+| UC04.4 thêm ảnh / lỗi định dạng | Timeline tháng/năm, lọc khoảng tháng, upload/xóa và lỗi định dạng đã kiểm tra UI/API | Kho file riêng tư và bền vững |
+| UC05.1 tra cứu theo sinh viên / chưa có phòng / không tìm thấy | Đã chỉnh ba trạng thái và thông báo theo Design/SRS | Nghiệm thu dữ liệu thực |
+| UC05.2 chi tiết phòng | Đã chỉnh theo ảnh; số người/chỗ còn lại/trạng thái lấy từ dữ liệu | Nghiệm thu dữ liệu thực |
+| UC05.3 sửa bố trí / phòng đầy / chuyển phòng / bỏ chọn | UI/API kiểm tra 6 người, chuyển phòng, bỏ chọn, vùng cuộn riêng | SQL transaction và kiểm thử đồng thời |
+| UC05.4 tạo / trùng tên / sức chứa sai | Chọn sinh viên ngay lúc tạo, lỗi dưới trường, API kiểm tra trước khi ghi | Lưu trữ SQL bền vững |
+| UC05.5 xóa / xác nhận / hủy | Dialog theo ảnh; hủy không ghi, xóa trả sinh viên về chưa bố trí | Audit SQL |
+| UC06.1 đánh giá mục tiêu / xác nhận / hủy | Radio, giai đoạn sáu tháng, bộ lọc và xác nhận/hủy đã kiểm tra | Nghiệm thu đặc tả đầy đủ và SQL |
+| UC06.2 duyệt kết quả / yêu cầu gửi lại / xác nhận / hủy | Hai nút riêng, xem minh chứng, ghi chú bắt buộc khi yêu cầu gửi lại; chỉ kết quả hợp lệ vào lịch sử UC04 | Email thật, storage minh chứng riêng tư |
 | UC07.1 xem alumni / tab | Có demo | Đủ dữ liệu lịch sử và giấy tờ từ hồ sơ gốc |
 | UC07.2 tra cứu alumni / rỗng | Có demo | Cột, nút Tìm và empty state đúng Frame |
 | UC08.1 thêm / xác nhận / hủy | Có demo | Màn hình xác nhận riêng, danh mục quyền thống nhất với SDD |
