@@ -10,15 +10,17 @@ trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại t
 
 ## Kết quả đã chạy
 
-- 22/22 tests đạt, không skip: 13 integration tests API, 4 kiểm tra UC01, 3 kiểm tra UC02 và 2 kiểm tra chuyển đổi sức chứa.
+- 25/25 tests đạt, không skip: 13 integration tests API, 4 kiểm tra UC01, 3 kiểm tra UC02, 3 kiểm tra UC03/UC04 và 2 kiểm tra chuyển đổi sức chứa.
 - Browser smoke đạt ở 1920×1080 và 1366×768: đăng nhập sai/đúng, các trang quản lý,
   đăng xuất, menu sinh viên, mục tiêu/kết quả học tập và tải lại trang.
 - 24 ảnh chụp trong `artifacts/browser/`, kèm `results.json`. Chỉ là ảnh hiện trạng;
   chưa có ảnh chuẩn Figma và chưa chạy pixel diff.
 - Sửa lỗi sinh viên tải lại trang bị chuyển vào tiếp nhận hồ sơ không được phép.
-- Sửa CSS kế thừa `width:19px` làm chữ menu xuống thành cột; cho menu cuộn riêng,
-  đặt footer trong luồng bố cục để không đè lên menu. Browser kiểm tra độ rộng nhãn
-  và vùng menu không giao với footer ở cả hai viewport.
+- Sửa CSS kế thừa `width:19px` làm chữ menu xuống thành cột. Sidebar hiển thị đủ menu
+  và footer không cần cuộn ở cả hai viewport. UC03/UC04 có vùng cuộn dữ liệu riêng,
+  đầu bảng và tiêu đề đứng yên; xem `UC03-UC04.md`.
+- Đã đối chiếu 28 ảnh UC03/UC04 trong ZIP người dùng; bộ browser bổ sung tạo 56 ảnh
+  và kiểm tra luồng xử lý, xem minh chứng, sửa/xác nhận/hủy và kích thước hai bên.
 - Phòng có sức chứa cố định 6: UI khóa lựa chọn tiếp khi đủ 6, API từ chối người thứ 7;
   kiểm thử xác nhận chuyển đổi dữ liệu cũ không mất hồ sơ và có thể chạy lại.
 - Đã thêm workflow CI; chưa có bằng chứng GitHub Actions chạy thành công trên remote.
@@ -33,11 +35,11 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 | UC01 đăng nhập | Có demo, API và browser smoke | Ghi nhớ đăng nhập thực; phiên bền vững; kiểm tra độ khớp Frame đầy đủ (đã có asset gốc và nút hiện mật khẩu) |
 | UC01 quên mật khẩu, nhập mã, gửi lại, tạo mật khẩu, lỗi/thành công | Đã tách các màn hình, mã 4 số và validation theo ảnh; xem `UC01.md` | Email thật và đối chiếu pixel còn thiếu; ảnh nền/logo gốc đã bổ sung từ Downloads.zip |
 | UC02 đăng ký, tỉnh/thành, lỗi/thành công | Đã chỉnh hai màn hình theo `uc02.zip`, có hai nhóm minh chứng và validation từng trường; xem `UC02.md` | Còn nghiệm thu đặc tả đầy đủ và môi trường lưu bền vững |
-| UC03.1 kiểm tra, đạt/chờ bổ sung/từ chối | Có demo đổi trạng thái | Email thông báo, link form bổ sung có hạn và cập nhật lại hồ sơ; dialog đúng Frame |
+| UC03.1 kiểm tra, đạt/chờ bổ sung/từ chối | Đã chỉnh theo ảnh, ghi chú bổ sung bắt buộc, xác nhận/hủy được kiểm tra | Email thông báo, link form bổ sung có hạn và cập nhật lại hồ sơ |
 | UC03.2 tiếp nhận, xác nhận/hủy | API kiểm tra điều kiện và tạo tài khoản | Gửi email; giao dịch SQL chống tiếp nhận trùng; chốt chính sách mật khẩu ban đầu |
-| UC04.1 tra cứu / rỗng | Có tìm từ khóa demo | Đầy đủ tiêu chí, trạng thái và empty state đúng đặc tả |
-| UC04.2 chi tiết / tab / xem minh chứng | Có tab demo | Quyền tải tệp riêng tư; bằng chứng hiển thị đủ dữ liệu và đúng Frame |
-| UC04.3 sửa / xác nhận / hủy / lỗi | Có demo sửa và audit | Lưu bản cũ theo NFR-12; validation tại trường; kiểm thử hủy không ghi dữ liệu |
+| UC04.1 tra cứu / rỗng | Đã chỉnh theo ảnh và kiểm tra tìm/rỗng, cuộn dữ liệu riêng | Nghiệm thu đầy đủ tiêu chí theo SRS |
+| UC04.2 chi tiết / tab / xem minh chứng | Đã chỉnh các tab và hộp thoại theo ảnh, xem giấy tờ gốc từ UC02 | Quyền tải tệp riêng tư và nghiệm thu dữ liệu đầy đủ |
+| UC04.3 sửa / xác nhận / hủy / lỗi | Validation tại trường/API, kiểm thử hủy, lưu bản cũ và audit trong JSON | Lưu bản cũ và audit trên SQL bền vững |
 | UC04.4 thêm ảnh / lỗi định dạng | Có local upload | Kho file riêng tư và timeline tháng/năm đúng SDD |
 | UC05.1 tra cứu theo sinh viên / chưa có phòng / không tìm thấy | Có demo | Đối chiếu ba trạng thái và văn bản thông báo |
 | UC05.2 chi tiết phòng | Có demo | Số người, sức chứa, còn chỗ và trạng thái phải nhất quán |
@@ -84,7 +86,8 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 - NFR-06–10: kiểm thử phân quyền, bảo mật tệp, truy cập, audit và hết hạn phiên đầy đủ.
 - NFR-11–14: lưu tập trung, giữ bản cũ, giữ alumni, sao lưu mỗi 5–10 phút và phục hồi.
 - NFR-15–17: usability, đăng nhập lại, tiếng Việt/Anh đầy đủ.
-- Chưa có URL public, DNS/SSL, kiểm tra redeploy không mất dữ liệu hoặc diễn tập rollback.
-- Chưa kiểm kê từng node Figma, chưa lấy asset gốc hay đối chiếu ảnh từng trạng thái.
+- Đã có URL demo Render do người dùng cung cấp; chưa kiểm tra redeploy không mất dữ liệu hoặc diễn tập rollback.
+- Chưa kiểm kê từng node Figma; đã nhận asset gốc UC01 và đối chiếu ảnh người dùng
+  cung cấp cho UC01–UC04, các UC còn lại chưa được đối chiếu lại từng trạng thái.
 
 Không nghiệm thu Final hoặc đưa dữ liệu sinh viên thật lên bản demo này.

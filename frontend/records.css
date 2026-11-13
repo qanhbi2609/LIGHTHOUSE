@@ -1,0 +1,139 @@
+/* UC03/UC04: fixed shell, scroll only the data or long dialog/profile body. */
+.dashboard:has(.records-workspace){height:100dvh;min-height:0;overflow:hidden}
+.dashboard:has(.records-workspace) .content-shell{padding:24px 32px;min-height:0;overflow:hidden}
+.dashboard:has(.records-workspace) .topbar{height:100px;min-height:100px;flex-shrink:0;margin-bottom:0!important}
+.dashboard:has(.records-workspace) .main-content{display:flex;min-height:0;overflow:hidden}
+.dashboard:has(.records-workspace) #page-content{min-height:0;display:flex;flex:1}
+.records-workspace{width:100%;min-height:0;display:flex;flex-direction:column;font-family:Roboto,Arial,sans-serif}
+.dashboard:has(.records-workspace) .sidebar{background:linear-gradient(104deg,#93c5fd 10%,#bfdbfe 50%,#eef4ff 80%)}
+.dashboard:has(.records-workspace) .sidebar .navitem.active{position:relative}
+.dashboard:has(.records-workspace) .sidebar .navitem.active::before{content:'';position:absolute;left:14px;top:5px;bottom:5px;width:4px;background:#dbeafe;border-radius:3px}
+.dashboard:has(.records-workspace) .topbar .userbox{padding:6px 12px}
+.dashboard:has(.records-workspace) .topbar .usertext small{font-size:12px;line-height:14px}
+.records-registration-list{padding-top:51px;gap:50px}.records-student-list{padding-top:52px}
+.records-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;flex-shrink:0}
+.records-stat{height:112px;border:1px solid #b5b5b5;border-radius:16px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.records-stat strong{font-size:48px;line-height:58px}.records-stat span{font-size:14px;color:#1e3a8a;line-height:17px}.records-stat.amber strong{color:#d99300}.records-stat.blue strong{color:#1d4ed8}.records-stat.green strong{color:#008323}
+.records-workspace .records-list-panel{display:flex;flex-direction:column;flex:1;min-height:0;margin:0;border-radius:16px}
+.records-list-panel .panel-top{height:72px;min-height:72px;flex-shrink:0;padding:20px 24px;gap:16px}
+.records-list-panel .panel-top h2{font-size:20px;margin:0;line-height:24px}
+.records-list-panel .search{height:34px;min-width:0;width:300px;border-color:#b5b5b5;background:#f8fafc}
+.records-student-list .search{width:500px;border-color:#e2e8f0}
+.records-list-panel .figma-select{height:34px;max-width:170px;border-color:#b5b5b5}
+.records-grid-table{display:flex;flex-direction:column;flex:1;min-height:0}
+.records-grid-table table{border-collapse:collapse;table-layout:fixed;width:100%;font-family:Roboto,Arial,sans-serif}
+.records-columns{flex-shrink:0}
+.records-columns th{height:80px;line-height:17px;font-size:12px;font-weight:700;letter-spacing:0;text-align:left;background:#eef4ff;color:#1e3a8a;padding:16px 24px;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0}
+.records-data-scroll{position:relative;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#5b93ff transparent}
+.records-data-scroll::-webkit-scrollbar,.records-profile-scroll::-webkit-scrollbar,.review-scroll::-webkit-scrollbar{width:6px;height:6px}
+.records-data-scroll::-webkit-scrollbar-thumb,.records-profile-scroll::-webkit-scrollbar-thumb,.review-scroll::-webkit-scrollbar-thumb{background:#5b93ff;border-radius:6px}
+.records-data-scroll td{height:80px;border:0;border-bottom:1px solid #e2e8f0;padding:14px 24px;color:#64748b;font-size:14px;line-height:18px;overflow-wrap:anywhere}
+.records-data-scroll td:nth-child(2){color:#334155}.records-data-scroll strong{color:#1e3a8a;font-weight:500}
+.records-data-scroll tr:nth-child(even){background:#f8faff}
+.records-workspace button.small{min-height:28px;padding:6px 16px;font-size:12px;line-height:16px}
+.records-data-scroll .actions{gap:8px}.records-data-scroll button.secondary{background:#e2e8f0;color:#374151}
+.records-empty{padding:200px 20px;text-align:center;color:#1e3a8a;font-size:20px;font-weight:700}
+.records-empty[hidden]{display:none}
+.records-link{background:transparent;border:0;border-radius:0;text-decoration:underline;color:#005cff;font:400 14px/20px Roboto,Arial,sans-serif;padding:0;cursor:pointer;text-align:left}
+.records-error{color:#c52222;font-size:12px;line-height:17px;margin:6px 0 0}.records-error:empty{display:none}
+.records-overlay{position:fixed;inset:0;background:#0008;z-index:90;display:flex;align-items:center;justify-content:center;font-family:Roboto,Arial,sans-serif;color:#002f6c}
+.records-overlay button:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+.records-review{width:1400px;max-width:calc(100vw - 48px);height:min(896px,calc(100dvh - 80px));display:flex;flex-direction:column;border-radius:20px;background:#fff;border:1px solid #ddd;overflow:hidden}
+.records-review>h2{margin:0;padding:22px 28px 0;height:52px;flex-shrink:0;font-size:24px;line-height:29px;border-bottom:1px solid #ddd}
+.records-review form{display:flex;flex-direction:column;min-height:0;flex:1}
+.review-scroll{padding:12px 60px 0 52px;display:grid;grid-template-columns:minmax(0,870fr) minmax(0,376fr);gap:40px;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.review-information h3{font-size:18px;line-height:22px;margin:20px 0}.review-information h3:first-child{margin-top:0}
+.review-personal-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px 24px}
+.review-field label{display:block;font-size:14px;line-height:17px;font-weight:700;margin-bottom:6px}
+.review-value{border:1px solid #d8d8d8;border-radius:10px;background:#f1f6ff;padding:12px 13px;min-height:44px;font-size:14px;line-height:18px;overflow-wrap:anywhere}
+.review-education-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}
+.review-description{grid-column:span 2}.review-description .review-value{min-height:170px;white-space:pre-wrap}
+.review-proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}.review-proof-grid strong{display:block;font-size:14px;line-height:18px;margin-bottom:6px}.review-proof-grid .records-link{display:block;margin-bottom:3px;overflow-wrap:anywhere}
+.review-decision{border-left:1px solid #ddd;margin-left:-20px;padding:20px 0 0 20px}
+.review-decision label{display:block;font-size:14px;line-height:17px;font-weight:700;margin-bottom:20px}
+.review-decision select,.review-decision textarea{width:100%;height:44px;background:white;border:1px solid #d8d8d8;border-radius:10px;padding:10px 13px;color:#002f6c;font:400 14px Roboto,Arial,sans-serif}
+.review-note{margin-top:50px}.review-decision textarea{height:82px;resize:vertical;line-height:20px}.review-decision textarea::placeholder{color:#819bc2}
+.review-actions{flex-shrink:0;display:flex;justify-content:center;gap:10px;padding:12px 20px 22px}
+.review-actions button{width:100px;height:50px;border:0;border-radius:10px;font:700 20px Roboto,Arial,sans-serif}
+.review-actions .review-cancel{background:#aaa;color:white}
+.records-confirm-layer{z-index:110;align-items:flex-start;padding-top:75px}
+.records-confirm{width:300px;max-width:calc(100vw - 32px);min-height:120px;background:white;border-radius:20px;padding:20px;color:#333}
+.records-confirm>p{font-size:14px;line-height:18px;margin:0 0 35px}
+.records-confirm>div{display:flex;justify-content:flex-end;gap:10px}
+.records-confirm button{min-width:58px;height:22px;border:0;background:#dbeafe;color:#003572;font:400 14px Roboto,Arial,sans-serif;border-radius:18px;padding:0 12px}
+.records-confirm button.confirm-ok{background:#4a90ff;color:white;font-weight:700}
+.records-confirm .records-error{margin-top:10px;margin-bottom:0}
+.records-notice-layer{z-index:120;align-items:flex-start;padding-top:75px}
+.records-notice{width:400px;max-width:calc(100vw - 32px);min-height:50px;border-radius:10px;background:#555;color:white;font:700 20px/26px Roboto,Arial,sans-serif;padding:12px;text-align:center}
+.records-preview-layer{z-index:105}
+.records-preview{max-width:92vw;display:flex;flex-direction:column;align-items:center;gap:24px}
+.records-preview img{max-width:90vw;max-height:70vh;object-fit:contain}
+.records-preview iframe{width:min(700px,90vw);height:70vh;border:0;background:white}
+.records-preview>button{border:0;border-radius:50%;background:#ddd;color:#111;width:80px;height:80px;font:400 64px/70px Arial,sans-serif;padding:0}
+.records-profile-view{padding-top:28px;overflow:hidden}
+.records-profile-view .student-profile,.records-profile-view .student-edit{display:flex;flex-direction:column;min-height:0;max-height:100%;margin:0;padding:28px;border-radius:16px;overflow:hidden;background:white}
+.records-profile-view .student-profile-heading{flex-shrink:0;padding-bottom:20px;gap:24px}
+.records-profile-view .student-profile-heading h2{font-size:24px;line-height:31px}.records-profile-view .student-profile-heading small{font-size:14px;line-height:17px}
+.records-profile-view .student-tabbar{flex-shrink:0;gap:12px;padding-bottom:12px}.records-profile-view .tab{font-size:14px;padding:12px 20px;min-height:40px}
+.records-profile-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;flex:1}
+.records-profile-scroll h3{font-size:20px;line-height:24px;margin:20px 0 18px}
+.student-tab-body.records-profile-scroll h3{margin-top:0}
+.records-profile-view .student-info-grid{gap:28px 40px}
+.records-profile-view .student-info-grid>div{gap:5px;font-size:14px}.records-profile-view .student-info-grid strong,.records-profile-view .student-info-grid span{font-size:14px;line-height:16px}
+.profile-table-scroll{overflow:auto;border:1px solid #e2e8f0;border-radius:8px;margin-top:20px}
+.profile-table-scroll table{width:100%;table-layout:fixed;border-collapse:collapse}
+.profile-table-scroll th{height:60px;padding:16px 20px;font-size:12px;color:#1e3a8a;background:#eef4ff;letter-spacing:0}
+.profile-table-scroll td{height:62px;padding:15px 20px;font-size:14px;line-height:18px;color:#334155;border-bottom:1px solid #e2e8f0;overflow-wrap:anywhere}
+.profile-table-scroll tr:nth-child(even){background:#f8faff}
+.profile-truncate{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.records-profile-view .student-profile-actions{flex-shrink:0;margin-top:16px}
+.records-profile-view .profile-tall{flex:1;margin-bottom:48px}
+.records-profile-view:has(.student-edit) h3{margin-bottom:18px}
+.records-profile-view .student-edit-grid{gap:24px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.records-profile-view .student-edit-grid label{font-size:14px;gap:7px;line-height:17px}
+.records-profile-view .student-edit-grid input{font:400 14px Roboto,Arial,sans-serif;border-color:#b4c4df}
+.records-profile-view .student-edit-grid small{font:400 12px/16px Roboto,Arial,sans-serif;color:#64748b}
+.records-profile-view .profile-readonly{padding:12px;background:#eef4ff;border-radius:8px;gap:0!important}
+.records-profile-view .profile-readonly input{border:0;padding:0;height:18px;background:transparent}
+.profile-photo{padding:0;border:0;background:transparent;width:100%}
+.records-goal{width:600px;max-width:calc(100vw - 32px);max-height:88vh;overflow:auto;padding:28px 44px 80px;background:white;border-radius:20px;color:#334155}
+.records-goal header{display:flex;align-items:center;justify-content:space-between;margin:0 -8px 60px}
+.records-goal h2{font-size:24px;color:#1e3a8a;margin:0}.records-goal header button{background:none;border:0;padding:0;font-size:30px;color:#222}
+.records-goal strong{font-size:14px;line-height:18px;display:block}.goal-summary{display:grid;grid-template-columns:135px 1fr;gap:28px 20px;align-items:center;font-size:14px;margin-bottom:42px}
+.goal-description{white-space:pre-wrap;margin:8px 0 40px;min-height:100px}
+@media(min-width:1600px){
+.dashboard:has(.records-student-list,.records-profile-view) .content-shell{padding-top:28px}
+.dashboard:has(.student-edit) .content-shell{padding:49px 46px 24px 18px}
+}
+@media(max-height:850px){
+.records-registration-list{padding-top:24px;gap:24px}.records-student-list{padding-top:24px}.records-profile-view{padding-top:20px}
+.records-stat{height:90px}.records-stat strong{font-size:38px;line-height:44px}
+.records-columns th{height:56px;padding:12px 16px}.records-data-scroll td{height:68px;padding:12px 16px}
+.records-list-panel .panel-top{height:64px;min-height:64px;padding:16px}.records-list-panel .search{width:250px}
+.records-profile-view .student-profile,.records-profile-view .student-edit{padding:20px}
+.records-profile-view .student-profile-heading h2{font-size:20px}.records-profile-view .student-profile-heading small{font-size:12px}
+.records-profile-view .student-edit-grid{gap:16px}.records-profile-view .student-tabbar{gap:8px}.records-profile-view .tab{padding:10px 14px;font-size:13px}
+.records-review>h2{height:48px;padding-top:14px}
+.review-scroll{padding:12px 24px 0;gap:24px;grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.review-personal-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.review-decision{margin-left:0;padding-left:20px}.review-actions{padding-bottom:12px}.review-actions button{height:40px;font-size:16px}
+}
+@media(max-width:1100px){.records-data-scroll .actions{flex-wrap:wrap}.records-workspace .records-link{font-size:12px}.records-profile-view .student-profile-heading{flex-wrap:wrap;gap:12px}.records-goal{padding:24px}.records-profile-view .student-edit-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.dashboard:has(.records-workspace) .content-shell{padding:12px}.records-list-panel .panel-top{height:auto;min-height:72px;flex-wrap:wrap}.records-list-panel .search{width:100%}.records-stats{gap:8px}.records-stat{height:76px}.records-stat strong{font-size:28px}.records-registration-list{gap:16px;padding-top:16px}.records-columns th,.records-data-scroll td{padding:8px;font-size:11px}.review-scroll{display:block}.review-decision{border-left:0;padding:20px 0}.records-profile-view .tab{padding:8px}.records-profile-view .student-info-grid,.records-profile-view .student-edit-grid{grid-template-columns:1fr}.records-preview>button{width:50px;height:50px;font-size:40px;line-height:50px}}
+.records-badge{font:400 12px/16px Roboto,Arial,sans-serif;padding:4px 12px;border-radius:5px;display:inline-block}
+.records-badge.good{background:#d5ffce;color:#00852b}.records-badge.amber{background:#fff2d2;color:#a16b00}.records-badge.blue{background:#dbeafe;color:#005dcc}
+.records-profile-view .student-profile-heading{display:grid;grid-template-columns:3fr 1fr 1fr}
+.records-profile-view .student-profile-heading>.tag{justify-self:center}.records-profile-view .student-profile-heading>span:last-child{justify-self:end}
+.records-profile-view .student-profile-heading small{display:block}
+.records-profile-view .tab{font-weight:400}.records-profile-view .tab.selected{font-weight:700}
+.records-profile-view[data-profile-section=personal] .profile-table-scroll td{height:48px}
+.records-profile-view[data-profile-section=supports] .profile-table-scroll td{height:56px}
+.records-profile-view .student-profile-actions button.small{height:36px;min-height:36px;font-size:14px;padding:8px 18px}
+@media(min-height:951px) and (min-width:761px){
+.dashboard:has(.records-workspace) .sidebar-brand{font-size:28px;margin-bottom:48px}
+.dashboard:has(.records-workspace) .sidebar-group{gap:5px}
+.dashboard:has(.records-workspace) .sidebar .navitem{padding-top:10px;padding-bottom:10px;line-height:1.3}
+.dashboard:has(.records-workspace) .sidebar .navitem.active{min-height:75px;padding-left:30px}
+.dashboard:has(.records-workspace) .sidebar-footer{font:400 10px/1.3 Roboto,Arial,sans-serif;padding:12px 0 7px;margin-bottom:85px}
+}
+@media(max-width:1100px){.records-profile-view .student-profile-heading{display:flex}}
