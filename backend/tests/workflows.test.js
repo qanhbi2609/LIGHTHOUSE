@@ -1,4 +1,5 @@
 'use strict';
+process.env.LIGHTHOUSE_DEMO_DATASET='workflow';
 const {test,before,after}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{spawn,spawnSync}=require('node:child_process');
 const base=path.resolve(__dirname,'..'),testData=fs.mkdtempSync(path.join(os.tmpdir(),'lighthouse-test-')),db=path.join(testData,'lighthouse.json');

@@ -1,5 +1,5 @@
 const fs=require('fs'),path=require('path'),crypto=require('crypto');
-const dir=path.resolve(process.env.LIGHTHOUSE_DATA_DIR||path.join(__dirname,'data')),file=path.join(dir,'lighthouse.json');
+const {comparison,dataDir:dir,dataFile:file}=require('./storage');
 const hash=pass=>{const salt=crypto.randomBytes(16).toString('hex');return salt+':'+crypto.scryptSync(pass,salt,64).toString('hex')};
 const users=[
  ['ND001','Quản lý Lighthouse','quanly@lighthouse.test','QuanLy',null,['*']],
@@ -27,5 +27,16 @@ const db={users,students,registrations,rooms:[{id:'A101',capacity:6},{id:'A102',
  supports:[{id:'HT001',studentId:'LH001',name:'Học phí',type:'Tài chính',amount:3000000,date:'2026-06-10',evidence:''},{id:'HT002',studentId:'LH003',name:'Sách vở',type:'Học tập',amount:450000,date:'2026-08-21',evidence:''}],
  reports:[{id:'BC001',type:'Báo cáo tháng',from:'2026-10-01',to:'2026-10-31',content:'Tổng hợp hoạt động hỗ trợ sinh viên trong tháng.',notes:'Báo cáo minh họa với dữ liệu giả lập.',files:[],status:'Đã lưu',author:'ND001',created:now,updated:now}],
  history:[{id:'LS001',userId:'ND001',actor:'Quản lý Lighthouse',action:'Tạo phòng',subject:'A101',time:now}],otps:[]};
-fs.mkdirSync(dir,{recursive:true});if(!fs.existsSync(file)||process.argv.includes('--reset'))fs.writeFileSync(file,JSON.stringify(db,null,2)+'\n');
+fs.mkdirSync(dir,{recursive:true});if(!fs.existsSync(file)||process.argv.includes('--reset')){
+ if(comparison)require('./fixtures/figma').applyFigmaFixture(db);
+ fs.writeFileSync(file,JSON.stringify(db,null,2)+'\n');
+}
+if(comparison){
+ const uploads=path.resolve(process.env.LIGHTHOUSE_UPLOADS_DIR||path.join(__dirname,'uploads'));
+ fs.mkdirSync(uploads,{recursive:true});
+ for(const kind of ['family','grades','invoice']){
+  const dest=path.join(uploads,`figma-${kind}.png`);
+  if(!fs.existsSync(dest))fs.copyFileSync(path.join(__dirname,'fixtures',`figma-${kind}.png`),dest);
+ }
+}
 console.log('Đã chuẩn bị dữ liệu demo ở',file); 

@@ -8,10 +8,10 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 const {URL}=require('node:url');
 const root=path.resolve(__dirname,'../frontend');
-const dataDir=path.resolve(process.env.LIGHTHOUSE_DATA_DIR||path.join(__dirname,'data'));const dataFile=path.join(dataDir,'lighthouse.json');
+const {comparison,dataDir,dataFile}=require('./storage');
 const uploadsDir=path.resolve(process.env.LIGHTHOUSE_UPLOADS_DIR||path.join(__dirname,'uploads'));
 fs.mkdirSync(dataDir,{recursive:true});fs.mkdirSync(uploadsDir,{recursive:true});
-if(!fs.existsSync(dataFile))require('./seed');
+if(!fs.existsSync(dataFile)||comparison)require('./seed');
 let db=JSON.parse(fs.readFileSync(dataFile,'utf8'));
 // Confirmed business rule: every room accommodates exactly six students.
 const ROOM_CAPACITY=6;

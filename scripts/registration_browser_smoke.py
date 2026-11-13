@@ -16,7 +16,7 @@ PNG = base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='lighthouse-uc02-') as tmp:
-        env = dict(os.environ, LIGHTHOUSE_DATA_DIR=tmp + '/data', LIGHTHOUSE_UPLOADS_DIR=tmp + '/uploads')
+        env = dict(os.environ, LIGHTHOUSE_DEMO_DATASET='workflow', LIGHTHOUSE_DATA_DIR=tmp + '/data', LIGHTHOUSE_UPLOADS_DIR=tmp + '/uploads')
         subprocess.run(['node', 'seed.js'], cwd=ROOT / 'backend', env=env, check=True)
         code = "const {server}=require('./server');server.listen(0,'127.0.0.1',()=>console.log(server.address().port))"
         proc = subprocess.Popen(['node', '-e', code], cwd=ROOT / 'backend', env=env, stdout=subprocess.PIPE, text=True)

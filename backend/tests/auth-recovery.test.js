@@ -7,6 +7,7 @@ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'lighthouse-auth-'));
 process.env.LIGHTHOUSE_DATA_DIR=path.join(dir,'data');
 process.env.LIGHTHOUSE_UPLOADS_DIR=path.join(dir,'uploads');
 process.env.DEMO_ONLY='1';
+process.env.LIGHTHOUSE_DEMO_DATASET='workflow';
 const seeded=spawnSync(process.execPath,['seed.js'],{cwd:path.resolve(__dirname,'..'),env:process.env,encoding:'utf8'});
 assert.equal(seeded.status,0);
 const {server,db}=require('../server');

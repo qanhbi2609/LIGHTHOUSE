@@ -10,7 +10,7 @@ trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại t
 
 ## Kết quả đã chạy
 
-- 25/25 tests đạt, không skip: 13 integration tests API, 4 kiểm tra UC01, 3 kiểm tra UC02, 3 kiểm tra UC03/UC04 và 2 kiểm tra chuyển đổi sức chứa.
+- 28/28 tests đạt, không skip: 13 integration tests API, 4 kiểm tra UC01, 3 kiểm tra UC02, 3 kiểm tra UC03/UC04, 3 kiểm tra dữ liệu theo ảnh và 2 kiểm tra chuyển đổi sức chứa.
 - Browser smoke đạt ở 1920×1080 và 1366×768: đăng nhập sai/đúng, các trang quản lý,
   đăng xuất, menu sinh viên, mục tiêu/kết quả học tập và tải lại trang.
 - 24 ảnh chụp trong `artifacts/browser/`, kèm `results.json`. Chỉ là ảnh hiện trạng;
@@ -21,6 +21,9 @@ trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại t
   đầu bảng và tiêu đề đứng yên; xem `UC03-UC04.md`.
 - Đã đối chiếu 28 ảnh UC03/UC04 trong ZIP người dùng; bộ browser bổ sung tạo 56 ảnh
   và kiểm tra luồng xử lý, xem minh chứng, sửa/xác nhận/hủy và kích thước hai bên.
+- Bản demo có dữ liệu nhìn thấy theo ảnh UC03/UC04 và thêm các dòng mẫu ngoài ảnh
+  để kiểm tra scrollbar. Bộ browser dữ liệu riêng kiểm tra bộ đếm, nội dung các tab,
+  ảnh minh chứng tham chiếu, scrollbar bắt đầu dưới đầu cột và căn cột khi có thanh cuộn.
 - Phòng có sức chứa cố định 6: UI khóa lựa chọn tiếp khi đủ 6, API từ chối người thứ 7;
   kiểm thử xác nhận chuyển đổi dữ liệu cũ không mất hồ sơ và có thể chạy lại.
 - Đã thêm workflow CI; chưa có bằng chứng GitHub Actions chạy thành công trên remote.

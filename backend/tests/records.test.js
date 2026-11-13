@@ -1,4 +1,5 @@
 'use strict';
+process.env.LIGHTHOUSE_DEMO_DATASET='workflow';
 const {test,before,after}=require('node:test');
 const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawnSync}=require('node:child_process');

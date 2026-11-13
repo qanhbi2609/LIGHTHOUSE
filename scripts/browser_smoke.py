@@ -49,7 +49,7 @@ def sidebar_layout(page):
 def main():
     results = []
     with tempfile.TemporaryDirectory(prefix="lighthouse-browser-") as tmp:
-        env = dict(os.environ, LIGHTHOUSE_DATA_DIR=tmp + '/data',
+        env = dict(os.environ, LIGHTHOUSE_DEMO_DATASET='workflow', LIGHTHOUSE_DATA_DIR=tmp + '/data',
                    LIGHTHOUSE_UPLOADS_DIR=tmp + '/uploads', DEMO_ONLY='1',
                    NODE_ENV='development')
         subprocess.run(['node', 'seed.js'], cwd=ROOT / 'backend', env=env, check=True)

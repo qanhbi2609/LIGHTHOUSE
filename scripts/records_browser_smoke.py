@@ -18,7 +18,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='lighthouse-records-') as tmp:
         data_dir, uploads = Path(tmp) / 'data', Path(tmp) / 'uploads'
         uploads.mkdir()
-        env = dict(os.environ, LIGHTHOUSE_DATA_DIR=str(data_dir), LIGHTHOUSE_UPLOADS_DIR=str(uploads), DEMO_ONLY='1')
+        env = dict(os.environ, LIGHTHOUSE_DEMO_DATASET='workflow', LIGHTHOUSE_DATA_DIR=str(data_dir), LIGHTHOUSE_UPLOADS_DIR=str(uploads), DEMO_ONLY='1')
         subprocess.run(['node', 'seed.js'], cwd=ROOT / 'backend', env=env, check=True)
         db_file = data_dir / 'lighthouse.json'
         db = json.loads(db_file.read_text())

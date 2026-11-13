@@ -18,12 +18,16 @@ Chưa nghiệm thu Final, chưa triển khai Production.
 
    ```powershell
    cd backend
+   $env:DEMO_ONLY="1"
    node seed.js
    node server.js
    ```
 
 4. Open **http://localhost:3000** in Chrome.
-5. Changes are stored in `backend/data/lighthouse.json`. After testing, reset sample data with `node seed.js --reset` while the server is **stopped**.
+5. Changes are stored in `backend/data/figma-demo-v1.json` by default, using
+   the supplied UC03/UC04 screenshot data. The previous `lighthouse.json` is kept.
+   After testing, reset the selected sample dataset with `node seed.js --reset`
+   while the server is **stopped**. See [data and scrollbar details](docs/UC03-UC04.md).
 
 ## Demo accounts
 
@@ -59,7 +63,7 @@ cd backend
 npm test
 ```
 
-22 automated API, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
+28 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
 
 ## Architecture
 
@@ -68,6 +72,7 @@ npm test
 - `backend/seed.js` – **synthetic** demo data, resettable.
 - `backend/tests/` – integration tests.
 - `backend/data/lighthouse.json` – mutable demo data (excluded from Git).
+- `backend/data/figma-demo-v1.json` – default screenshot comparison demo (excluded from Git).
 - `backend/uploads/` – mutable demonstration uploads (excluded from Git).
 - `database/01_sqlserver_schema.sql` – 16 SQL Server tables based on SDD, with documented technical adjustments. This schema is **not yet wired to the JSON demo runtime**.
 - `render.yaml` – online deploy Blueprint template for demo/testing use only.

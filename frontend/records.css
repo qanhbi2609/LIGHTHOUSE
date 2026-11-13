@@ -22,7 +22,7 @@
 .records-list-panel .figma-select{height:34px;max-width:170px;border-color:#b5b5b5}
 .records-grid-table{display:flex;flex-direction:column;flex:1;min-height:0}
 .records-grid-table table{border-collapse:collapse;table-layout:fixed;width:100%;font-family:Roboto,Arial,sans-serif}
-.records-columns{flex-shrink:0}
+.records-grid-table .records-columns{flex-shrink:0;width:calc(100% - var(--records-scrollbar,0px))}
 .records-columns th{height:80px;line-height:17px;font-size:12px;font-weight:700;letter-spacing:0;text-align:left;background:#eef4ff;color:#1e3a8a;padding:16px 24px;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0}
 .records-data-scroll{position:relative;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#5b93ff transparent}
 .records-data-scroll::-webkit-scrollbar,.records-profile-scroll::-webkit-scrollbar,.review-scroll::-webkit-scrollbar{width:6px;height:6px}
@@ -68,6 +68,8 @@
 .records-preview-layer{z-index:105}
 .records-preview{max-width:92vw;display:flex;flex-direction:column;align-items:center;gap:24px}
 .records-preview img{max-width:90vw;max-height:70vh;object-fit:contain}
+.records-preview-crop{position:relative;overflow:hidden;flex-shrink:0}
+.records-preview-crop img{position:absolute;max-width:none;max-height:none;object-fit:fill}
 .records-preview iframe{width:min(700px,90vw);height:70vh;border:0;background:white}
 .records-preview>button{border:0;border-radius:50%;background:#ddd;color:#111;width:80px;height:80px;font:400 64px/70px Arial,sans-serif;padding:0}
 .records-profile-view{padding-top:28px;overflow:hidden}
