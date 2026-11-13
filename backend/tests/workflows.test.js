@@ -9,7 +9,33 @@ after(async()=>{if(proc)proc.kill();fs.rmSync(testData,{recursive:true,force:tru
 test('UC01 login wrong password and permission isolation',async()=>{assert.equal((await request('auth/login',{method:'POST',body:{email:'quanly@lighthouse.test',password:'wrong'}})).status,401);assert.equal((await request('users',{role:'student'})).status,403);assert.equal((await request('history',{role:'student'})).status,403);assert.equal((await request('students',{role:'student'})).data.items.length,1);});
 test('UC02 and UC03 registration review and intake',async()=>{const reg=await request('registrations',{method:'POST',body:{name:'Demo Thu Trang',email:'trang@example.test',phone:'0912345678',school:'DUE',major:'Kế toán',family:'Hộ khó khăn'}});assert.equal(reg.status,201);const id=reg.data.item.id;assert.equal((await request('registrations/'+id+'/accept',{method:'POST',role:'manager'})).status,400);assert.equal((await request('registrations/'+id,{method:'PATCH',role:'manager',body:{status:'Đạt yêu cầu'}})).status,200);const accepted=await request('registrations/'+id+'/accept',{method:'POST',role:'manager'});assert.equal(accepted.status,201);assert.ok(accepted.data.item.id.startsWith('LH'));assert.ok(accepted.data.demoStudentPassword);});
 test('UC04 edit profile and UC07 alumni move',async()=>{const edit=await request('students/LH002',{method:'PATCH',role:'manager',body:{name:'Trần Thanh Bình Bản sửa'}});assert.equal(edit.status,200);const students=await request('students?q=Thanh%20Bình',{role:'manager'});assert.ok(students.data.items.some(x=>x.id==='LH002'));const moved=await request('students/LH003',{method:'PATCH',role:'manager',body:{status:'Đã kết thúc hỗ trợ',endReason:'Tốt nghiệp'}});assert.equal(moved.status,200);assert.equal(moved.data.item.room,null);assert.ok((await request('alumni',{role:'manager'})).data.items.some(x=>x.id==='LH003'));});
-test('UC05 rooms validation create edit capacity delete',async()=>{const a=await request('rooms',{role:'manager',method:'POST',body:{id:'C101',capacity:1}});assert.equal(a.status,201);assert.equal((await request('rooms/C101',{method:'PUT',role:'manager',body:{studentIds:['LH001','LH002']}})).status,400);const edit=await request('rooms/C101',{method:'PUT',role:'manager',body:{studentIds:['LH002']}});assert.equal(edit.status,200);assert.equal((await request('rooms/C101',{method:'DELETE',role:'manager'})).status,200);assert.equal((await request('students/LH002',{role:'manager'})).data.item.room,null);});
+test('UC05 rooms validation create edit capacity delete',async()=>{
+for(const capacity of [0,1,4,7,50,6.5])assert.equal((await request('rooms',{role:'manager',method:'POST',body:{id:'INVALID',capacity}})).status,400);
+const a=await request('rooms',{role:'manager',method:'POST',body:{id:'C101',capacity:6}});assert.equal(a.status,201);
+const edit=await request('rooms/C101',{method:'PUT',role:'manager',body:{studentIds:['LH002']}});assert.equal(edit.status,200);
+assert.equal((await request('rooms/C101',{method:'DELETE',role:'manager'})).status,200);
+assert.equal((await request('students/LH002',{role:'manager'})).data.item.room,null);
+});
+test('UC05 accepts six residents and rejects a seventh without changing assignments',async()=>{
+const ids=[];
+for(let i=0;i<7;i++){
+const reg=await request('registrations',{method:'POST',body:{name:'Capacity test '+i,email:'capacity'+i+'@example.test',phone:'0900000000',school:'Test school',major:'Test major'}});assert.equal(reg.status,201);
+const id=reg.data.item.id;
+assert.equal((await request('registrations/'+id,{method:'PATCH',role:'manager',body:{status:'Đạt yêu cầu'}})).status,200);
+const accepted=await request('registrations/'+id+'/accept',{method:'POST',role:'manager'});assert.equal(accepted.status,201);ids.push(accepted.data.item.id);
+}
+assert.equal((await request('rooms',{role:'manager',method:'POST',body:{id:'FULL6',capacity:6}})).status,201);
+assert.equal((await request('rooms/FULL6',{role:'manager',method:'PUT',body:{studentIds:ids.slice(0,6)}})).status,200);
+const before=fs.readFileSync(db,'utf8');
+const rejected=await request('rooms/FULL6',{role:'manager',method:'PUT',body:{studentIds:ids}});
+assert.equal(rejected.status,400);assert.equal(rejected.data.error,'Phòng đầy!');assert.equal(fs.readFileSync(db,'utf8'),before);
+const room=(await request('rooms',{role:'manager'})).data.items.find(r=>r.id==='FULL6');
+assert.equal(room.capacity,6);assert.equal(room.students.length,6);
+assert.equal((await request('students/'+ids[6],{role:'manager'})).data.item.room,null);
+// Unassigning one resident frees a place for the seventh student.
+assert.equal((await request('rooms/FULL6',{role:'manager',method:'PUT',body:{studentIds:ids.slice(1)}})).status,200);
+assert.equal((await request('students/'+ids[0],{role:'manager'})).data.item.room,null);
+});
 test('UC04.4 invalid upload rejects nonimage',async()=>{const x=await request('images',{method:'POST',role:'manager',body:{studentId:'LH001',file:{mime:'image/png',data:'data:image/png;base64,bm90IGFuIGltYWdl'}}});assert.equal(x.status,400);});
 test('UC06 UC11 goals submit review resubmit',async()=>{const g=await request('goals',{role:'student',method:'POST',body:{name:'IELTS B1',detail:'Ôn mỗi ngày'}});assert.equal(g.status,201);const id=g.data.item.id;assert.equal((await request('goals/'+id+'/review',{role:'manager',method:'PATCH',body:{status:'Chờ bổ sung',feedback:'Thêm thời hạn'}})).status,200);assert.equal((await request('goals/'+id+'/resubmit',{role:'student',method:'PATCH',body:{name:'IELTS B1',detail:'Trong 6 tháng'}})).status,200);});
 test('UC06 UC11 grades submit review resubmit',async()=>{const g=await request('grades',{role:'student',method:'POST',body:{term:'1',year:'2026-2027',gpa:3.5,debts:0,rank:'Giỏi'}});assert.equal(g.status,201);const id=g.data.item.id;assert.equal((await request('grades/'+id+'/review',{role:'manager',method:'PATCH',body:{status:'Yêu cầu gửi lại',note:'Bổ sung minh chứng'}})).status,200);assert.equal((await request('grades/'+id+'/resubmit',{role:'student',method:'PATCH',body:{term:'1',year:'2026-2027',gpa:3.5,debts:0,rank:'Giỏi'}})).status,200);});

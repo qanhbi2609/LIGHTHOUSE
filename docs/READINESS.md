@@ -10,7 +10,7 @@ trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại t
 
 ## Kết quả đã chạy
 
-- 12/12 integration tests API đạt, không skip; dùng dữ liệu và upload thử nghiệm.
+- 15/15 tests đạt, không skip: 13 integration tests API và 2 kiểm tra chuyển đổi sức chứa.
 - Browser smoke đạt ở 1920×1080 và 1366×768: đăng nhập sai/đúng, các trang quản lý,
   đăng xuất, menu sinh viên, mục tiêu/kết quả học tập và tải lại trang.
 - 24 ảnh chụp trong `artifacts/browser/`, kèm `results.json`. Chỉ là ảnh hiện trạng;
@@ -19,6 +19,8 @@ trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại t
 - Sửa CSS kế thừa `width:19px` làm chữ menu xuống thành cột; cho menu cuộn riêng,
   đặt footer trong luồng bố cục để không đè lên menu. Browser kiểm tra độ rộng nhãn
   và vùng menu không giao với footer ở cả hai viewport.
+- Phòng có sức chứa cố định 6: UI khóa lựa chọn tiếp khi đủ 6, API từ chối người thứ 7;
+  kiểm thử xác nhận chuyển đổi dữ liệu cũ không mất hồ sơ và có thể chạy lại.
 - Đã thêm workflow CI; chưa có bằng chứng GitHub Actions chạy thành công trên remote.
 
 ## Ánh xạ yêu cầu và khoảng trống
@@ -39,7 +41,7 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 | UC04.4 thêm ảnh / lỗi định dạng | Có local upload | Kho file riêng tư và timeline tháng/năm đúng SDD |
 | UC05.1 tra cứu theo sinh viên / chưa có phòng / không tìm thấy | Có demo | Đối chiếu ba trạng thái và văn bản thông báo |
 | UC05.2 chi tiết phòng | Có demo | Số người, sức chứa, còn chỗ và trạng thái phải nhất quán |
-| UC05.3 sửa bố trí / phòng đầy / chuyển phòng / bỏ chọn | API có demo và tests | Chốt giới hạn 4 hay 6; SQL transaction và kiểm thử đồng thời |
+| UC05.3 sửa bố trí / phòng đầy / chuyển phòng / bỏ chọn | API có demo và tests | Đã chốt 6 sinh viên/phòng; còn SQL transaction và kiểm thử đồng thời |
 | UC05.4 tạo / trùng tên / sức chứa sai | API có demo và tests | Chọn sinh viên ngay lúc tạo, lỗi dưới từng trường theo SDD |
 | UC05.5 xóa / xác nhận / hủy | Có demo, API trả sinh viên về chưa bố trí | Dialog và bằng chứng hủy, audit SQL |
 | UC06.1 đánh giá mục tiêu / xác nhận / hủy | Có demo | Radio Đạt/Chưa đạt, giai đoạn 6 tháng, lọc ngày/trạng thái đúng SDD |
@@ -58,9 +60,11 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 
 ## Các điểm tài liệu cần chốt
 
-1. SRS UC05.3 BR01 ghi tối đa **4** người/phòng; SDD phần sửa/tạo phòng ghi **6**.
-   Ví dụ SDD chi tiết phòng ghi sức chứa 6, đang ở 3, còn 1 cũng không nhất quán.
-   Không sửa quy tắc sức chứa hiện hành trước khi có câu trả lời.
+1. **Đã chốt theo người dùng: sức chứa mỗi phòng là 6 sinh viên.** Quyết định này
+   thay thế giới hạn 4 trong SRS UC05.3. Còn chỗ = 6 − số sinh viên đang ở; đủ 6 là đầy.
+   Backend từ chối giá trị sức chứa khác 6 và phân bổ quá 6 người. Database JSON cũ
+   được chuyển về 6 khi khởi động, có bản sao lưu `.before-room-capacity-6.bak`;
+   nếu phòng đã ở quá 6 thì dừng chuyển đổi, không bỏ sinh viên khỏi phòng.
 2. SRS UC03.2 BR03 ghi mật khẩu 4 số ngày sinh; SDD reset mật khẩu yêu cầu ít nhất
    8 ký tự, hoa/thường/số/ký tự đặc biệt. Cần thống nhất chính sách tài khoản mới.
    Không lưu hoặc gửi lại mật khẩu người dùng hiện hành; ưu tiên link kích hoạt có hạn.

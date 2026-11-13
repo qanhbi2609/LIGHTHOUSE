@@ -13,6 +13,15 @@ const uploadsDir=path.resolve(process.env.LIGHTHOUSE_UPLOADS_DIR||path.join(__di
 fs.mkdirSync(dataDir,{recursive:true});fs.mkdirSync(uploadsDir,{recursive:true});
 if(!fs.existsSync(dataFile))require('./seed');
 let db=JSON.parse(fs.readFileSync(dataFile,'utf8'));
+// Confirmed business rule: every room accommodates exactly six students.
+const ROOM_CAPACITY=6;
+if(db.rooms.some(r=>r.capacity!==ROOM_CAPACITY)){
+if(db.rooms.some(r=>db.students.filter(s=>s.room===r.id).length>ROOM_CAPACITY))throw Error('Không thể cập nhật sức chứa: có phòng đang ở quá 6 sinh viên.');
+const backup=dataFile+'.before-room-capacity-6.bak';
+if(!fs.existsSync(backup))fs.copyFileSync(dataFile,backup,fs.constants.COPYFILE_EXCL);
+for(const room of db.rooms)room.capacity=ROOM_CAPACITY;
+save();
+}
 const sessions=new Map();
 const limitBytes=15_000_000;const PORT=Number(process.env.PORT||3000);
 const TEXT={'Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff','Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Frame-Options':'DENY'};
@@ -61,7 +70,7 @@ if(parts[1]==='students'&&id&&parts.length===3&&method==='GET'){const actor=user
 if(parts[1]==='students'&&id&&parts.length===3&&method==='PATCH'){const actor=allow(req,'students.edit'),s=find(db.students,id,'sinh viên'),a=await read();for(const k of ['name','email','phone','cccd','dob','hometown','address','school','major','family','cohort','studentCode'])if(Object.hasOwn(a,k))s[k]=clean(a[k]);if(Object.hasOwn(a,'status')){if(!['Đang hỗ trợ','Tạm dừng hỗ trợ','Đã kết thúc hỗ trợ'].includes(a.status))error(400,'Trạng thái hỗ trợ không hợp lệ');s.status=a.status;if(a.status==='Đã kết thúc hỗ trợ'){s.endDate=clean(a.endDate,10)||today();s.endReason=clean(a.endReason);s.room=null;}}log(actor,'Chỉnh sửa hồ sơ',s.id);save();return reply(res,200,{item:s,message:'Cập nhật thành công!'});}
 if(p==='/api/alumni'&&method==='GET'){allow(req,'alumni.view');const q=norm(u.searchParams.get('q'));return reply(res,200,{items:db.students.filter(s=>s.status==='Đã kết thúc hỗ trợ'&&(!q||same(s.name,q)||same(s.id,q)))});}
 if(p==='/api/rooms'&&method==='GET'){allow(req,'rooms.view');return reply(res,200,{items:db.rooms.map(r=>({...r,students:db.students.filter(s=>s.room===r.id)}))});}
-if(p==='/api/rooms'&&method==='POST'){const actor=allow(req,'rooms.edit'),a=await read(),id=required(a.id,'mã phòng').toUpperCase(),capacity=Number(a.capacity);if(!Number.isInteger(capacity)||capacity<1||capacity>50)error(400,'Sức chứa phải là số nguyên từ 1–50');if(db.rooms.some(r=>r.id===id))error(409,'Tên phòng đã tồn tại');db.rooms.push({id,capacity});log(actor,'Tạo phòng',id);save();return reply(res,201,{message:'Tạo mới thành công!'});}
+if(p==='/api/rooms'&&method==='POST'){const actor=allow(req,'rooms.edit'),a=await read(),id=required(a.id,'mã phòng').toUpperCase(),capacity=Number(a.capacity);if(capacity!==ROOM_CAPACITY)error(400,'Sức chứa mỗi phòng phải là 6 sinh viên');if(db.rooms.some(r=>r.id===id))error(409,'Tên phòng đã tồn tại');db.rooms.push({id,capacity});log(actor,'Tạo phòng',id);save();return reply(res,201,{message:'Tạo mới thành công!'});}
 if(parts[1]==='rooms'&&id&&method==='PUT'){const actor=allow(req,'rooms.edit'),r=find(db.rooms,id,'phòng'),a=await read(),ids=Array.isArray(a.studentIds)?[...new Set(a.studentIds)]:[];if(ids.length>r.capacity)error(400,'Phòng đầy!');for(const sId of ids){const s=find(db.students,sId,'sinh viên');if(s.status==='Đã kết thúc hỗ trợ')error(400,'Không thể xếp Alumni vào phòng');}for(const s of db.students)if(s.room===id&&!ids.includes(s.id))s.room=null;for(const sId of ids)find(db.students,sId,'sinh viên').room=id;log(actor,'Sửa bố trí phòng',id);save();return reply(res,200,{message:'Cập nhật thành công!'});}
 if(parts[1]==='rooms'&&id&&method==='DELETE'){const actor=allow(req,'rooms.edit');find(db.rooms,id,'phòng');db.rooms=db.rooms.filter(x=>x.id!==id);for(const s of db.students)if(s.room===id)s.room=null;log(actor,'Xóa phòng',id);save();return reply(res,200,{message:'Xóa phòng thành công!'});}
 if(p==='/api/images'&&method==='POST'){const actor=allow(req,'students.edit'),a=await read();find(db.students,a.studentId,'sinh viên');const url=storeFile(a.file,a.studentId);if(!url.startsWith('/uploads/'))error(400,'Thiếu ảnh');const row={id:nextId(db.images,'HA'),studentId:a.studentId,url,created:current()};db.images.push(row);log(actor,'Thêm hình ảnh',a.studentId);save();return reply(res,201,{item:row,message:'Tải ảnh thành công!'});}
