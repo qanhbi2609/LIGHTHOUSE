@@ -138,7 +138,7 @@ def main():
                         expect(second.locator('.auth-login')).to_be_visible()
                         assert not second.evaluate("Boolean(localStorage.getItem('lh_token'))")
                         second.get_by_role('button', name='Đăng ký vào Lighthouse', exact=True).click()
-                        expect(second.locator('#registration-files')).to_be_visible()
+                        expect(second.locator('#registration-form')).to_be_visible()
                         assert not errors, errors
                         context.close()
                 finally:

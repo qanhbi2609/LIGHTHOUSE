@@ -10,7 +10,7 @@ trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại t
 
 ## Kết quả đã chạy
 
-- 19/19 tests đạt, không skip: 13 integration tests API, 4 kiểm tra UC01 và 2 kiểm tra chuyển đổi sức chứa.
+- 22/22 tests đạt, không skip: 13 integration tests API, 4 kiểm tra UC01, 3 kiểm tra UC02 và 2 kiểm tra chuyển đổi sức chứa.
 - Browser smoke đạt ở 1920×1080 và 1366×768: đăng nhập sai/đúng, các trang quản lý,
   đăng xuất, menu sinh viên, mục tiêu/kết quả học tập và tải lại trang.
 - 24 ảnh chụp trong `artifacts/browser/`, kèm `results.json`. Chỉ là ảnh hiện trạng;
@@ -32,7 +32,7 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 | --- | --- | --- |
 | UC01 đăng nhập | Có demo, API và browser smoke | Ghi nhớ đăng nhập thực; phiên bền vững; kiểm tra độ khớp Frame đầy đủ (đã có asset gốc và nút hiện mật khẩu) |
 | UC01 quên mật khẩu, nhập mã, gửi lại, tạo mật khẩu, lỗi/thành công | Đã tách các màn hình, mã 4 số và validation theo ảnh; xem `UC01.md` | Email thật và đối chiếu pixel còn thiếu; ảnh nền/logo gốc đã bổ sung từ Downloads.zip |
-| UC02 đăng ký, tỉnh/thành, lỗi/thành công | Có demo form và upload | Các nhóm minh chứng, dropdown quê quán và nội dung hướng dẫn đúng SDD; validation từng trường |
+| UC02 đăng ký, tỉnh/thành, lỗi/thành công | Đã chỉnh hai màn hình theo `uc02.zip`, có hai nhóm minh chứng và validation từng trường; xem `UC02.md` | Còn nghiệm thu đặc tả đầy đủ và môi trường lưu bền vững |
 | UC03.1 kiểm tra, đạt/chờ bổ sung/từ chối | Có demo đổi trạng thái | Email thông báo, link form bổ sung có hạn và cập nhật lại hồ sơ; dialog đúng Frame |
 | UC03.2 tiếp nhận, xác nhận/hủy | API kiểm tra điều kiện và tạo tài khoản | Gửi email; giao dịch SQL chống tiếp nhận trùng; chốt chính sách mật khẩu ban đầu |
 | UC04.1 tra cứu / rỗng | Có tìm từ khóa demo | Đầy đủ tiêu chí, trạng thái và empty state đúng đặc tả |

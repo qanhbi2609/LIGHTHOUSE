@@ -84,7 +84,24 @@ if(!otp||otp.expiry<=Date.now()||!otp.verifiedHash||otp.verifiedHash!==crypto.cr
 const password=String(a.password||'');if(password.length<8||!/[A-Z]/.test(password)||!/[a-z]/.test(password)||!/[0-9]/.test(password)||!/[^A-Za-z0-9\s]/.test(password))error(400,'Mật khẩu không hợp lệ!');
 account.passwordHash=hash(password);db.otps=db.otps.filter(x=>x!==otp);for(const [key,session] of sessions)if(session.id===account.id)sessions.delete(key);save();return reply(res,200,{message:'Đổi mật khẩu thành công!'});
 }
-if(p==='/api/registrations'&&method==='POST'){const a=await read();const name=required(a.name,'họ tên'),email=required(a.email,'email');if(!/^\S+@\S+\.\S+$/.test(email))error(400,'Email không hợp lệ');if(db.registrations.some(r=>r.email===email&&r.status!=='Từ chối'))error(409,'Email đã có hồ sơ đăng ký');const item={id:nextId(db.registrations,'HS'),name,email,phone:required(a.phone,'số điện thoại'),dob:clean(a.dob,10),cccd:clean(a.cccd,12),hometown:clean(a.hometown),address:clean(a.address),school:required(a.school,'trường'),major:required(a.major,'ngành'),family:clean(a.family),description:clean(a.description),files:Array.isArray(a.files)?a.files.slice(0,6).map(f=>storeFile(f,'registration')):[],status:'Chờ kiểm tra',note:'',created:today()};db.registrations.push(item);save();return reply(res,201,{item,message:'Đăng ký thành công!'});}
+if(p==='/api/registrations'&&method==='POST'){
+const a=await read(),name=required(a.name,'họ tên'),email=required(a.email,'email').toLowerCase(),phone=required(a.phone,'số điện thoại'),school=required(a.school,'trường'),major=required(a.major,'ngành');
+if(!/^\S+@\S+\.\S+$/.test(email))error(400,'Email không hợp lệ');
+if(!/^0\d{9}$/.test(phone))error(400,'Số điện thoại không hợp lệ');
+const dob=clean(a.dob,10),cccd=clean(a.cccd);
+if(cccd&&!/^\d{12}$/.test(cccd))error(400,'Số căn cước công dân phải gồm 12 chữ số');
+if(dob&&(!/^\d{4}-\d{2}-\d{2}$/.test(dob)||!Number.isFinite(Date.parse(dob))||new Date(dob).toISOString().slice(0,10)!==dob||dob>today()))error(400,'Ngày sinh không hợp lệ');
+if(db.registrations.some(r=>r.email.toLowerCase()===email&&r.status!=='Từ chối'))error(409,'Email đã có hồ sơ đăng ký');
+for(const key of ['files','familyFiles','schoolFiles'])if(a[key]!==undefined&&!Array.isArray(a[key]))error(400,'Danh sách tệp không hợp lệ');
+const family=a.familyFiles||[],education=a.schoolFiles||[],legacy=a.files||[];
+if(family.length+education.length+legacy.length>6)error(400,'Chỉ được tải lên tối đa 6 tệp');
+const written=[];const upload=f=>{const url=storeFile(f,'registration');if(!url)error(400,'Tệp minh chứng không hợp lệ');written.push(url);return url;};
+let familyFiles,schoolFiles,files;
+try{familyFiles=family.map(upload);schoolFiles=education.map(upload);files=[...familyFiles,...schoolFiles,...legacy.map(upload)];}
+catch(e){for(const url of written)fs.unlinkSync(path.join(uploadsDir,path.basename(url)));throw e;}
+const item={id:nextId(db.registrations,'HS'),name,email,phone,dob,cccd,hometown:clean(a.hometown),address:clean(a.address),school,major,family:clean(a.family,2000),description:clean(a.description,5000),files,familyFiles,schoolFiles,status:'Chờ kiểm tra',note:'',created:today()};
+db.registrations.push(item);save();return reply(res,201,{item,message:'Đăng ký thành công!'});
+}
 if(p==='/api/registrations'&&method==='GET'){allow(req,'registrations.view');const q=norm(u.searchParams.get('q'));return reply(res,200,{items:db.registrations.filter(r=>!q||same(r.name,q)||same(r.id,q)||same(r.status,q))});}
 if(parts[1]==='registrations'&&id&&parts.length===3&&method==='PATCH'){const actor=allow(req,'registrations.review'),a=await read(),r=find(db.registrations,id,'hồ sơ');if(!['Đạt yêu cầu','Chờ kiểm tra','Chờ bổ sung','Từ chối'].includes(a.status))error(400,'Trạng thái không hợp lệ');r.status=a.status;r.note=clean(a.note,1000);log(actor,'Xử lý hồ sơ',r.id+' → '+r.status);save();return reply(res,200,{item:r,message:'Đã lưu thành công!'});}
 if(parts[1]==='registrations'&&id&&parts[3]==='accept'&&method==='POST'){const actor=allow(req,'registrations.review'),r=find(db.registrations,id,'hồ sơ');if(r.status!=='Đạt yêu cầu')error(400,'Hồ sơ chưa đủ điều kiện tiếp nhận!');if(db.students.some(s=>s.registrationId===id))error(409,'Hồ sơ đã được tiếp nhận');const studentId=nextId(db.students,'LH'),usrId=nextId(db.users,'ND');const temp='Temp@'+crypto.randomInt(100000,999999);const stud={id:studentId,registrationId:r.id,userId:usrId,name:r.name,email:r.email,cccd:r.cccd,dob:r.dob,hometown:r.hometown,address:r.address,phone:r.phone,cohort:'',studentCode:'',school:r.school,major:r.major,family:r.family,room:null,status:'Đang hỗ trợ',joined:today(),endDate:'',endReason:''};db.students.push(stud);db.users.push({id:usrId,name:r.name,email:r.email,role:'SinhVien',studentId,permissions:[],passwordHash:hash(temp),active:true});r.status='Đã tiếp nhận';log(actor,'Tiếp nhận hồ sơ',r.id+' / '+studentId);save();return reply(res,201,{item:stud,demoStudentPassword:process.env.NODE_ENV==='production'?undefined:temp,message:'Đã tạo hồ sơ sinh viên thành công!'});}

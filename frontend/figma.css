@@ -6,12 +6,12 @@ body{margin:0;min-width:360px;font-family:Roboto,'Segoe UI',Arial,sans-serif}
 .sidebar{width:260px;flex-shrink:0;min-height:100vh;height:100vh;position:sticky;top:0;display:flex;flex-direction:column;align-items:stretch;padding:46px 0 0 20px;border-radius:0 100px 0 0;background:linear-gradient(104deg,#eef4ff 10%,#bfdbfe 50%,#93c5fd 100%);box-shadow:none;overflow:hidden}
 .sidebar-brand{font-family:Ribeye,Georgia,serif!important;color:#1d4ed8;text-align:center;font-size:26px;font-weight:400;line-height:1.15;letter-spacing:-.6px;margin:0 20px 68px 0}
 .sidebar-brand small{display:block!important;color:#1d4ed8;font:400 12px/1.4 Roboto,Arial,sans-serif;letter-spacing:0;margin-top:3px}
-.sidebar-group{display:flex;flex-direction:column;gap:6px;width:240px;max-width:100%;padding:0;flex:1;min-height:0;overflow-y:auto}
+.sidebar-group{display:flex;flex-direction:column;gap:6px;width:240px;max-width:100%;padding:0;flex:0 0 auto;min-height:0;overflow:visible}
 .sidebar .navitem{flex-shrink:0;width:240px;min-height:46px;display:flex;align-items:center;gap:10px;border:0;border-radius:30px 0 0 30px;color:#1d4ed8;background:transparent;text-align:left;padding:12px 14px;font:400 18px/1.4 Roboto,Arial,sans-serif;white-space:normal;box-shadow:none;transition:background-color .15s}
 .sidebar .navitem svg{flex:0 0 19px;display:block}.sidebar .navitem span{width:auto;flex:1;min-width:0;font-size:18px;line-height:1.35}
 .sidebar .navitem.active{background:rgba(255,255,255,.9);color:#1d4ed8;font-weight:700}
 .sidebar .navitem.active span{font-weight:700}.sidebar .navitem:hover{background:rgba(255,255,255,.58)}
-.sidebar-footer{position:static;flex-shrink:0;margin:16px 20px 24px 0;width:220px;color:#1d4ed8;border-top:1px solid #1d4ed8;padding-top:12px;text-transform:none;letter-spacing:0;font:400 11px/1.4 Roboto,Arial,sans-serif}
+.sidebar-footer{position:static;flex-shrink:0;margin:auto 20px 24px 0;width:220px;color:#1d4ed8;border-top:1px solid #1d4ed8;padding-top:12px;text-transform:none;letter-spacing:0;font:400 11px/1.4 Roboto,Arial,sans-serif}
 .content-shell{flex:1;min-width:0;display:flex;flex-direction:column;padding:24px 40px 32px 40px}
 .topbar{margin:0 0 18px 0!important;padding:20px 28px;height:102px;min-height:102px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 4px 16px rgba(30,58,138,.06);display:flex;justify-content:space-between;align-items:center}
 .topbar h1{font:700 28px/1.4 Roboto,Arial,sans-serif;color:#1e3a8a;margin:0;letter-spacing:0}
@@ -108,3 +108,14 @@ button.primary:hover{background:#2563eb}button.secondary:hover{background:#e5edf
 .login-alt{margin-top:12px;display:flex;flex-direction:column;gap:12px;align-items:center}.login-alt button{color:#1e3a8a;font-size:13px}
 .login-alt button:first-child{display:none}.login-alt button:nth-child(2){background:#eff6ff;border-radius:9px;padding:12px 20px;order:3;min-width:300px;font-weight:700}.login-alt button:nth-child(3){order:2;text-decoration:underline}
 @media(max-width:680px){.login-card{padding:30px;min-height:600px}.login-mark{margin:20px 0 60px;font-size:30px}}
+/* Keep the complete sidebar visible on laptop-height viewports. */
+@media(min-width:761px) and (max-height:850px){
+.sidebar{padding-top:24px}.sidebar-brand{margin-bottom:28px}
+.sidebar-group{gap:4px}.sidebar .navitem{min-height:42px;padding-top:9px;padding-bottom:9px;font-size:16px}
+.sidebar .navitem span{font-size:16px;line-height:1.3}.sidebar-footer{margin-bottom:16px;padding-top:10px}
+}
+@media(min-width:761px) and (max-height:650px){
+.sidebar{padding-top:16px}.sidebar-brand{margin-bottom:16px}
+.sidebar-group{gap:2px}.sidebar .navitem{min-height:36px;padding-top:6px;padding-bottom:6px}
+.sidebar .navitem span{font-size:14px;line-height:1.25}.sidebar-footer{font-size:9px;margin-bottom:10px;padding-top:6px}
+}

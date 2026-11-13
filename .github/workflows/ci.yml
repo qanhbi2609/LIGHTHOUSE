@@ -36,6 +36,7 @@ jobs:
         run: |
           python scripts/browser_smoke.py
           python scripts/auth_browser_smoke.py
+          python scripts/registration_browser_smoke.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -59,7 +59,7 @@ cd backend
 npm test
 ```
 
-19 automated API, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
+22 automated API, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
 
 ## Architecture
 

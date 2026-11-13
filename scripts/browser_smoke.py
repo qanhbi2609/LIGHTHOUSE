@@ -32,11 +32,18 @@ def ready(page):
 
 
 def sidebar_layout(page):
+    assert page.locator('.sidebar-brand').evaluate('el => getComputedStyle(el).fontFamily').startswith('Ribeye')
+    assert page.locator('.navitem span').first.evaluate('el => getComputedStyle(el).fontFamily').startswith('Roboto')
     nav = page.locator('.sidebar-group').bounding_box()
     footer = page.locator('.sidebar-footer').bounding_box()
     label = page.locator('.navitem span').first.bounding_box()
     assert label['width'] > 100, 'Navigation labels squeezed into a narrow column'
     assert nav['y'] + nav['height'] <= footer['y'] + 1, 'Navigation overlaps footer'
+    assert page.locator('.sidebar-group').evaluate('el => el.scrollHeight <= el.clientHeight + 1'), 'Navigation requires scrolling'
+    for item in page.locator('.sidebar .navitem').all():
+        box = item.bounding_box()
+        assert box['y'] >= nav['y'] and box['y'] + box['height'] <= footer['y'], 'A menu item is clipped'
+    assert footer['y'] + footer['height'] <= page.viewport_size['height'], 'Footer is clipped'
 
 
 def main():

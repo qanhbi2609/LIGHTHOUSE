@@ -1,0 +1,36 @@
+.registration-shell{position:relative;isolation:isolate;min-height:100svh;background:#e2e7e6;color:#002f6c;font-family:Roboto,Arial,sans-serif}
+.registration-shell::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(#ffffffc7,#ffffffc7),url('/assets/auth-background.png') center/cover no-repeat;filter:blur(10px);clip-path:inset(0)}
+#registration-form{padding:0 48px 44px;max-width:1920px;margin:auto}
+#registration-form h1{font-size:32px;line-height:38px;margin:0 0 37px;text-align:center;font-weight:700}
+#registration-form h2{font-size:24px;line-height:29px;margin:0 0 8px;font-weight:700}
+.registration-personal-grid,.registration-family-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px}
+.registration-field{min-width:0}.registration-field>label:first-child{display:block;font-size:14px;line-height:17px;font-weight:700;margin-bottom:6px}
+.registration-field input:not([type=file]),.registration-field select,.registration-field textarea{display:block;width:100%;height:43px;border:1px solid #d8d8d8;border-radius:10px;background:white;color:#002f6c;padding:0 13px;font:400 14px Roboto,Arial,sans-serif;outline-offset:2px}
+.registration-field input::placeholder,.registration-field textarea::placeholder{color:#7f99bf;opacity:1}
+.registration-field select:has(option:checked[value=""]){color:#7f99bf}
+.registration-field select option{color:#002f6c}.registration-field input[type=date]{color:#7f99bf}
+.registration-date{position:relative}.registration-date-hint{position:absolute;top:36px;left:14px;pointer-events:none;font-size:14px;color:#7f99bf}
+.registration-date input[data-empty=true]:not(:focus)::-webkit-datetime-edit{color:transparent}
+.registration-date input:focus~.registration-date-hint,.registration-date input[data-empty=false]~.registration-date-hint{display:none}
+.registration-field:has(select){position:relative}.registration-field select{appearance:none;padding-right:35px}
+.registration-field:has(select)::after{content:"";position:absolute;right:16px;top:42px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid #6b7280;pointer-events:none}
+.registration-family{margin-top:19px}.registration-family-grid{column-gap:26px}
+.registration-upload{position:relative;display:flex;align-items:center;width:250px;max-width:100%;height:25px;border:1px solid #aaa;border-radius:14px;background:#f7f7f7;color:#64748b;font-size:14px;line-height:20px;cursor:pointer;padding:0 10px}
+.registration-upload svg{width:17px;height:17px;flex:none;color:#222}
+.registration-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.registration-file-names{display:block;max-width:100%;overflow-wrap:anywhere;color:#64748b;font-size:12px;line-height:16px}
+.registration-error{display:block;font-size:12px;line-height:16px;color:#c52222}.registration-error:empty,.registration-file-names:empty{display:none}
+.registration-field [aria-invalid=true]{border-color:#c52222!important}
+.registration-education{margin-top:19px}.registration-education-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.930693fr);gap:23px 24px}
+.registration-school-files{position:relative}.registration-school-files>p{position:absolute;top:48px;font-size:12px;line-height:14px;color:#6b7280;margin:5px 0 0}
+.registration-description{grid-column:span 2}.registration-field textarea{height:200px;resize:vertical;padding:18px 19px;line-height:20px}
+.registration-prompts{font-size:14px;line-height:16px;margin:23px 0 0;padding-left:16px;color:#7390b6}
+.registration-status{color:#c52222;text-align:center;font-size:14px;margin-top:16px}.registration-status:empty{display:none}
+.registration-submit{margin-top:95px;font-size:16px}
+.registration-success{min-height:100svh;text-align:center;padding:230px 24px 80px}
+.registration-success .auth-success-icon{margin:0 auto 142px}
+.registration-success h1{font-size:48px;line-height:58px;margin:0;font-weight:700;color:#1e3a8a}
+.registration-success p{font-size:24px;line-height:28px;color:#64748b;margin:16px auto 58px;max-width:1150px}
+.registration-success .auth-primary{width:300px;max-width:100%;font-size:18px}
+@media(max-width:1500px){#registration-form{padding:16px 32px 36px}#registration-form h1{margin-bottom:24px}.registration-education-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.registration-school-files{grid-row:2;grid-column:2}.registration-description{grid-row:2 / span 2;grid-column:1}.registration-prompts{grid-column:2;margin-top:0}.registration-submit{margin-top:40px}.registration-success{padding-top:120px}.registration-success .auth-success-icon{margin-bottom:90px}.registration-success h1{font-size:38px;line-height:48px}.registration-success p{font-size:20px;line-height:26px;margin-bottom:40px}}
+@media(max-width:760px){#registration-form{padding:16px 20px 32px}#registration-form h1{font-size:26px}.registration-personal-grid,.registration-family-grid,.registration-education-grid{grid-template-columns:1fr;gap:14px}.registration-school-files,.registration-description,.registration-prompts{grid-column:auto;grid-row:auto}.registration-education,.registration-family{margin-top:24px}.registration-success{padding-top:85px}.registration-success h1{font-size:28px;line-height:36px}.registration-success p{font-size:16px;line-height:24px}.registration-wide-break{display:none}.registration-success .auth-success-icon{margin-bottom:65px}}
