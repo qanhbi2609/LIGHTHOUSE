@@ -2,6 +2,14 @@
 
 > **IMPORTANT / PHẠM VI:** Source here is an **end-to-end runnable workflow-testing prototype**. All 11 UC groups have corresponding pages and working API operations against **fake demo data**. This is **NOT the final production implementation** specified by SDD: runtime persistence is JSON, not SQL Server; email sending, production uploads/storage, and direct generated PDF backend are not implemented. No live hosting URL has been created by this package alone.
 
+## Phát triển và triển khai trực tuyến
+
+Chỉ làm việc trong repository `qanhbi2609/LIGHTHOUSE`.
+Đọc [hướng dẫn Development / Staging / Production](docs/DEPLOYMENT.md) và
+[kiểm kê SRS / SDD, kết quả kiểm thử, phần còn thiếu](docs/READINESS.md).
+Workflow CI chạy API và browser smoke; CD và URL công khai cần kết nối hosting.
+Chưa nghiệm thu Final, chưa triển khai Production.
+
 ## Run locally (Windows)
 
 1. Install Node.js 20+.
@@ -68,9 +76,11 @@ npm test
 
 The SDD has 16 tables. This project includes an SSMS schema adapted for engineering consistency (e.g., nullable student room for 'Chưa bố trí', report draft status). To make a real SQL Server-backed production website, the Backend repository must be implemented against the relational schema (parameterized queries and transactions). **Running the SQL script alone does not change runtime storage.**
 
-## Deploy demo to Render without touching the group's GitHub
+## Deploy Staging
 
-You can create a **separate personal private repository** for this testing copy, or use a source-deploy workflow supported by your Render account, then deploy it using `render.yaml`. When deployment is configured, keep `DEMO_ONLY=1` and use **synthetic data only**. On ephemeral hosting, modified JSON data and uploaded files can disappear on restart or redeploy; a persistent database and private object storage are required before using real records.
+Dùng đúng repository `qanhbi2609/LIGHTHOUSE`, nhánh `staging`, tách khỏi Production.
+Xem [hướng dẫn triển khai và rollback](docs/DEPLOYMENT.md). Chưa tạo hosting hoặc URL.
+Bản JSON demo có thể mất dữ liệu trên host dùng filesystem tạm; chưa đáp ứng lưu bền vững.
 
 ## Known production blockers / remaining work
 
