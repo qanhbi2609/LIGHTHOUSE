@@ -41,6 +41,17 @@ def main():
                         font_response = page.request.get(f'http://127.0.0.1:{port}/assets/fonts/ribeye-latin-400-normal.woff2')
                         assert font_response.status == 200
                         assert font_response.body()[:4] == b'wOF2'
+                        for selector, filename in [('.auth-shell', 'auth-background.png'), ('.auth-logo', 'auth-logo.png')]:
+                            background = page.locator(selector).evaluate('el => getComputedStyle(el).backgroundImage')
+                            assert filename in background, background
+                            await_image = """url => new Promise((resolve, reject) => {
+                                const image = new Image();
+                                image.onload = () => resolve([image.naturalWidth, image.naturalHeight]);
+                                image.onerror = () => reject(new Error('Unable to load auth asset'));
+                                image.src = url;
+                            })"""
+                            dimensions = page.evaluate(await_image, f'/assets/{filename}')
+                            assert dimensions == ([1920, 1080] if selector == '.auth-shell' else [120, 120])
                         if width == 1920:
                             assert card == {'x': 1270, 'y': 77, 'width': 540, 'height': 960}, card
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -138,7 +149,7 @@ def main():
     (OUT / 'results.json').write_text(json.dumps({
         'viewports': ['1920x1080', '1366x768'], 'status': 'passed',
         'screenshots': 20, 'expiry_ui_response': 'mocked; backend tested separately',
-        'figma_pixel_diff': 'not_run', 'original_photo_and_logo': 'pending_assets'
+        'figma_pixel_diff': 'not_run', 'original_photo_and_logo': 'Downloads.zip; loaded successfully'
     }, indent=2) + '\n')
     print('PASS: UC01 screens, password toggles, invalid/expired code, password validation, reset, remembered login and logout at both sizes')
 

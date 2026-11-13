@@ -30,8 +30,8 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 
 | UC / màn hình | Hiện trạng | Phần còn thiếu hoặc cần xác minh |
 | --- | --- | --- |
-| UC01 đăng nhập | Có demo, API và browser smoke | Ghi nhớ đăng nhập thực; phiên bền vững; asset gốc và nút hiện mật khẩu |
-| UC01 quên mật khẩu, nhập mã, gửi lại, tạo mật khẩu, lỗi/thành công | Đã tách các màn hình, mã 4 số và validation theo ảnh; xem `UC01.md` | Email thật, asset ảnh nền/logo và đối chiếu pixel còn thiếu |
+| UC01 đăng nhập | Có demo, API và browser smoke | Ghi nhớ đăng nhập thực; phiên bền vững; kiểm tra độ khớp Frame đầy đủ (đã có asset gốc và nút hiện mật khẩu) |
+| UC01 quên mật khẩu, nhập mã, gửi lại, tạo mật khẩu, lỗi/thành công | Đã tách các màn hình, mã 4 số và validation theo ảnh; xem `UC01.md` | Email thật và đối chiếu pixel còn thiếu; ảnh nền/logo gốc đã bổ sung từ Downloads.zip |
 | UC02 đăng ký, tỉnh/thành, lỗi/thành công | Có demo form và upload | Các nhóm minh chứng, dropdown quê quán và nội dung hướng dẫn đúng SDD; validation từng trường |
 | UC03.1 kiểm tra, đạt/chờ bổ sung/từ chối | Có demo đổi trạng thái | Email thông báo, link form bổ sung có hạn và cập nhật lại hồ sơ; dialog đúng Frame |
 | UC03.2 tiếp nhận, xác nhận/hủy | API kiểm tra điều kiện và tạo tài khoản | Gửi email; giao dịch SQL chống tiếp nhận trùng; chốt chính sách mật khẩu ban đầu |
