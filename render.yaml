@@ -1,0 +1,15 @@
+# Render Blueprint for a TEST/DEMO deployment only.
+# The backend currently persists to JSON on local disk; a free/ephemeral instance
+# resets modifications on redeploy/restart. Do not upload real student data.
+services:
+  - type: web
+    name: lighthouse-uc11-test
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DEMO_ONLY
+        value: '1'
