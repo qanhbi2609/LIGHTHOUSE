@@ -25,6 +25,7 @@ def main():
         shutil.copyfile(ROOT / 'frontend/assets/auth-logo.png', uploads / 'test-proof.png')
         proof = {'url': '/uploads/test-proof.png', 'name': 'Synthetic proof.png', 'group': 'family', 'created': '2026-01-01'}
         for r in db['registrations']:
+            r.update(dob='2006-01-15',hometown='Đà Nẵng',address='Địa chỉ kiểm thử',cccd='001001000001',description='Kế hoạch học tập kiểm thử')
             r['documents'] = [proof, dict(proof, group='school', name='Synthetic school proof.png')]
         for i in range(40):
             db['registrations'].append(dict(db['registrations'][0], id=f'QA{i:03}', name=f'Hồ sơ kiểm thử {i}',
@@ -58,6 +59,7 @@ def main():
                         page.locator('#login-form button[type=submit]').click()
                         expect(page.locator('.records-registration-list')).to_be_visible()
                         expect(page.locator('#toast')).not_to_be_visible()
+                        if page.locator('.lh-feedback button').count():page.locator('.lh-feedback button').click()
                         page.evaluate('document.fonts.ready')
 
                         def shot(name):
@@ -65,7 +67,7 @@ def main():
                             screenshots.append(f'{name}-{width}.png')
 
                         def dismiss():
-                            page.locator('.records-notice-layer').click(position={'x': 5, 'y': 5})
+                            page.locator('.lh-feedback button').click()
 
                         def check_scroll():
                             sidebar_layout(page)
@@ -115,7 +117,7 @@ def main():
                         page.locator('#review-status').select_option('Đạt yêu cầu')
                         shot('23-uc03-eligible')
                         page.locator('.review-actions button[type=submit]').click()
-                        expect(page.locator('.records-notice')).to_have_text('Đã lưu thành công!')
+                        expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Đã lưu thành công!')
                         shot('24-uc03-saved')
                         dismiss()
                         review(pending_id)
@@ -124,7 +126,7 @@ def main():
                         page.locator('#review-note').fill('Yêu cầu bổ sung thêm minh chứng')
                         shot('21-uc03-additional-note')
                         page.locator('.review-actions button[type=submit]').click()
-                        expect(page.locator('.records-notice')).to_have_text('Gửi yêu cầu thành công!')
+                        expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Gửi yêu cầu thành công!')
                         shot('19-uc03-request-saved')
                         dismiss()
                         review(pending_id)
@@ -133,14 +135,14 @@ def main():
                         expect(page.locator('.records-confirm')).to_be_visible()
                         shot('25-uc03-refuse-confirm')
                         page.locator('.records-confirm [data-close]').click()
-                        expect(page.locator('.records-notice')).to_have_text('Đã hủy thao tác!')
+                        expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Đã hủy thao tác!')
                         assert db_file.read_text() == before
                         shot('27-uc03-cancel')
                         dismiss()
                         page.locator('#review-status').select_option('Từ chối')
                         shot('20-uc03-refuse-choice')
                         page.locator('.confirm-ok').click()
-                        expect(page.locator('.records-notice')).to_have_text('Đã xóa khỏi danh sách!')
+                        expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Đã xóa khỏi danh sách!')
                         shot('26-uc03-refused')
                         dismiss()
                         expect(page.locator('.records-data-scroll tbody tr')).to_have_count(0)
@@ -149,7 +151,7 @@ def main():
                         page.locator('[data-action=accept]').click()
                         shot('29-uc03-accept-confirm')
                         page.locator('.confirm-ok').click()
-                        expect(page.locator('.records-notice')).to_have_text('Đã tạo hồ sơ sinh viên thành công!')
+                        expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Đã tạo hồ sơ sinh viên thành công!')
                         shot('28-uc03-accepted')
                         dismiss()
                         saved = json.loads(db_file.read_text())
@@ -192,17 +194,17 @@ def main():
                         before = db_file.read_text()
                         page.locator('.records-support [data-close]').click()
                         assert db_file.read_text() == before
-                        dismiss()
+                        expect(page.locator('.lh-feedback')).to_have_count(0)
                         page.locator('[data-action=add-support]').click()
                         page.locator('#support-form [type=submit]').click()
-                        expect(page.locator('.records-support .records-error')).to_have_text('Vui lòng nhập tên hỗ trợ.')
+                        expect(page.locator('.records-support [data-error=name]')).to_have_text('Vui lòng nhập đầy đủ thông tin')
                         page.locator('#support-form [name=name]').fill(f'Hỗ trợ kiểm thử {width}')
-                        page.locator('#support-form [name=type]').fill('Học phí')
+                        page.locator('#support-form [name=type]').select_option('Học phí')
                         page.locator('#support-form [name=amount]').fill('1200000')
                         page.locator('#support-form [name=date]').fill('2026-11-14')
                         page.locator('#support-evidence').set_input_files(str(uploads / 'test-proof.png'))
                         page.locator('#support-form [type=submit]').click()
-                        expect(page.locator('.records-notice')).to_have_text('Cập nhật thành công!')
+                        expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Cập nhật thành công!')
                         dismiss()
                         expect(page.locator('.student-tab-body')).to_contain_text(f'Hỗ trợ kiểm thử {width}')
                         page.locator('.student-profile [data-preview]').last.click()
@@ -223,14 +225,14 @@ def main():
                         page.locator('#student-edit-form [type=submit]').click()
                         shot('12-uc04-save-confirm')
                         page.locator('.records-confirm [data-close]').click()
-                        expect(page.locator('.records-notice')).to_have_text('Đã hủy thao tác!')
+                        expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Đã hủy thao tác!')
                         current = next(s for s in json.loads(db_file.read_text())['students'] if s['id'] == 'LH001')
                         assert current == original
                         shot('15-uc04-cancel-save')
                         dismiss()
                         page.locator('#student-edit-form [type=submit]').click()
                         page.locator('.confirm-ok').click()
-                        expect(page.locator('.records-notice')).to_have_text('Lưu hồ sơ thành công!')
+                        expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Lưu hồ sơ thành công!')
                         shot('14-uc04-saved')
                         saved = json.loads(db_file.read_text())
                         assert next(s for s in saved['students'] if s['id'] == 'LH001')['name'] == changed_name

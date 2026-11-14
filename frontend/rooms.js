@@ -12,11 +12,12 @@ async function show(reset=false){
  put(`<div class="records-workspace rooms-workspace"><section class="panel rooms-search"><h2>Tìm phòng theo sinh viên</h2><form id="room-search-form"><div class="search">${searchIcon}<input id="room-student-input" aria-label="Tìm phòng theo sinh viên" placeholder="Nhập tên hoặc mã quản lý sinh viên" value="${esc(query)}"></div><button class="primary" type="submit">Tìm</button></form><div id="room-search-result"></div></section><div class="rooms-toolbar"><h2>Danh sách phòng · ${rooms.length} phòng</h2>${permitted('rooms.create')?'<button type="button" class="primary" id="room-new"><span aria-hidden="true">＋</span> Tạo phòng</button>':''}</div><div class="rooms-card-scroll"><div class="room-grid">${rooms.map(r=>`<article class="room-card" data-room="${esc(r.id)}"><div class="room-header"><h3>${esc(r.id)}</h3>${pill(r)}</div><div class="room-capacity">${r.students.length}/${r.capacity} sinh viên</div><p>${esc(r.students.map(s=>s.id+' '+s.name).join(' · ')||'Chưa có sinh viên trong phòng.')}</p><div class="room-bottom"><div class="actions">${action('Xem','detail',r.id)}${(permitted('rooms.assign')?action('Sửa','edit',r.id,'primary'):'')+(permitted('rooms.delete')?action('Xoá','delete',r.id,'danger-button'):'')}</div></div></article>`).join('')}</div></div></div>`);
  document.querySelectorAll('[data-room-action]').forEach(b=>b.onclick=()=>({detail,edit,delete:remove})[b.dataset.roomAction](b.dataset.id));
  $('#room-new')?.addEventListener('click',()=>edit());
+ $('#room-student-input').oninput=e=>{if(!e.target.value){query='';searched=false;$('#room-search-result').innerHTML='';}};
  $('#room-search-form').onsubmit=e=>{e.preventDefault();query=$('#room-student-input').value.trim();searched=true;find(true);};if(searched)find();
 }
 function find(announce=false){
  const q=query.toLocaleLowerCase('vi'),matches=q?students.filter(s=>(s.id+' '+s.name).toLocaleLowerCase('vi').includes(q)):[];
- if(announce&&q&&!matches.length)notice('Không tìm thấy thông tin.');
+
  $('#room-search-result').innerHTML=`<small>Nhập tên hoặc mã quản lý sinh viên</small>${matches.length?matches.map(s=>{const r=rooms.find(r=>r.id===s.room);return `<div class="room-search-match"><strong>${esc(s.id)} · ${esc(s.name)}</strong><span>${r?`Phòng ${esc(r.id)} · ${r.students.length}/${r.capacity} · Còn chỗ: ${r.capacity-r.students.length}`:'Chưa được bố trí phòng ở'}</span></div>`;}).join(''):'<p class="room-search-empty">Chưa có dữ liệu.</p>'}`;
 }
 async function detail(id){
@@ -41,8 +42,8 @@ async function edit(id){
  $('#room-picker-search',el).oninput=draw;$('.room-clear',el)?.addEventListener('click',()=>{selected.clear();draw();});draw();
  $('#room-picker-form',el).onsubmit=async e=>{
   e.preventDefault();const b=$('[type=submit]',el),name=creating?$('#new-room-id',el).value.trim().toUpperCase():id;
-  if(!/^[A-Z0-9][A-Z0-9_-]{0,19}$/.test(name)||selected.size>6||(creating&&rs.some(r=>r.id===name))){if(creating)$('#new-room-id-error',el).textContent='Thông tin không hợp lệ!';notice('Thông tin không hợp lệ!');return;}
-  b.disabled=true;try{await api(creating?'rooms':'rooms/'+id,{method:creating?'POST':'PUT',body:{id:name,capacity:6,studentIds:[...selected]}});close();await show();notice(creating?'Tạo mới thành công!':'Cập nhật thành công!');}catch(error){$('.records-error',el).textContent=error.message;notice(error.message);}finally{b.disabled=false;}
+  if(!/^[A-Z0-9][A-Z0-9_-]{0,19}$/.test(name)||selected.size>6||(creating&&rs.some(r=>r.id===name))){if(creating)$('#new-room-id-error',el).textContent='Thông tin không hợp lệ!';return;}
+  b.disabled=true;try{await api(creating?'rooms':'rooms/'+id,{method:creating?'POST':'PUT',body:{id:name,capacity:6,studentIds:[...selected]}});close();await show();notice(creating?'Tạo mới thành công!':'Cập nhật thành công!');}catch(error){$('.records-error[role=alert]',el).textContent=error.message;}finally{b.disabled=false;}
  };
 }
 async function remove(id){

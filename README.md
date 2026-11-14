@@ -10,6 +10,8 @@ Chỉ làm việc trong repository `qanhbi2609/LIGHTHOUSE`.
 Workflow CI chạy API và browser smoke; CD và URL công khai cần kết nối hosting.
 Chưa nghiệm thu Final, chưa triển khai Production.
 
+Latest cross-site UI/permission fixes and their checks: [32 requested fixes](docs/UI-FIXES-2026-11-14.md).
+
 ## Run locally (Windows)
 
 1. Install Node.js 20+.
@@ -44,7 +46,7 @@ Credentials are fake and must **never be used for real accounts**.
 
 | UC | Function | Current test status |
 |---|---|---|
-| UC01 | Login/logout, forgot-password demo OTP, password reset | Working demo API/UI. No real email service. |
+| UC01 | Login/logout, inline validation and remembered sessions | Recovery was removed per the latest request; old APIs return 410. |
 | UC02 | New registration form | Working demo API/UI, plus proof-file upload to local test storage. |
 | UC03 | Review status, accept eligible profile, generate student account | Working demo API/UI. Real invitation email not connected. |
 | UC04 | Search, view and edit student; image upload/delete; support records | Working API/UI. Image files on local disk, not cloud storage. |
@@ -63,10 +65,10 @@ cd backend
 npm test
 ```
 
-58 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
+67 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
 
 See [UC05/UC06 screens and scrolling](docs/UC05-UC06.md) and the
-[UC01–UC06 notification audit](docs/UC01-UC06-NOTIFICATIONS.md). Nine workflow browser
+[UC01–UC06 notification audit](docs/UC01-UC06-NOTIFICATIONS.md). Ten workflow browser
 suites run in CI at 1920×1080 and 1366×768, plus one responsive suite at eight viewports.
 
 ## Architecture

@@ -76,7 +76,7 @@ def main():
                         form.locator('[name=cccd]').fill('123')
                         form.locator('[name=files]').set_input_files(dict(name='large.png',mimeType='image/png',buffer=PNG+b'0'*1500001))
                         submit.click()
-                        expect(form.locator('#error-phone')).to_have_text('Số điện thoại phải có 10 chữ số!')
+                        expect(form.locator('#error-phone')).to_have_text('Số điện thoại không hợp lệ')
                         expect(form.locator('#error-email')).to_have_text('Địa chỉ email không hợp lệ!')
                         expect(form.locator('#error-cccd')).to_have_text('Số CCCD phải có 12 chữ số!')
                         expect(form.locator('#error-files')).to_contain_text('Dung lượng tệp vượt quá giới hạn')

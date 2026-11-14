@@ -24,7 +24,7 @@ def main():
                         dbfile=Path(tmp)/'data/figma-demo-v1.json';uploads=Path(tmp)/'uploads'
                         def shot(name):
                             f=f'{name}-{width}.png';page.screenshot(path=str(OUT/f));shots.append(f)
-                        def dismiss():page.locator('.records-notice-layer').click(position={'x':2,'y':2})
+                        def dismiss():page.locator('.lh-feedback button').click()
                         def report_list():page.evaluate("L.go('reports')");expect(page.locator('.reports-list')).to_be_visible()
                         def aggregate(from_day='2026-10-01',to_day='2026-10-31'):
                             page.locator('#report-from').fill(from_day);page.locator('#report-to').fill(to_day);page.locator('#report-range-form [type=submit]').click()
@@ -40,7 +40,7 @@ def main():
                         assert fixed==[page.locator(s).bounding_box() for s in ['.topbar','.reports-total','.reports-tools','.records-columns']];assert page.evaluate('window.scrollY')==0;scroll.evaluate('e=>e.scrollTop=0');shot('01-list')
                         page.locator('#report-filter-query').fill('BC001');expect(page.locator('.report-data tbody tr')).to_have_count(1)
                         page.locator('#report-filter-query').fill('missing');expect(page.locator('.records-empty')).to_be_visible();shot('02-empty-list');page.locator('#report-filter-query').fill('')
-                        page.locator('#report-filter-type').select_option('Tổng hợp tháng');expect(page.locator('.report-data tbody tr')).to_have_count(12);page.locator('#report-filter-type').select_option('')
+                        page.locator('#report-filter-type').select_option('Báo cáo tháng');expect(page.locator('.report-data tbody tr')).to_have_count(13);page.locator('#report-filter-type').select_option('')
                         page.locator('#report-filter-from').fill('2026-10-01');expect(page.locator('.report-data tbody tr')).to_have_count(1)
                         page.locator('#report-filter-to').fill('2026-09-01');expect(page.locator('#report-filter-error')).to_have_text('Khoảng thời gian không hợp lệ!')
                         page.locator('#report-filter-from').fill('');page.locator('#report-filter-to').fill('')
@@ -57,12 +57,12 @@ def main():
                         page.locator('#report-files').set_input_files(str(ROOT/'frontend/assets/auth-logo.png'));expect(page.locator('.report-images h4')).to_have_text('Hình ảnh đính kèm (1)')
                         page.locator('#report-files').set_input_files(dict(name='bad.txt',mimeType='text/plain',buffer=b'bad'));expect(page.locator('#report-upload-error')).to_have_text('Định dạng không phù hợp!');expect(page.locator('.report-images h4')).to_have_text('Hình ảnh đính kèm (1)');shot('04-compose')
                         page.locator('#report-save').click();expect(page.locator('.records-confirm')).to_contain_text('Xác nhận lưu thông tin báo cáo?');shot('05-confirm')
-                        page.locator('.records-confirm [data-close]').click();expect(page.locator('.records-notice')).to_have_text('Đã hủy thao tác!');expect(page.locator('.reports-list')).to_be_visible();assert dbfile.read_text()==before;shot('06-cancel');dismiss()
+                        page.locator('.records-confirm [data-close]').click();expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Đã hủy thao tác!');expect(page.locator('.reports-list')).to_be_visible();assert dbfile.read_text()==before;shot('06-cancel');dismiss()
                         compose();page.locator('#report-notes').fill('Nhận xét mới <script>plain text</script>');page.locator('#report-files').set_input_files(str(ROOT/'frontend/assets/auth-logo.png'));expect(page.locator('.report-images h4')).to_have_text('Hình ảnh đính kèm (1)')
                         page.route('**/api/reports',lambda r:r.fulfill(status=503,json={'error':'Không lưu được báo cáo. Vui lòng thử lại.'}),times=1)
                         page.locator('#report-save').click();page.locator('.confirm-ok').click();expect(page.locator('.records-confirm .records-error')).to_have_text('Không lưu được báo cáo. Vui lòng thử lại.');assert dbfile.read_text()==before
                         expect(page.locator('#report-notes')).to_have_value('Nhận xét mới <script>plain text</script>');shot('07-save-error')
-                        page.locator('.confirm-ok').click();expect(page.locator('.records-notice')).to_have_text('Lưu thành công!');expect(page.locator('.reports-total span')).to_have_text('14');shot('08-saved');dismiss()
+                        page.locator('.confirm-ok').click();expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text('Lưu thành công!');expect(page.locator('.reports-total span')).to_have_text('14');shot('08-saved');dismiss()
                         saved=json.loads(dbfile.read_text());r=saved['reports'][0];assert r['notes']=='Nhận xét mới <script>plain text</script>' and len(r['files'])==1 and len(r['reportData']['sections'])==10
                         page.locator('#report-filter-query').fill(r['id']);page.locator('[data-report-action=detail]').click();expect(page.locator('.report-detail')).to_be_visible();expect(page.locator('.report-preserve')).to_have_text(r['notes']);shot('09-detail')
                         page.locator('[data-report-action=back]').click();expect(page.locator('.report-data tbody tr')).to_have_count(1)

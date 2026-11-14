@@ -7,7 +7,7 @@ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'lighthouse-registration-'));
 process.env.LIGHTHOUSE_DATA_DIR=path.join(dir,'data');process.env.LIGHTHOUSE_UPLOADS_DIR=path.join(dir,'uploads');
 assert.equal(spawnSync(process.execPath,['seed.js'],{cwd:path.resolve(__dirname,'..'),env:process.env}).status,0);
 const {server,db}=require('../server');let url;
-const valid={name:'Synthetic applicant',email:'applicant@example.test',phone:'0901234567',school:'Chưa chọn',major:'Chưa chọn',dob:'2006-01-15',cccd:'001001000001'};
+const valid={hometown:'Đà Nẵng',address:'Địa chỉ kiểm thử',family:'Hoàn cảnh kiểm thử',description:'Kế hoạch học tập kiểm thử',name:'Synthetic applicant',email:'applicant@example.test',phone:'0901234567',school:'Chưa chọn',major:'Chưa chọn',dob:'2006-01-15',cccd:'001001000001'};
 const file={mime:'image/png',data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII='};
 before(async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));url='http://127.0.0.1:'+server.address().port;});
 after(async()=>{await new Promise(resolve=>server.close(resolve));fs.rmSync(dir,{recursive:true,force:true});});

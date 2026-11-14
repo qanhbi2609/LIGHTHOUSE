@@ -1,5 +1,8 @@
 # Rà soát thông báo UC01–UC06 theo Design
 
+**Yêu cầu mới 14/11/2026:** [UI-FIXES-2026-11-14.md](UI-FIXES-2026-11-14.md)
+thay thế hành vi OTP, thông báo tìm kiếm và báo hủy khi bấm X bên dưới.
+
 Cập nhật 14/11/2026: phần trình bày UC01/UC02 bên dưới là ghi chép đợt trước.
 Nguồn mới `màn hình update.rar` và hành vi hiện tại được ghi tại
 [SCREEN-UPDATE-UC01-UC02.md](SCREEN-UPDATE-UC01-UC02.md); ưu tiên tài liệu mới

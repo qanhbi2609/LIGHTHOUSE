@@ -1,14 +1,14 @@
 'use strict';
 window.LighthouseReports={create({api,esc,prettyDate,permitted,put,setTitle,ui,getToken}){
 const {notice,confirm,gridTable,alignColumns,preview}=ui,$=(s,r=document)=>r.querySelector(s);
-const TYPES=['Tổng hợp tháng','Tổng hợp quý','Tổng hợp 6 tháng','Tổng hợp năm','Tổng hợp 5 năm'];
+const TYPES=['Báo cáo tháng','Báo cáo quý','Báo cáo 6 tháng','Báo cáo năm','Báo cáo 5 năm'];
 const searchIcon='<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>';
 let items=[],draft=null,viewed=null;const filters={from:'',to:'',query:'',type:''};
 const button=(label,action,id='',kind='secondary')=>`<button type="button" class="${kind} small" data-report-action="${action}" data-id="${esc(id)}">${label}</button>`;
 const fileSize=n=>n>=1e6?(n/1e6).toLocaleString('vi-VN',{maximumFractionDigits:1})+' MB':Math.max(1,Math.round(n/1000))+' KB';
 const safe=url=>/^\/uploads\/[a-zA-Z0-9._-]+$/.test(url||'');
 function release(){for(const f of draft?.files||[])URL.revokeObjectURL(f.preview);draft=null;}
-function options(value,all=false){return `${all?'<option value="">Loại báo cáo</option>':''}${[...new Set([...TYPES,...(all?items.map(r=>r.type):[])])].map(t=>`<option ${t===value?'selected':''}>${esc(t)}</option>`).join('')}`;}
+function options(value,all=false){return `${all?'<option value="">Loại báo cáo</option>':''}${TYPES.map(t=>`<option ${t===value?'selected':''}>${esc(t)}</option>`).join('')}`;}
 async function show(){
  if(draft)release();setTitle('Quản lý báo cáo');items=(await api('reports')).items;const saved=items.filter(r=>r.status==='Đã lưu');
  put(`<div class="records-workspace reports-workspace reports-list"><div class="reports-total"><strong>Báo cáo đã lưu</strong><span>${saved.length}</span></div><section class="reports-tools"><h2>Danh sách báo cáo đã lưu</h2><div class="toolrow"><input id="report-filter-from" aria-label="Từ ngày của kỳ báo cáo" type="date" value="${esc(filters.from)}"><input id="report-filter-to" aria-label="Đến ngày của kỳ báo cáo" type="date" value="${esc(filters.to)}"><div class="search">${searchIcon}<input id="report-filter-query" aria-label="Tìm kiếm báo cáo" placeholder="Tìm kiếm báo cáo..." value="${esc(filters.query)}"></div><select id="report-filter-type" aria-label="Loại báo cáo">${options(filters.type,true)}</select>${permitted('reports.edit')?button('＋ Lập báo cáo','new','','primary'):''}</div></section><p class="records-error" id="report-filter-error" role="alert"></p><section class="panel report-list-table">${gridTable(['LOẠI BÁO CÁO','MÃ BÁO CÁO','KHOẢNG THỜI GIAN','NGÀY LẬP','NGƯỜI LẬP',''],[12,12,25,16,16,19],'','report-data')}</section></div>`);
@@ -17,8 +17,8 @@ async function show(){
 }
 function filter(){
  const bad=filters.from&&filters.to&&filters.from>filters.to,q=filters.query.trim().toLocaleLowerCase('vi');$('#report-filter-error').textContent=bad?'Khoảng thời gian không hợp lệ!':'';
- const rows=bad?[]:items.filter(r=>r.status==='Đã lưu'&&(!filters.from||r.to>=filters.from)&&(!filters.to||r.from<=filters.to)&&(!filters.type||r.type===filters.type)&&(!q||[r.id,r.type,r.authorName,r.reportData?.title].some(v=>String(v||'').toLocaleLowerCase('vi').includes(q))));
- $('.report-data tbody').innerHTML=rows.map(r=>`<tr><td>${esc(r.type)}</td><td>${esc(r.id)}</td><td>${prettyDate(r.from)}–${prettyDate(r.to)}</td><td>${prettyDate(r.created)}</td><td>${esc(r.authorName||r.author)}</td><td><div class="actions">${button('Xem','detail',r.id)}${button('Xuất PDF','preview',r.id,'primary')}</div></td></tr>`).join('');$('.report-data .records-empty').hidden=!!rows.length;alignColumns($('.reports-list'));
+ const rows=bad?[]:items.filter(r=>r.status==='Đã lưu'&&(!filters.from||r.to>=filters.from)&&(!filters.to||r.from<=filters.to)&&(!filters.type||r.type.replace(/^Tổng hợp /,'Báo cáo ')===filters.type)&&(!q||[r.id,r.type,r.authorName,r.reportData?.title].some(v=>String(v||'').toLocaleLowerCase('vi').includes(q))));
+ $('.report-data tbody').innerHTML=rows.map(r=>`<tr><td>${esc(r.type.replace(/^Tổng hợp /,'Báo cáo '))}</td><td>${esc(r.id)}</td><td>${prettyDate(r.from)}–${prettyDate(r.to)}</td><td>${prettyDate(r.created)}</td><td>${esc(r.authorName||r.author)}</td><td><div class="actions">${button('Xem','detail',r.id)}${button('Xuất PDF','preview',r.id,'primary')}</div></td></tr>`).join('');$('.report-data .records-empty').hidden=!!rows.length;alignColumns($('.reports-list'));
  $('.report-data').querySelectorAll('[data-report-action]').forEach(b=>b.onclick=()=>guard(()=>b.dataset.reportAction==='detail'?detail(b.dataset.id):pdfPreview(b.dataset.id)));
 }
 async function guard(action){try{await action();}catch(e){notice(e.message);}}
@@ -44,8 +44,8 @@ function editor(){
  },()=>{release();guard(show);notice('Đã hủy thao tác!');}));
 }
 async function detail(id){viewed=(await api('reports/'+id)).item;const r=viewed;setTitle('Quản lý báo cáo · Xem báo cáo đã lưu');
- put(`<div class="records-workspace reports-workspace report-detail"><div class="report-compose-scroll"><div class="report-compose-body"><section class="panel report-content-card"><h3>${esc(r.reportData?.title||r.type)}</h3><p class="report-muted">Loại: ${esc(r.type)}　 Kỳ: ${prettyDate(r.from)}–${prettyDate(r.to)}</p><p class="report-muted">Người lập: ${esc(r.authorName||r.author)}　 Ngày lập: ${prettyDate(r.created)}</p>${sectionsHTML(r)}<h4>Nhận xét và đề xuất</h4><p class="report-preserve">${esc(r.notes||'Chưa có nhận xét.')}</p><footer class="report-detail-actions">${button('Xem trước PDF','preview',r.id,'primary')}${button('Quay lại','back')}</footer></section><aside class="panel report-images"><h4>Hình ảnh đính kèm (${r.files?.length||0})</h4>${attachmentHTML(r)}</aside></div></div></div>`);
- $('[data-report-action=back]').onclick=()=>guard(show);$('[data-report-action=preview]').onclick=()=>guard(()=>pdfPreview(id));bindProofs();
+ put(`<div class="records-workspace reports-workspace report-detail"><div class="report-compose-scroll"><div class="report-compose-body"><section class="panel report-content-card"><h3>${esc(r.reportData?.title||r.type)}</h3><p class="report-muted">Loại: ${esc(r.type)}　 Kỳ: ${prettyDate(r.from)}–${prettyDate(r.to)}</p><p class="report-muted">Người lập: ${esc(r.authorName||r.author)}　 Ngày lập: ${prettyDate(r.created)}</p>${sectionsHTML(r)}<h4>Nhận xét và đề xuất</h4><p class="report-preserve">${esc(r.notes||'Chưa có nhận xét.')}</p><footer class="report-detail-actions">${button('Quay lại','back')}</footer></section><aside class="panel report-images"><h4>Hình ảnh đính kèm (${r.files?.length||0})</h4>${attachmentHTML(r)}</aside></div></div></div>`);
+ $('[data-report-action=back]').onclick=()=>guard(show);bindProofs();
 }
 function bindProofs(){document.querySelectorAll('[data-report-proof]').forEach(b=>b.onclick=()=>preview(b.dataset.reportProof));}
 async function pdfPreview(id){viewed=(await api('reports/'+id)).item;const r=viewed,sections=r.reportData?.sections||[{number:1,title:'Nội dung tổng hợp',text:r.content||''}],m=r.reportData?.metrics;

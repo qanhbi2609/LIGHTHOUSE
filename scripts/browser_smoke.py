@@ -23,6 +23,7 @@ def login(page, email):
     page.locator('#login-form button[type="submit"]').click()
     expect(page.locator('.dashboard')).to_be_visible()
     expect(page.locator('#page-content .loading')).to_have_count(0)
+    if page.locator('.lh-feedback button').count():page.locator('.lh-feedback button').click()
 
 
 def ready(page):

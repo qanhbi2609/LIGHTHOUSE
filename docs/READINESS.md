@@ -8,6 +8,16 @@ các mục kiến trúc, dữ liệu và màn hình. Đây chưa phải đối c
 Figma chưa truy cập được do proxy trả 403. Số 66 Frame Quản lý và 8 Frame Sinh viên
 trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại trong lần này.
 
+## Sửa lỗi chung theo phản hồi nhóm — 14/11/2026
+
+Nguồn mới gồm PDF 7 trang và văn bản 32 yêu cầu. Bỏ khôi phục mật khẩu, thông báo
+khi tìm kiếm, báo hủy khi X và bộ lọc trạng thái UC06; sửa dữ liệu bắt buộc, lịch,
+hỗ trợ, trạng thái hồ sơ, mật khẩu/người dùng và role cap API. Thông báo dùng chung,
+sidebar/responsive vẫn theo bố cục hiện tại. Xem
+[UI-FIXES-2026-11-14.md](UI-FIXES-2026-11-14.md) cho ánh xạ đầy đủ và giới hạn.
+Các ghi chép OTP/thông báo tìm kiếm/14 checkbox cũ bên dưới là lịch sử đã được
+thay thế bởi yêu cầu mới. Không reset dữ liệu hoặc thay cấu hình Render.
+
 ## Cập nhật UC10/UC11 — 14/11/2026
 
 Đã đối chiếu 13 PNG mới: lịch sử nhóm ngày/lọc và các trang sinh viên gửi mục tiêu,

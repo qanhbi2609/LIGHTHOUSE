@@ -29,8 +29,8 @@ def main():
                         page.goto(f'http://127.0.0.1:{port}',wait_until='networkidle');login(page,'quanly@lighthouse.test');expect(page.locator('#toast')).not_to_be_visible()
                         def shot(name):
                             fn=f'{name}-{width}.png';page.screenshot(path=str(OUT/fn));shots.append(fn)
-                        def dismiss():page.locator('.records-notice-layer').click(position={'x':2,'y':2})
-                        def notice(text):expect(page.locator('.records-notice')).to_have_text(text)
+                        def dismiss():page.locator('.lh-feedback button').click()
+                        def notice(text):expect(page.locator('.lh-feedback > span:nth-child(2)')).to_have_text(text)
                         def switch(email):
                             page.get_by_text('Đăng xuất',exact=True).click();login(page,email);expect(page.locator('#toast')).not_to_be_visible()
                         page.evaluate("L.go('history')");expect(page.locator('.history-workspace')).to_be_visible();sidebar_layout(page)
@@ -38,11 +38,11 @@ def main():
                         anchors=[page.locator(s).bounding_box() for s in ['.sidebar','.topbar','.history-filter','.history-table-heading']]
                         scroll.hover();page.mouse.wheel(0,500);page.wait_for_timeout(200);assert scroll.evaluate('e=>e.scrollTop')>0;assert anchors==[page.locator(s).bounding_box() for s in ['.sidebar','.topbar','.history-filter','.history-table-heading']];assert page.evaluate('window.scrollY')==0;scroll.evaluate('e=>e.scrollTop=0');shot('01-history')
                         before=dbfile.read_text();page.locator('#history-from').fill('2026-11-05');page.locator('#history-to').fill('2026-11-05');expect(page.locator('.history-day')).to_have_count(1);expect(page.locator('.history-row')).to_have_count(6);shot('02-history-filtered')
-                        page.locator('#history-from').fill('2026-11-06');notice('Khoảng thời gian không hợp lệ!');expect(page.locator('.history-row')).to_have_count(6);shot('03-history-invalid');dismiss()
-                        page.locator('#history-from').fill('2100-01-01');notice('Khoảng thời gian không hợp lệ!');dismiss();page.locator('#history-to').fill('2100-01-31');notice('Không tìm thấy lịch sử hoạt động!');expect(page.locator('.history-empty')).to_be_visible();shot('04-history-empty');dismiss();assert dbfile.read_text()==before
+                        page.locator('#history-from').fill('2026-11-06');expect(page.locator('#history-filter-error')).to_have_text('Khoảng thời gian không hợp lệ!');expect(page.locator('.history-row')).to_have_count(6);shot('03-history-invalid')
+                        page.locator('#history-from').fill('2100-01-01');expect(page.locator('#history-filter-error')).to_have_text('Khoảng thời gian không hợp lệ!');page.locator('#history-to').fill('2100-01-31');expect(page.locator('.history-empty')).to_be_visible();expect(page.locator('.lh-feedback')).to_have_count(0);shot('04-history-empty');assert dbfile.read_text()==before
                         switch('sinhvien@lighthouse.test');expect(page.locator('.student-goals')).to_be_visible();expect(page.locator('.sidebar .navitem.active')).to_have_count(1);expect(page.locator('.topbar .usertext b')).to_contain_text('Mai Hồng Ngọc');shot('05-goals')
                         before=dbfile.read_text();page.locator('#student-goal-new').click();expect(page.locator('.student-goal-dialog')).to_be_visible();page.locator('#student-goal-form [type=submit]').click();expect(page.locator('[data-error=name]')).to_have_text('Vui lòng nhập đầy đủ các mục tiêu trước khi gửi!');shot('06-goal-errors')
-                        page.locator('.student-goal-dialog [data-close]').click();notice('Đã hủy thao tác!');dismiss();assert dbfile.read_text()==before
+                        page.locator('.student-goal-dialog [data-close]').click();expect(page.locator('.lh-feedback')).to_have_count(0);assert dbfile.read_text()==before
                         page.locator('#student-goal-new').click();name=f'Mục tiêu kiểm thử {width}';detail=('Việc cần làm:\n• Học 30 từ vựng mỗi ngày.\n'+('• Hoàn thành kế hoạch phát triển cá nhân.\n'*20)).strip()
                         page.locator('#student-goal-name').fill(name);page.locator('#student-goal-detail').fill(detail);shot('07-goal-create')
                         page.route('**/api/goals',lambda r:r.fulfill(status=503,json={'error':'Không gửi được mục tiêu!'}),times=1)
@@ -62,7 +62,7 @@ def main():
                         page.locator('.student-grade-history').scroll_into_view_if_needed();expect(page.locator(f'[data-grade-view={grade["id"]}]')).to_be_visible();shot('15-grades-history')
                         page.locator(f'[data-grade-view={grade["id"]}]').click();expect(page.locator('.student-grade-values')).to_contain_text('3.85');page.locator('.student-old-proof').click();expect(page.locator('.records-preview img')).to_be_visible();page.locator('.records-preview [data-close]').click();page.locator('.student-goal-dialog [data-close]').click()
                         page.locator('[data-grade-view=KQ101]').click();expect(page.locator('.student-grade-dialog')).to_be_visible();expect(page.locator('.student-request-note')).to_contain_text('Bổ sung chứng chỉ và bảng điểm rõ hơn');expect(page.locator('.student-request-note textarea,.student-request-note input')).to_have_count(0);shot('16-grade-supplement')
-                        original=next(g for g in json.loads(dbfile.read_text())['grades'] if g['id']=='KQ101');before=dbfile.read_text();page.locator('.student-grade-dialog [data-close]').click();notice('Đã hủy thao tác!');dismiss();assert dbfile.read_text()==before
+                        original=next(g for g in json.loads(dbfile.read_text())['grades'] if g['id']=='KQ101');before=dbfile.read_text();page.locator('.student-grade-dialog [data-close]').click();expect(page.locator('.lh-feedback')).to_have_count(0);assert dbfile.read_text()==before
                         page.locator('[data-grade-view=KQ101]').click();redo=page.locator('#student-grade-resubmit');redo.locator('[name=gpa]').fill('3.90');redo.locator('[type=file]').set_input_files(str(ROOT/'frontend/assets/auth-logo.png'))
                         page.route('**/api/grades/KQ101/resubmit',lambda r:r.fulfill(status=503,json={'error':'Không gửi lại được kết quả!'}),times=1)
                         redo.locator('[type=submit]').click();expect(redo.locator('.student-form-error')).to_have_text('Không gửi lại được kết quả!');assert dbfile.read_text()==before;shot('17-supplement-retry')

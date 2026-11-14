@@ -9,11 +9,11 @@ const storage=(()=>{try{return {getItem:k=>window.sessionStorage.getItem(k)||win
 let token=storage.getItem('lh_token')||'',me=JSON.parse(storage.getItem('lh_user')||'null'),page='home',query='',modal=null,toastTimer=null;
 const menu=[['registrations','Tiếp nhận hồ sơ'],['students','Hồ sơ sinh viên'],['rooms','Phòng ở'],['alumni','Kết thúc hỗ trợ'],['goals','Mục tiêu & Kết quả học tập'],['users','Người dùng & Phân quyền'],['reports','Báo cáo'],['history','Lịch sử hoạt động']];
 const permissions=[['registrations.view','Xem hồ sơ đăng ký'],['registrations.review','Kiểm tra / tiếp nhận'],['students.view','Xem hồ sơ sinh viên'],['students.edit','Chỉnh sửa hồ sơ & hình ảnh'],['rooms.view','Xem phòng ở'],['rooms.edit','Tạo / sửa / xóa phòng'],['goals.view','Xem mục tiêu'],['goals.review','Đánh giá mục tiêu'],['grades.view','Xem kết quả học tập'],['grades.review','Xét duyệt kết quả học tập'],['alumni.view','Xem Alumni'],['users.view','Xem người dùng'],['reports.view','Xem báo cáo'],['reports.edit','Lập / chỉnh sửa báo cáo'],['history.view','Xem lịch sử hoạt động']];
-const permitted=(k)=>me&&window.LighthousePermissions.has(me.permissions||[],k);
+const permitted=(k)=>me&&window.LighthousePermissions.hasFor(me,k);
 const isStudent=()=>me?.role==='SinhVien';
 async function api(endpoint,options={}){const headers={'Accept':'application/json',...options.headers};if(options.body&&typeof options.body==='object'){headers['Content-Type']='application/json';options.body=JSON.stringify(options.body)}if(token)headers.Authorization='Bearer '+token;let res;try{res=await fetch('/api/'+endpoint,{...options,headers});}catch{throw new Error('Không kết nối được Backend')}
 let d;try{d=await res.json()}catch{throw new Error('Backend không trả dữ liệu JSON')}if(!res.ok){if(res.status===401&&endpoint!=='auth/login'){logout(false)}throw new Error(d.error||'Không thực hiện được thao tác')}return d;}
-function toast(text,bad=false){const el=$('#toast');el.textContent=text;el.className='toast show'+(bad?' error':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.className='toast',3200)}
+function toast(text,bad=false){window.LighthouseFeedback.show(text,bad?'error':'info')}
 function root(html){$('#app').innerHTML=html}
 function button(text,call,cls='secondary',small=true){return `<button class="${cls}${small?' small':''}" onclick="${call}">${esc(text)}</button>`}
 function input(label,name,value='',type='text',extra=''){return `<label>${esc(label)}<input type="${type}" name="${esc(name)}" value="${esc(value)}" ${extra}></label>`}
@@ -77,7 +77,8 @@ async function grades(){return isStudent()?studentViews.showGrades():assessmentV
 async function gradeDetail(id){return isStudent()?studentViews.gradeDetail(id):assessmentViews.reviewGrade(id)}
 async function gradeNew(id){return id?studentViews.gradeEditor(id):studentViews.showGrades()}
 async function gradeReview(id){return assessmentViews.reviewGrade(id)}
-const people=window.LighthousePeople.create({api,esc,prettyDate,permitted,put,setTitle,ui:records.ui,studentDetail,refreshMe:async()=>{me=(await api('auth/me')).item;storage.setItem('lh_user',JSON.stringify(me));}});
+async function refreshMe(){me=(await api('auth/me')).item;storage.setItem('lh_user',JSON.stringify(me));}
+const people=window.LighthousePeople.create({api,esc,prettyDate,permitted,put,setTitle,ui:records.ui,studentDetail,refreshMe});
 async function alumni(){return people.alumni()}
 async function users(){return people.users()}
 function userNew(){return people.edit()}
@@ -95,7 +96,10 @@ async function history(){return historyViews.show()}
 async function historyFilter(){return historyViews.filter()}
 async function logout(show=true){closeModal();document.querySelectorAll('.records-overlay').forEach(el=>el.remove());try{await api('auth/logout',{method:'POST'})}catch{}token='';me=null;storage.removeItem('lh_token');storage.removeItem('lh_user');signinView();if(show)toast('Đã đăng xuất')}
 function toggleMenu(open){const d=$('.dashboard');if(!d)return;const visible=open??!d.classList.contains('menu-open');d.classList.toggle('menu-open',visible);$('.sidebar-toggle')?.setAttribute('aria-expanded',String(visible));}
-function go(k){page=k;query='';render()}
+let navigationQueue=Promise.resolve();
+function go(k){navigationQueue=navigationQueue.catch(()=>{}).then(async()=>{closeModal();document.querySelectorAll('.records-overlay').forEach(el=>el.remove());window.LighthouseFeedback.clear();page=k;query='';try{await refreshMe();if(token)return render();}catch(e){if(token)toast(e.message,true);}});return navigationQueue;}
 let searchTimer=null;function search(v){query=v;clearTimeout(searchTimer);searchTimer=setTimeout(()=>render(),300)}
 window.L={go,toggleMenu,render,auth:signinView,logout,search,reviewRegistration,acceptRegistration,filterRegistrations,studentDetail,studentTab,editStudent,uploadImage,deleteImage,addSupport,roomDetail,roomNew,roomEdit,roomDelete,findRoom,goalDetail,goalNew,goalReview,gradeDetail,gradeNew,gradeReview,userNew,userEdit,userDelete,filterUserRows,reportNew,reportDetail,reportEdit,reportPrint,historyFilter};
 render();
+
+document.addEventListener('keydown',e=>{const input=e.target;if(e.key!=='Enter'||!input.matches('.search input'))return;e.preventDefault();const form=input.closest('form');if(form&&['alumni-search','room-search-form'].includes(form.id))form.requestSubmit();else input.dispatchEvent(new Event('input',{bubbles:true}));});

@@ -15,15 +15,15 @@ before(async()=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve)
 after(async()=>{await new Promise(resolve=>server.close(resolve));fs.rmSync(dir,{recursive:true,force:true});});
 test('UC03 review validates supplement notes before changing state or history',async()=>{
  const before=fs.readFileSync(path.join(process.env.LIGHTHOUSE_DATA_DIR,'lighthouse.json'),'utf8');
- assert.equal((await request('registrations/HS005','PATCH',{status:'Chờ bổ sung',note:''})).status,400);
+ assert.equal((await request('registrations/HS005','PATCH',{dob:'2006-01-15',hometown:'Đà Nẵng',address:'Địa chỉ kiểm thử',cccd:'001001000001',family:'Hoàn cảnh kiểm thử',description:'Kế hoạch học tập kiểm thử',status:'Chờ bổ sung',note:''})).status,400);
  assert.equal(fs.readFileSync(path.join(process.env.LIGHTHOUSE_DATA_DIR,'lighthouse.json'),'utf8'),before);
- assert.equal((await request('registrations/HS005','PATCH',{status:'Chờ bổ sung',note:'Cần giấy tờ học tập'})).status,200);
+ assert.equal((await request('registrations/HS005','PATCH',{dob:'2006-01-15',hometown:'Đà Nẵng',address:'Địa chỉ kiểm thử',cccd:'001001000001',family:'Hoàn cảnh kiểm thử',description:'Kế hoạch học tập kiểm thử',status:'Chờ bổ sung',note:'Cần giấy tờ học tập'})).status,200);
  assert.equal((await request('registrations/HS005/accept','POST')).status,400);
  assert.equal((await request('registrations/HS005','PATCH',{status:'Đạt yêu cầu'},canbo)).status,403);
 });
 test('UC03 acceptance exposes original proof metadata in UC04 and prevents duplicate intake',async()=>{
  const file={name:'Synthetic proof.png',mime:'image/png',data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII='};
- const reg=await request('registrations','POST',{name:'Synthetic applicant',email:'records-proof@example.test',phone:'0901234567',school:'Test school',major:'Test major',familyFiles:[file],schoolFiles:[{...file,name:'Synthetic school.png'}]});assert.equal(reg.status,201);
+ const reg=await request('registrations','POST',{dob:'2006-01-15',hometown:'Đà Nẵng',address:'Địa chỉ kiểm thử',cccd:'001001000001',family:'Hoàn cảnh kiểm thử',description:'Kế hoạch học tập kiểm thử',name:'Synthetic applicant',email:'records-proof@example.test',phone:'0901234567',school:'Test school',major:'Test major',familyFiles:[file],schoolFiles:[{...file,name:'Synthetic school.png'}]});assert.equal(reg.status,201);
  const id=reg.data.item.id;
  assert.equal((await request('registrations/'+id,'PATCH',{status:'Đạt yêu cầu'})).status,200);
  const accepted=await request('registrations/'+id+'/accept','POST');assert.equal(accepted.status,201);

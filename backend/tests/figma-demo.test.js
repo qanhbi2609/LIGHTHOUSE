@@ -33,7 +33,7 @@ test('UC03 and UC04 demo data match screenshot rows, counts and related profile 
  assert.equal(students.length,35);assert.equal(new Set(students.map(s=>s.id)).size,35);
  assert.deepEqual(students.slice(0,3).map(s=>s.name),['Mai Hồng Ngọc','Nguyễn Khoa Tóc Tiên','Vũ Cát Tường']);
  const s=(await request('/api/students/LH001')).data.item;
- assert.equal(s.name,'Mai Hồng Ngọc');assert.equal(s.cohort,'2023-2027');assert.equal(s.files.length,2);
+ assert.equal(s.name,'Mai Hồng Ngọc');assert.equal(s.cohort,'2023-2027');assert.equal(s.files.length,1);assert.equal(db.students.find(x=>x.id==='LH001').files.length,2);assert.ok(s.files.every(f=>f.url));
  assert.deepEqual(s.grades.map(g=>g.gpa),['3.85','3.72','3.68','3.60']);
  assert.equal(s.goals[1].name,'Thành thạo Python');assert.ok(s.goals.every(g=>g.status==='Đạt'));
  assert.deepEqual(s.supports.map(x=>x.amount),[8500000,1500000,520000,1800000]);
