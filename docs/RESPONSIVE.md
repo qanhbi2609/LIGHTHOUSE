@@ -42,3 +42,12 @@ CHROMIUM_PATH=/usr/bin/chromium python scripts/auth_browser_smoke.py
 
 Không khẳng định đã kiểm tra mọi máy hoặc mọi mức zoom. Khi có lỗi trên thiết bị
 khác, cần viewport, trình duyệt, mức zoom và ảnh lỗi để tái hiện cụ thể.
+
+## Điều chỉnh tỷ lệ UC01 theo ảnh Figma
+
+Sau khi xác nhận máy thành viên đã bình thường khi đưa zoom về 100%, giữ khung
+đăng nhập desktop theo tỷ lệ gốc 540:960 (9:16). Chiều rộng tính từ chiều cao khả
+dụng, giới hạn 320–540 px để giữ chữ dễ đọc. Ở viewport thấp, bố cục flow vẫn giữ
+các nút nằm trong luồng, cho cuộn khi không đủ chỗ thay vì ép chữ nhỏ hoặc chồng
+phần tử. Không thay đổi sidebar hay các trang UC khác trong lần điều chỉnh này.
+Bộ responsive bổ sung kiểm tra tỷ lệ card ở các viewport desktop.

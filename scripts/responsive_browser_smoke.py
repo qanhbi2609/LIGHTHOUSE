@@ -36,6 +36,8 @@ def main():
                             page.evaluate('(v)=>L.auth(v)',view);expect(page.locator('.auth-card')).to_be_visible()
                             no_overflow('auth-'+view)
                             card=page.locator('.auth-card').bounding_box()
+                            if view=='login' and width>760:
+                                assert abs(card['width']/card['height']-540/960)<.02,('login card proportions',width,height,card)
                             for el in page.locator('.auth-card input:not([type=checkbox]),.auth-card .auth-primary,.auth-register').all():
                                 b=el.bounding_box();assert b['x']>=card['x'] and b['x']+b['width']<=card['x']+card['width']+1,(view,b,card)
                                 el.scroll_into_view_if_needed();assert el.is_visible()
