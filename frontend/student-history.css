@@ -1,0 +1,61 @@
+/* UC10: dates/columns stay fixed; grouped audit days have the data scrollbar. */
+.dashboard:has(.history-workspace,.student-workspace) .content-shell{padding-top:28px}
+.history-workspace{padding-top:26px;overflow:hidden}
+.history-workspace .history-filter{margin:0 0 24px;flex-shrink:0}
+.history-date{position:relative;display:block;width:200px;max-width:calc(50% - 5px)}
+.history-workspace .history-filter input{position:relative;min-width:0;width:100%;height:34px;border-color:#aaa;font:400 14px Roboto,Arial,sans-serif;padding:7px 10px 7px 36px;background:#f8fafc}
+.history-date>span{position:absolute;inset:1px 28px 1px 30px;display:flex;align-items:center;background:#f8fafc;pointer-events:none;color:#819bc0;font-size:14px}
+.history-date:has(input:focus)>span,.history-date:has(input[data-empty=false])>span{display:none}
+.history-date input::-webkit-calendar-picker-indicator{position:absolute;left:10px;cursor:pointer;opacity:.6}
+.history-table-scroll{display:flex;flex-direction:column;min-height:0;flex:1;overflow:auto}
+.history-workspace .history-table-heading{flex-shrink:0;height:80px;min-height:80px;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;letter-spacing:0}
+.history-workspace #history-results{min-height:0;flex:1;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#5b93ff transparent}
+.history-workspace .history-day{margin:24px 0 0;border-radius:16px}.history-workspace .history-day:first-child{margin-top:24px}
+.history-workspace .history-day-header{font:700 20px/24px Roboto,Arial,sans-serif;padding:8px 24px;margin:0;border-bottom:1px solid #e2e8f0}
+.history-workspace .history-row{height:auto;min-height:80px;gap:0;border-bottom:1px solid #e2e8f0}.history-workspace .history-row span{padding:12px 12px 12px 0;overflow-wrap:anywhere}
+/* UC11: independent student pages, with complete sidebar labels at every size. */
+.student-workspace{overflow:hidden}.student-goals{padding-top:70px}
+.student-goals .records-list-panel{flex:0 1 auto;max-height:100%}.student-goals .records-data-scroll{max-height:calc(100dvh - 360px);flex:0 1 auto}
+.student-goal-summary{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.student-state{display:inline-block;text-align:center;min-width:96px;border-radius:5px;padding:4px 12px;font:400 12px/16px Roboto,Arial,sans-serif;white-space:nowrap}
+.student-state.good{background:#d5ffce;color:#008323}.student-state.bad{background:#ffd5df;color:#d11c1c}.student-state.pending{background:#fff2d2;color:#a16b00}.student-state.return{background:#dbeafe;color:#005dcc}
+.student-inactive{flex-shrink:0;padding:14px 18px;border-radius:10px;background:#fff7e8;color:#8f5f11;font-size:14px}
+.student-goal-dialog,.student-grade-dialog{width:600px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:24px;border-radius:20px;background:white;color:#334155;display:flex;flex-direction:column;overflow:hidden}
+.student-goal-dialog>header,.student-grade-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;margin-bottom:24px;min-height:36px}
+.student-goal-dialog>header{border-bottom:1px solid #aaa}
+.student-goal-dialog h2,.student-grade-dialog h2{font-size:24px;line-height:29px;color:#1e3a8a;margin:0 12px}
+.student-goal-dialog [data-close],.student-grade-dialog [data-close]{width:30px;height:30px;border:0;padding:0;background:none;font:400 28px/30px Arial,sans-serif;color:#222;flex-shrink:0}
+.student-goal-dialog form,.student-grade-dialog form{display:flex;flex-direction:column;min-height:0;flex:1}
+.student-dialog-scroll{overflow:auto;min-height:0;flex:1;scrollbar-width:thin;overscroll-behavior:contain}
+.student-goal-fields{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px 24px;align-items:start}
+.student-goal-fields>label{font-size:14px;font-weight:700;line-height:18px;padding-top:6px}
+.student-goal-fields input,.student-goal-fields textarea{width:100%;min-width:0;border:1px solid #d8d8d8;border-radius:10px;background:white;color:#334155;padding:10px 13px;font:400 14px/20px Roboto,Arial,sans-serif}
+.student-goal-fields input{height:40px}.student-goal-fields textarea{height:300px;resize:vertical}
+.student-goal-dialog footer,.student-grade-dialog footer{display:flex;justify-content:flex-end;padding-top:20px;flex-shrink:0}
+.student-goal-dialog footer button,.student-grade-dialog footer button{height:34px;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700}
+.student-goal-fields [aria-invalid=true],.student-grade-fields [aria-invalid=true]{border-color:#e44}
+.student-goal-readonly h3{font-size:18px;color:#1e3a8a}.student-preserve{white-space:pre-wrap;overflow-wrap:anywhere}.student-sent{color:#64748b;font-size:14px}
+.student-grades{padding-top:24px}.student-grade-scroll{min-height:0;overflow:auto;flex:1;scrollbar-width:thin;overscroll-behavior:contain}
+.student-grades .student-grade-card{padding:28px 36px;margin:0 0 24px;border-radius:20px;background:white;min-height:calc(100dvh - 182px);display:flex;flex-direction:column}
+.student-grade-card h2{font-size:24px;line-height:29px;margin:0 0 40px;color:#1e3a8a}
+.student-grade-card form{display:flex;flex-direction:column;flex:1}
+.student-grade-fields{display:grid;grid-template-columns:100px minmax(0,300px);gap:40px 25px;align-items:start;padding-left:8px}
+.student-grade-fields>label{font-size:14px;font-weight:700;line-height:18px;padding-top:12px}
+.student-grade-fields input:not([type=file]){width:100%;min-width:0;height:40px;border:1px solid #d8d8d8;border-radius:10px;padding:10px;color:#334155;background:white;font:400 14px/18px Roboto,Arial,sans-serif}
+.student-file-upload{position:relative;width:250px;max-width:100%;height:18px;display:flex;align-items:center;border:1px solid #aaa;border-radius:18px;background:#f5f5f5;color:#64748b;font:400 14px/16px Roboto,Arial,sans-serif;cursor:pointer;margin-top:12px;gap:2px;padding:0 10px}
+.student-file-upload input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}.student-file-upload:focus-within{outline:3px solid #93c5fd;outline-offset:3px}
+.student-file-upload svg{flex:0 0 14px}.student-file-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.student-grade-fields .records-error{display:block;max-width:100%;color:red;font-size:14px;line-height:18px;margin:2px 0 0}
+.student-grade-fields .records-error:empty{display:none}.student-debt-note{display:block;font-size:12px;color:#a16b00;line-height:18px}
+.student-grade-card footer{display:flex;justify-content:center;margin-top:auto;padding:40px 0 94px}.student-grade-card footer button{height:48px;min-width:120px;font-size:14px;border-radius:10px}
+.student-return-banner{flex-shrink:0;display:flex;align-items:center;gap:16px;padding:12px 20px;min-height:60px;border:1px solid #f4a078;border-radius:16px;background:#fff0e6;color:#b43800;margin-bottom:24px}
+.student-return-banner>span{width:36px;height:36px;border:4px solid #d62900;border-radius:50%;font-size:28px;font-weight:700;text-align:center;line-height:28px;flex:0 0 36px}.student-return-banner p{margin:0;font-size:16px}.student-return-banner button{margin-left:auto}
+.student-grade-history{display:flex;flex-direction:column;margin:0 0 24px!important}.student-grade-history .panel-top{flex-shrink:0}.student-grade-history h2{font-size:18px;margin:0}.student-grade-history .records-data-scroll{max-height:400px;flex:0 1 auto}
+.student-grade-dialog{max-height:calc(100dvh - 48px)}.student-grade-dialog>header{margin-bottom:25px}
+.student-grade-dialog .student-grade-fields{padding:0 40px;grid-template-columns:100px minmax(0,300px)}
+.student-request-note{margin:28px 20px 0;font-size:14px;line-height:20px}.student-request-note>strong{color:#002f6c}.student-request-note>p,.student-request-note.student-preserve{background:#eef4ff;border:1px solid #d8d8d8;border-radius:10px;padding:14px;min-height:100px;margin-top:14px;white-space:pre-wrap}
+.student-grade-dialog .student-request-note>p{min-height:150px}.student-old-proof{margin:16px 20px 0;overflow-wrap:anywhere}
+.student-grade-values{display:grid;grid-template-columns:120px 1fr;gap:18px;font-size:14px;margin:24px 0}.student-grade-dialog footer{padding-top:24px}
+@media(max-height:850px){.student-goals{padding-top:24px}.student-grade-card h2{margin-bottom:24px;font-size:20px}.student-grade-fields{row-gap:18px}.student-grade-card footer{padding-bottom:24px}.student-grades .student-grade-card{padding:24px}.student-grade-dialog .student-grade-fields{row-gap:18px}.history-workspace .history-table-heading{height:56px;min-height:56px}.history-workspace .history-row{min-height:64px}.student-return-banner{margin-bottom:16px}}
+@media(max-width:1100px){.student-goal-dialog,.student-grade-dialog{max-height:calc(100dvh - 24px);max-width:calc(100vw - 24px)}.history-workspace .history-table-heading,.history-workspace .history-row{min-width:750px}.history-workspace #history-results{min-width:750px}.history-table-scroll{overflow:auto}}
+@media(max-width:760px){.student-goals{padding-top:24px}.student-grades{padding-top:16px}.student-grades .student-grade-card{padding:20px 16px;min-height:calc(100dvh - 128px)}.student-grade-fields{padding:0;grid-template-columns:80px minmax(0,1fr);gap:18px 12px}.student-grade-fields>label{font-size:13px}.student-grade-fields input:not([type=file]){font-size:14px}.student-grade-card h2{font-size:20px;line-height:26px}.student-file-upload{font-size:12px;padding:0 6px}.student-grade-card footer{padding:30px 0 10px}.student-return-banner{padding:10px 12px;gap:10px;flex-wrap:wrap}.student-return-banner p{font-size:14px;flex:1}.student-return-banner>span{flex-basis:28px;height:28px;width:28px;font-size:20px;line-height:20px}.student-return-banner button{margin-left:auto}.student-goal-dialog,.student-grade-dialog{padding:20px 16px}.student-goal-dialog h2,.student-grade-dialog h2{font-size:20px;line-height:26px;margin-left:0}.student-goal-fields{grid-template-columns:1fr;gap:8px}.student-goal-fields>label{padding-top:0}.student-goal-fields textarea{height:220px}.student-grade-dialog .student-grade-fields{padding:0;grid-template-columns:80px minmax(0,1fr);column-gap:12px}.student-grade-dialog .student-request-note{margin-left:0;margin-right:0}.student-grade-dialog .student-request-note>p{min-height:100px}.student-goal-dialog .student-request-note{margin-left:0;margin-right:0}.student-grade-values{grid-template-columns:90px 1fr;gap:12px}.history-workspace{padding-top:16px}.history-workspace .history-filter{margin-bottom:16px}.history-date>span{font-size:12px;left:30px}.history-workspace .history-day-header{font-size:17px}.history-workspace .history-table-heading,.history-workspace .history-row{font-size:12px;padding-left:16px;padding-right:16px}.history-workspace .history-day{margin-top:16px}.student-grade-history .records-columns,.student-grade-history .records-data-scroll,.student-grade-history .records-data-scroll table{min-width:700px}}

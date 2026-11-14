@@ -114,6 +114,22 @@ def main():
                         page.locator('#report-save').click();page.locator('.records-confirm [data-close]').click();expect(page.locator('.reports-list')).to_be_visible()
                         page.locator('.records-notice-layer').click(position={'x':2,'y':2});assert (Path(tmp)/'data/figma-demo-v1.json').read_text()==before
                         page.locator('[data-report-action=preview]').first.click();expect(page.locator('.report-paper')).to_have_count(2);no_overflow('report-pdf-preview');shot('report-pdf-preview')
+                        page.evaluate("""async()=>fetch('/api/grades/KQ101/review',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+sessionStorage.getItem('lh_token')},body:JSON.stringify({status:'Yêu cầu gửi lại',note:'Bổ sung minh chứng'})})""")
+                        page.get_by_text('Đăng xuất',exact=True).click();login(page,'sinhvien@lighthouse.test');expect(page.locator('#toast')).not_to_be_visible()
+                        expect(page.locator('.student-goals')).to_be_visible();expect(page.locator('.navitem.active')).to_have_count(1);no_overflow('student-goals');shot('student-goals')
+                        before=(Path(tmp)/'data/figma-demo-v1.json').read_text();page.locator('#student-goal-new').click();expect(page.locator('.student-goal-dialog')).to_be_visible();no_overflow('student-goal-dialog')
+                        page.locator('#student-goal-name').fill('Mục tiêu responsive');page.locator('#student-goal-detail').fill('Kế hoạch sáu tháng.\n'*30)
+                        box=page.locator('.student-goal-dialog').bounding_box();assert box['y']>=0 and box['y']+box['height']<=height+1
+                        b=page.locator('#student-goal-form [type=submit]').bounding_box();assert b['y']+b['height']<=height+1;shot('student-goal-dialog')
+                        page.locator('.student-goal-dialog [data-close]').click();page.locator('.records-notice-layer').click(position={'x':2,'y':2})
+                        page.evaluate("L.go('grades')");expect(page.locator('#student-grade-form')).to_be_visible();expect(page.locator('.navitem.active')).to_have_count(1);no_overflow('student-grades');shot('student-grades')
+                        for field in page.locator('#student-grade-form input:not([type=file])').all():
+                            box=page.locator('#student-grade-form').bounding_box();b=field.bounding_box();assert b['x']>=box['x']-1 and b['x']+b['width']<=box['x']+box['width']+1
+                        send=page.locator('#student-grade-form [type=submit]');send.scroll_into_view_if_needed();b=send.bounding_box();assert b['y']+b['height']<=height+1
+                        page.locator('.student-grade-history').scroll_into_view_if_needed();no_overflow('student-grades-history');shot('student-grades-history');assert page.evaluate('window.scrollY')==0
+                        page.locator('#student-return-first').click();expect(page.locator('.student-grade-dialog')).to_be_visible();no_overflow('student-grade-dialog')
+                        dialog=page.locator('.student-grade-dialog');fixed=[dialog.locator(s).bounding_box() for s in ['header','footer']];dialog.locator('.student-dialog-scroll').evaluate('e=>e.scrollTop=e.scrollHeight');assert fixed==[dialog.locator(s).bounding_box() for s in ['header','footer']];assert fixed[1]['y']+fixed[1]['height']<=height+1;shot('student-grade-dialog')
+                        dialog.locator('[data-close]').click();page.locator('.records-notice-layer').click(position={'x':2,'y':2});assert (Path(tmp)/'data/figma-demo-v1.json').read_text()==before
                         assert not errors,errors
                         results.append({'width':width,'height':height,'status':'passed'});page.close()
                 finally:browser.close()

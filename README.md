@@ -53,8 +53,8 @@ Credentials are fake and must **never be used for real accounts**.
 | UC07 | Alumni list, search and detail; mark end of support in edit student | Working demo API/UI. |
 | UC08 | List, create, edit permissions, deactivate users | Working demo API/UI. Deactivation retains history rather than hard delete. |
 | UC09 | Period summaries, saved snapshots, notes/images, saved views and direct PDF download | PDF backend with embedded Roboto; preserves legacy reports/drafts. See [updated screens](docs/SCREEN-UPDATE-UC07-UC09.md). |
-| UC10 | View audit logs, filter start/end date; invalid-range / empty states | Working demo API/UI. |
-| UC11 | Student submits/resubmits goals and grades | Working demo API/UI; evidence upload to local test storage. |
+| UC10 | Grouped audit logs, filter start/end date; invalid-range / empty states | Updated UI, strict dates and read permission. See [updated screens](docs/SCREEN-UPDATE-UC10-UC11.md). |
+| UC11 | Student goal list/editor, grades form/history and requested supplements | Updated student UI, ownership checks, revision snapshots and evidence upload to local test storage. |
 
 ## Test
 
@@ -63,11 +63,11 @@ cd backend
 npm test
 ```
 
-34 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
+58 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
 
 See [UC05/UC06 screens and scrolling](docs/UC05-UC06.md) and the
-[UC01–UC06 notification audit](docs/UC01-UC06-NOTIFICATIONS.md). Six browser suites
-run in CI at 1920×1080 and 1366×768.
+[UC01–UC06 notification audit](docs/UC01-UC06-NOTIFICATIONS.md). Nine workflow browser
+suites run in CI at 1920×1080 and 1366×768, plus one responsive suite at eight viewports.
 
 ## Architecture
 

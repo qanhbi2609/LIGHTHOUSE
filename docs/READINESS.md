@@ -8,6 +8,15 @@ các mục kiến trúc, dữ liệu và màn hình. Đây chưa phải đối c
 Figma chưa truy cập được do proxy trả 403. Số 66 Frame Quản lý và 8 Frame Sinh viên
 trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại trong lần này.
 
+## Cập nhật UC10/UC11 — 14/11/2026
+
+Đã đối chiếu 13 PNG mới: lịch sử nhóm ngày/lọc và các trang sinh viên gửi mục tiêu,
+KQHT, bổ sung và thông báo. 58 tests API, browser UC10/11 tại hai viewport và bộ
+responsive 8 viewport đạt. Giữ dữ liệu cũ, bổ sung lưu bản trước khi sinh viên gửi
+lại và rollback khi ghi lỗi. Xem [SCREEN-UPDATE-UC10-UC11.md](SCREEN-UPDATE-UC10-UC11.md).
+Các mô tả “Có API demo” UC10/UC11 trong bảng kiểm kê cũ bên dưới là lịch sử kiểm kê,
+đã được cập nhật bởi phần này; các điều kiện Final vẫn cần nghiệm thu riêng.
+
 ## Cập nhật UC07/UC08/UC09 — 14/11/2026
 
 Nguồn hiện tại có 33 ảnh UC07–UC09. UC08 bổ sung lỗi tại trường và chọn vai trò,

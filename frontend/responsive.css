@@ -96,7 +96,7 @@ body{min-width:0}
  .alumni-list-heading{align-items:flex-start;gap:8px;flex-direction:column;margin:16px 0}.alumni-list-heading h2{font-size:17px}.alumni-list-heading>span{font-size:12px}
  .people-editor{padding:20px 16px}.people-editor h2{font-size:20px;line-height:26px;margin:0}.people-fields{grid-template-columns:1fr}.people-grant-heading{gap:16px}.people-grants label{font-size:13px}.people-editor footer button{height:44px}
  .reports-total{height:110px;max-width:100%;margin:16px 0}.reports-total span{font-size:36px}.reports-tools h2{font-size:17px}.reports-tools .toolrow{width:100%;gap:8px}.reports-tools .toolrow input[type=date]{width:calc(50% - 4px);min-width:0}.reports-tools .search{width:100%;min-width:0}.table-scroll table{min-width:650px}
- .history-table-heading,.history-row{min-width:600px}.history-day{max-width:100%;overflow:auto}.dashboard:has(#history-results) .main-content{overflow:auto}
+ .history-table-heading,.history-row{min-width:600px}.history-day{max-width:100%;overflow:auto}
  .dialog,.dialog.wide{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px)}.dialog-head{padding:20px 16px 0}.dialog-head h2{font-size:20px}.dialog-body{padding:16px;max-height:calc(100dvh - 100px)}.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}
 }
 @media(max-height:450px){

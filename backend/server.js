@@ -34,14 +34,14 @@ function today(){return new Date().toISOString().slice(0,10)}
 function current(){return new Date().toISOString()}
 function norm(v){return String(v??'').trim()}
 function clean(v,max=500){return norm(v).slice(0,max)}
-function required(v,name){const x=clean(v);if(!x)error(400,`Vui lòng nhập ${name}`);return x;}
-function date(v){return /^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(new Date(v+'T00:00:00Z').getTime())}
+function required(v,name,max=500){const x=clean(v,max);if(!x)error(400,`Vui lòng nhập ${name}`);return x;}
+function date(v){return typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v}
 function same(v,q){return norm(v).toLocaleLowerCase('vi').includes(q.toLocaleLowerCase('vi'))}
 function find(rows,id,what){const r=rows.find(o=>o.id===id);if(!r)error(404,`Không tìm thấy ${what}`);return r;}
 function body(req){return new Promise((resolve,reject)=>{let s='',bytes=0;req.on('data',v=>{bytes+=v.length;if(bytes>limitBytes){reject(Object.assign(new Error('Dữ liệu quá lớn'),{status:413}));req.destroy();return;}s+=v});req.on('end',()=>{try{resolve(s?JSON.parse(s):{})}catch{reject(Object.assign(new Error('JSON không hợp lệ'),{status:400}))}});req.on('error',reject)});}
 function hash(pass,salt=crypto.randomBytes(16).toString('hex')){return salt+':'+crypto.scryptSync(pass,salt,64).toString('hex')}
 function validatePassword(pass,stored){try{const [salt]=stored.split(':');return crypto.timingSafeEqual(Buffer.from(hash(pass,salt).split(':')[1],'hex'),Buffer.from(stored.split(':')[1],'hex'))}catch{return false}}
-function publicUser(u){if(!u)return null;const {passwordHash,...rest}=u;return rest}
+function publicUser(u){if(!u)return null;const {passwordHash,...rest}=u;const profile=u.role==='SinhVien'&&db.students.find(s=>s.id===u.studentId);return profile?{...rest,name:profile.name}:rest}
 const MANAGER_ROLES=['QuanLy','GiamDoc','CanBo'];
 function tokenUser(req){const t=(req.headers.authorization||'').replace(/^Bearer /,'');const ses=sessions.get(t);if(!ses||ses.expires<Date.now())return null;return db.users.find(x=>x.id===ses.id&&x.active)||null;}
 function user(req){const u=tokenUser(req);if(!u)error(401,'Vui lòng đăng nhập');return u;}
@@ -54,13 +54,24 @@ function validateGrants(value,role){
  if(value.includes('*')&&!['QuanLy','GiamDoc'].includes(role))error(400,'Vai trò không được cấp toàn quyền!');
  return role==='SinhVien'?[]:[...new Set(value)];
 }
-function log(u,action,subject){db.history.unshift({id:nextId(db.history,'LS'),userId:u.id,actor:u.name,action,subject,time:current()});}
+function log(u,action,subject){db.history.unshift({id:nextId(db.history,'LS'),userId:u.id,actor:publicUser(u).name,action,subject,time:current()});}
 function studentDocuments(s){const registration=db.registrations.find(r=>r.id===s.registrationId);return (s.files?.length?s.files:registration?.documents?.length?registration.documents:registration?.files||[]).map((f,i)=>typeof f==='string'?{url:f,name:'Giấy tờ liên quan '+(i+1),created:registration?.created||s.joined}:f);}
 function studentScope(u,s){return u.role!=='SinhVien'||u.studentId===s.id}
 function storeFile(file,related,max=1_500_000){if(!file)return '';const mime=file.mime;const m=/^data:(image\/png|image\/jpeg|application\/pdf);base64,(.*)$/s.exec(file.data||'');if(!m||m[1]!==mime)error(400,'Định dạng không phù hợp!');const data=Buffer.from(m[2],'base64');if(data.length===0||data.length>max)error(400,'Dung lượng tệp không hợp lệ!');const isPng=mime==='image/png'&&data.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex'));
 const isJpg=mime==='image/jpeg'&&data.subarray(0,3).equals(Buffer.from('ffd8ff','hex'));
 const isPdf=mime==='application/pdf'&&data.subarray(0,5).toString()==='%PDF-';if(!isPng&&!isJpg&&!isPdf)error(400,'Định dạng không phù hợp!');
 const ext=isPng?'.png':isJpg?'.jpg':'.pdf',filename=crypto.randomBytes(14).toString('hex')+ext;fs.writeFileSync(path.join(uploadsDir,filename),data,{flag:'wx'});return '/uploads/'+filename;}
+function activeStudent(req){const actor=user(req),profile=db.students.find(s=>s.id===actor.studentId);if(actor.role!=='SinhVien'||!profile||profile.status!=='Đang hỗ trợ')error(403,'Hồ sơ sinh viên không ở trạng thái đang hỗ trợ');return actor;}
+function gradeFields(a){
+ const supplied=v=>(typeof v==='string'&&v.trim()!=='')||typeof v==='number';
+ const gpa=Number(a.gpa),debts=Number(a.debts);
+ if(!supplied(a.gpa)||!supplied(a.debts)||!Number.isFinite(gpa)||gpa<0||gpa>4||!Number.isInteger(debts)||debts<0)error(400,'GPA hoặc số môn nợ không hợp lệ');
+ return {term:required(a.term,'học kỳ'),year:required(a.year,'năm học'),gpa,rank:required(a.rank,'xếp loại'),debts,certificates:clean(a.certificates)};
+}
+function studentWrite(kind,work,files=[]){
+ const before=structuredClone(db[kind]),history=[...db.history],key=kind==='goals'?'goalRevisions':'gradeRevisions',revisions=db[key]?structuredClone(db[key]):null;
+ try{work();save();}catch(e){db[kind]=before;db.history=history;if(revisions)db[key]=revisions;else delete db[key];for(const url of files){try{fs.unlinkSync(path.join(uploadsDir,path.basename(url)))}catch{}}try{fs.unlinkSync(dataFile+'.tmp')}catch{}throw e;}
+}
 function counts(){return {students:db.students.length,active:db.students.filter(s=>s.status!=='Đã kết thúc hỗ trợ').length,alumni:db.students.filter(s=>s.status==='Đã kết thúc hỗ trợ').length,rooms:db.rooms.length,goals:db.goals.length,grades:db.grades.length,supportAmount:db.supports.reduce((s,x)=>s+Number(x.amount||0),0)}}
 async function route(req,res,u){let p=u.pathname,method=req.method,B=null;const parts=p.split('/').filter(Boolean);const id=parts[2];const read=async()=>B||(B=await body(req));
 if(p==='/api/health'&&method==='GET')return reply(res,200,{status:'ok',app:'LIGHTHOUSE',mode:'JSON DEMO',users:db.users.length});
@@ -160,20 +171,26 @@ if(parts[1]==='rooms'&&id&&method==='PUT'){
 if(parts[1]==='rooms'&&id&&method==='DELETE'){const actor=allow(req,'rooms.delete');find(db.rooms,id,'phòng');db.rooms=db.rooms.filter(x=>x.id!==id);for(const s of db.students)if(s.room===id)s.room=null;log(actor,'Xóa phòng',id);save();return reply(res,200,{message:'Xóa phòng thành công!'});}
 if(p==='/api/images'&&method==='POST'){const actor=allow(req,'students.edit'),a=await read();find(db.students,a.studentId,'sinh viên');if(!['image/png','image/jpeg'].includes(a.file?.mime))error(400,'Định dạng không phù hợp!');const url=storeFile(a.file,a.studentId);if(!url.startsWith('/uploads/'))error(400,'Thiếu ảnh');const row={id:nextId(db.images,'HA'),studentId:a.studentId,url,created:current()};db.images.push(row);log(actor,'Thêm hình ảnh',a.studentId);save();return reply(res,201,{item:row,message:'Tải ảnh thành công!'});}
 if(parts[1]==='images'&&id&&method==='DELETE'){const actor=allow(req,'students.edit'),img=find(db.images,id,'hình ảnh');db.images=db.images.filter(x=>x.id!==id);if(!db.images.some(x=>x.url===img.url)){try{fs.unlinkSync(path.join(uploadsDir,path.basename(img.url)))}catch{}}log(actor,'Xóa hình ảnh',img.studentId);save();return reply(res,200,{message:'Đã xóa hình ảnh!'});}
-if(p==='/api/goals'&&method==='GET'){const actor=user(req),q=norm(u.searchParams.get('q'));if(actor.role!=='SinhVien'&&!can(actor,'goals.view'))error(403,'Không có quyền xem mục tiêu');return reply(res,200,{items:db.goals.filter(g=>(actor.role!=='SinhVien'||g.studentId===actor.studentId)&&(!q||same(g.name,q)||same(g.studentId,q))).map(g=>({...g,studentName:db.students.find(x=>x.id===g.studentId)?.name}))});}
-if(p==='/api/goals'&&method==='POST'){const actor=user(req);if(actor.role!=='SinhVien')error(403,'Chức năng dành cho sinh viên');const a=await read(),row={id:nextId(db.goals,'MT'),studentId:actor.studentId,name:required(a.name,'mục tiêu'),detail:required(a.detail,'chi tiết'),sent:today(),status:'Chờ đánh giá',feedback:''};db.goals.push(row);log(actor,'Gửi mục tiêu',row.id);save();return reply(res,201,{message:'Đã gửi mục tiêu!',item:row});}
+if(p==='/api/goals'&&method==='GET'){const actor=user(req),q=norm(u.searchParams.get('q'));if(actor.role!=='SinhVien'&&!can(actor,'goals.view'))error(403,'Không có quyền xem mục tiêu');return reply(res,200,{items:db.goals.filter(g=>(actor.role!=='SinhVien'||(actor.studentId&&g.studentId===actor.studentId))&&(!q||same(g.name,q)||same(g.studentId,q))).map(g=>({...g,studentName:db.students.find(x=>x.id===g.studentId)?.name}))});}
+if(p==='/api/goals'&&method==='POST'){const actor=activeStudent(req),a=await read(),row={id:nextId(db.goals,'MT'),studentId:actor.studentId,name:required(a.name,'mục tiêu'),detail:required(a.detail,'chi tiết',10000),sent:today(),status:'Chờ đánh giá',feedback:''};studentWrite('goals',()=>{db.goals.push(row);log(actor,'Gửi mục tiêu',row.id);});return reply(res,201,{message:'Gửi thành công!',item:row});}
 if(parts[1]==='goals'&&id&&parts[3]==='review'&&method==='PATCH'){const actor=allow(req,'goals.review'),row=find(db.goals,id,'mục tiêu'),a=await read();if(!['Đạt','Chưa đạt','Chờ bổ sung'].includes(a.status))error(400,'Đánh giá không hợp lệ');row.status=a.status;row.feedback=clean(a.feedback,1000);log(actor,'Đánh giá mục tiêu',id);save();return reply(res,200,{message:'Cập nhật thành công!',item:row});}
-if(parts[1]==='goals'&&id&&parts[3]==='resubmit'&&method==='PATCH'){const actor=user(req),row=find(db.goals,id,'mục tiêu');if(actor.role!=='SinhVien'||actor.studentId!==row.studentId||row.status!=='Chờ bổ sung')error(403,'Không thể gửi lại mục tiêu');const a=await read();row.name=required(a.name,'mục tiêu');row.detail=required(a.detail,'chi tiết');row.status='Chờ đánh giá';row.sent=today();log(actor,'Gửi lại mục tiêu',id);save();return reply(res,200,{message:'Đã gửi mục tiêu!'});}
-if(p==='/api/grades'&&method==='GET'){const actor=user(req);if(actor.role!=='SinhVien'&&!can(actor,'grades.view'))error(403,'Không có quyền xem kết quả học tập');return reply(res,200,{items:db.grades.filter(g=>actor.role!=='SinhVien'||g.studentId===actor.studentId).map(g=>({...g,studentName:db.students.find(x=>x.id===g.studentId)?.name}))});}
-if(p==='/api/grades'&&method==='POST'){const actor=user(req);if(actor.role!=='SinhVien')error(403,'Chỉ sinh viên gửi kết quả học tập');const a=await read(),gpa=Number(a.gpa),debts=Number(a.debts);if(!(gpa>=0&&gpa<=4)||!Number.isInteger(debts)||debts<0)error(400,'GPA hoặc số môn nợ không hợp lệ');const row={id:nextId(db.grades,'KQ'),studentId:actor.studentId,term:required(a.term,'học kỳ'),year:required(a.year,'năm học'),gpa,rank:clean(a.rank),debts,certificates:clean(a.certificates),evidence:a.evidenceFile?storeFile(a.evidenceFile,'grade'):'',evidenceName:a.evidenceFile?clean(a.evidenceFile.name):'',status:'Chờ xét duyệt',requestNote:'',sent:today()};db.grades.push(row);log(actor,'Gửi kết quả học tập',row.id);save();return reply(res,201,{message:'Gửi thành công!',item:row});}
+if(parts[1]==='goals'&&id&&parts[3]==='resubmit'&&method==='PATCH'){
+ const actor=activeStudent(req),row=find(db.goals,id,'mục tiêu');if(actor.studentId!==row.studentId||row.status!=='Chờ bổ sung')error(403,'Không thể gửi lại mục tiêu');
+ const a=await read(),changes={name:required(a.name,'mục tiêu'),detail:required(a.detail,'chi tiết',10000),status:'Chờ đánh giá',sent:today()};
+ studentWrite('goals',()=>{(db.goalRevisions||=[]).push({id:nextId(db.goalRevisions||[],'GM'),goalId:id,userId:actor.id,time:current(),before:structuredClone(row)});Object.assign(row,changes);log(actor,'Gửi lại mục tiêu',id);});return reply(res,200,{message:'Gửi thành công!'});
+}
+if(p==='/api/grades'&&method==='GET'){const actor=user(req);if(actor.role!=='SinhVien'&&!can(actor,'grades.view'))error(403,'Không có quyền xem kết quả học tập');return reply(res,200,{items:db.grades.filter(g=>actor.role!=='SinhVien'||(actor.studentId&&g.studentId===actor.studentId)).map(g=>({...g,studentName:db.students.find(x=>x.id===g.studentId)?.name}))});}
+if(p==='/api/grades'&&method==='POST'){
+ const actor=activeStudent(req),a=await read(),fields=gradeFields(a),evidence=a.evidenceFile?storeFile(a.evidenceFile,'grade'):'';
+ const row={id:nextId(db.grades,'KQ'),studentId:actor.studentId,...fields,evidence,evidenceName:a.evidenceFile?clean(a.evidenceFile.name):'',status:'Chờ xét duyệt',requestNote:'',sent:today()};
+ studentWrite('grades',()=>{db.grades.push(row);log(actor,'Gửi kết quả học tập',row.id);},evidence?[evidence]:[]);return reply(res,201,{message:'Gửi thành công!',item:row});
+}
 if(parts[1]==='grades'&&id&&parts[3]==='review'&&method==='PATCH'){const actor=allow(req,'grades.review'),row=find(db.grades,id,'kết quả học tập'),a=await read();if(!['Hợp lệ','Yêu cầu gửi lại'].includes(a.status))error(400,'Trạng thái không hợp lệ');const note=clean(a.note,1000);if(a.status==='Yêu cầu gửi lại'&&!note)error(400,'Vui lòng nhập nội dung yêu cầu bổ sung.');row.status=a.status;row.requestNote=note;log(actor,'Xét duyệt KQHT',id);save();return reply(res,200,{message:a.status==='Hợp lệ'?'Cập nhật thành công!':'Gửi yêu cầu thành công!'});}
 if(parts[1]==='grades'&&id&&parts[3]==='resubmit'&&method==='PATCH'){
- const actor=user(req),row=find(db.grades,id,'kết quả học tập');if(actor.role!=='SinhVien'||row.studentId!==actor.studentId||row.status!=='Yêu cầu gửi lại')error(403,'Không thể gửi lại KQHT');
- const a=await read(),gpa=Number(a.gpa),debts=Number(a.debts);if(!(gpa>=0&&gpa<=4)||!Number.isInteger(debts)||debts<0)error(400,'GPA hoặc số môn nợ không hợp lệ');
- const changes={term:required(a.term,'học kỳ'),year:required(a.year,'năm học'),gpa,rank:clean(a.rank),debts,certificates:clean(a.certificates),status:'Chờ xét duyệt',sent:today()};
+ const actor=activeStudent(req),row=find(db.grades,id,'kết quả học tập');if(row.studentId!==actor.studentId||row.status!=='Yêu cầu gửi lại')error(403,'Không thể gửi lại KQHT');
+ const a=await read(),changes={...gradeFields(a),status:'Chờ xét duyệt',sent:today()};
  if(a.evidenceFile){changes.evidence=storeFile(a.evidenceFile,'grade');changes.evidenceName=clean(a.evidenceFile.name);}
- Object.assign(row,changes);if(a.evidenceFile)delete row.previewRegion;
- log(actor,'Bổ sung KQHT',id);save();return reply(res,200,{message:'Gửi thành công!'});
+ studentWrite('grades',()=>{(db.gradeRevisions||=[]).push({id:nextId(db.gradeRevisions||[],'GR'),gradeId:id,userId:actor.id,time:current(),before:structuredClone(row)});Object.assign(row,changes);if(a.evidenceFile)delete row.previewRegion;log(actor,'Bổ sung KQHT',id);},a.evidenceFile?[changes.evidence]:[]);return reply(res,200,{message:'Gửi thành công!'});
 }
 if(p==='/api/supports'&&method==='GET'){const actor=user(req);if(actor.role!=='SinhVien'&&!can(actor,'students.view'))error(403,'Không có quyền xem hỗ trợ');return reply(res,200,{items:db.supports.filter(s=>actor.role!=='SinhVien'||s.studentId===actor.studentId)});}
 if(p==='/api/supports'&&method==='POST'){
@@ -246,7 +263,7 @@ if(parts[1]==='reports'&&id&&method==='PATCH'){
  const uploaded=reportUploads(a.files),previous=structuredClone(r),history=[...db.history];
  try{Object.assign(r,changes);r.files.push(...uploaded.urls);r.fileDetails=[...(r.fileDetails||[]),...uploaded.details];r.updated=current();log(actor,'Chỉnh sửa báo cáo',id);save();}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,previous);db.history=history;rollbackReportFiles(uploaded);throw e;}return reply(res,200,{message:'Cập nhật thành công!',item:r});
 }
-if(p==='/api/history'&&method==='GET'){allow(req,'history.view');const from=norm(u.searchParams.get('from')),to=norm(u.searchParams.get('to'));if((from&&!date(from))||(to&&!date(to))||(from&&to&&from>to))error(400,'Khoảng thời gian không hợp lệ!');const items=db.history.filter(x=>(!from||x.time.slice(0,10)>=from)&&(!to||x.time.slice(0,10)<=to));return reply(res,200,{items});}
+if(p==='/api/history'&&method==='GET'){allow(req,'history.view');const from=norm(u.searchParams.get('from')),to=norm(u.searchParams.get('to'));if((from&&!date(from))||(to&&!date(to))||(from&&to&&from>to))error(400,'Khoảng thời gian không hợp lệ!');const items=db.history.filter(x=>(!from||x.time.slice(0,10)>=from)&&(!to||x.time.slice(0,10)<=to)).sort((a,b)=>String(b.time).localeCompare(String(a.time))||String(b.id).localeCompare(String(a.id))); return reply(res,200,{items});}
 error(404,'Không tìm thấy API');}
 function serve(req,res,u){const pathname=u.pathname==='/'?'index.html':u.pathname.slice(1);const file=path.resolve(root,decodeURIComponent(pathname));const fileUpload=u.pathname.startsWith('/uploads/')?path.resolve(uploadsDir,u.pathname.slice(9)):null;const full=fileUpload||file;const allowed=fileUpload?full.startsWith(uploadsDir+path.sep):full.startsWith(root+path.sep);if(!allowed||!fs.existsSync(full)||!fs.statSync(full).isFile()){res.writeHead(404);res.end('Not found');return;}
 if(fileUpload&&!tokenUser(req)){/* for demo images only: browser img cannot send bearer header; hashed URL is opaque */}
