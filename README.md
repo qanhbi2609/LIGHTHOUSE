@@ -1,6 +1,6 @@
 # LIGHTHOUSE – UC01–UC11 integrated testing build
 
-> **IMPORTANT / PHẠM VI:** Source here is an **end-to-end runnable workflow-testing prototype**. All 11 UC groups have corresponding pages and working API operations against **fake demo data**. This is **NOT the final production implementation** specified by SDD: runtime persistence is JSON, not SQL Server; email sending, production uploads/storage, and direct generated PDF backend are not implemented. No live hosting URL has been created by this package alone.
+> **IMPORTANT / PHẠM VI:** Source here is an **end-to-end runnable workflow-testing prototype**. All 11 UC groups have corresponding pages and working API operations against **fake demo data**. This is **NOT the final production implementation** specified by SDD: runtime persistence is JSON, not SQL Server; email sending and production uploads/storage are not implemented. UC09 now generates downloadable PDFs with embedded Vietnamese fonts. No live hosting URL has been created by this package alone.
 
 ## Phát triển và triển khai trực tuyến
 
@@ -52,7 +52,7 @@ Credentials are fake and must **never be used for real accounts**.
 | UC06 | Evaluate goals; review grades, request resubmission | Working demo API/UI. |
 | UC07 | Alumni list, search and detail; mark end of support in edit student | Working demo API/UI. |
 | UC08 | List, create, edit permissions, deactivate users | Working demo API/UI. Deactivation retains history rather than hard delete. |
-| UC09 | Create/save draft/edit/preview reports; **browser Print → Save as PDF** | Working demo UI/API with print-to-PDF; not an automatic PDF-rendering service. |
+| UC09 | Period summaries, saved snapshots, notes/images, saved views and direct PDF download | PDF backend with embedded Roboto; preserves legacy reports/drafts. See [updated screens](docs/SCREEN-UPDATE-UC07-UC09.md). |
 | UC10 | View audit logs, filter start/end date; invalid-range / empty states | Working demo API/UI. |
 | UC11 | Student submits/resubmits goals and grades | Working demo API/UI; evidence upload to local test storage. |
 
@@ -96,7 +96,7 @@ Bản JSON demo có thể mất dữ liệu trên host dùng filesystem tạm; c
 1. Replace demo JSON storage with SQL Server (SSMS schema provided).
 2. Build a real OTP/invitation email sender with rate limits and an out-of-band transport.
 3. Store student images and evidence privately in object storage with authorized retrieval; current file URL paths are unsuitable for real sensitive documents.
-4. Add true PDF-generation service instead of browser Print/Save as PDF if the rubric requires automatic PDF export.
+4. Review the generated PDF template and report statistics against the final rubric and production data.
 5. Finish private/protected storage for document, grade and report attachments; implement full historical versioning and every exceptional form validation exactly per SRS.
 6. Complete production security: session persistence, password policies, CSRF mitigation where applicable, access policy review, audit immutability, backups, encryption, tests and monitoring.
 7. Configure a reliable host and persistent database, then run real-browser regression tests with role/permission matrices and NFR tests.

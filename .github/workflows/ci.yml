@@ -41,6 +41,7 @@ jobs:
           python scripts/figma_data_browser_smoke.py
           python scripts/management_browser_smoke.py
           python scripts/people_browser_smoke.py
+          python scripts/reports_browser_smoke.py
           python scripts/responsive_browser_smoke.py
       - uses: actions/upload-artifact@v4
         if: always()

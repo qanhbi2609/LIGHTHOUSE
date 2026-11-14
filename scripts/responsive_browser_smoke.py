@@ -102,8 +102,19 @@ def main():
                         page.evaluate("L.go('users')");ready(page);page.locator('[data-people-action=new]').click()
                         expect(page.locator('.people-editor')).to_be_visible();no_overflow('people-editor');b=page.locator('.people-editor [type=submit]').bounding_box();assert b['y']+b['height']<=height+1;shot('people-editor');page.locator('.people-editor [data-close]').click()
                         page.locator('.records-notice-layer').click(position={'x':2,'y':2})
-                        page.evaluate("L.go('reports')");ready(page);page.evaluate('L.reportNew()');expect(page.locator('.dialog')).to_be_visible();no_overflow('report-editor');shot('report-editor')
-                        page.locator('.dialog .cancel').click();assert not errors,errors
+                        page.evaluate("L.go('alumni')");ready(page);page.locator('[data-people-action=profile][data-id=LH034]').click()
+                        for tab in ['personal','grades','goals','supports','images']:
+                            page.locator(f'[data-tab={tab}]').click();no_overflow('alumni-'+tab);shot('alumni-'+tab)
+                            expect(page.locator('[data-action=edit],[data-action=add-support],#profile-upload,[data-action=delete-image]')).to_have_count(0)
+                        page.evaluate("L.go('reports')");ready(page);before=(Path(tmp)/'data/figma-demo-v1.json').read_text()
+                        page.locator('[data-report-action=new]').click();expect(page.locator('.report-editor')).to_be_visible();no_overflow('report-editor-empty');shot('report-editor-empty')
+                        page.locator('#report-from').fill('2026-10-01');page.locator('#report-to').fill('2026-10-31');page.locator('#report-range-form [type=submit]').click()
+                        expect(page.locator('#report-save')).to_be_visible();no_overflow('report-editor');page.locator('#report-notes').fill('Nhận xét responsive')
+                        page.locator('#report-save').scroll_into_view_if_needed();b=page.locator('#report-save').bounding_box();assert b['y']+b['height']<=height+1;shot('report-editor')
+                        page.locator('#report-save').click();page.locator('.records-confirm [data-close]').click();expect(page.locator('.reports-list')).to_be_visible()
+                        page.locator('.records-notice-layer').click(position={'x':2,'y':2});assert (Path(tmp)/'data/figma-demo-v1.json').read_text()==before
+                        page.locator('[data-report-action=preview]').first.click();expect(page.locator('.report-paper')).to_have_count(2);no_overflow('report-pdf-preview');shot('report-pdf-preview')
+                        assert not errors,errors
                         results.append({'width':width,'height':height,'status':'passed'});page.close()
                 finally:browser.close()
         finally:proc.terminate();proc.wait(timeout=10)

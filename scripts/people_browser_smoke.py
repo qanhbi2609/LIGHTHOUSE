@@ -72,7 +72,7 @@ def main():
                         expect(page.locator('.users-data tbody tr')).to_have_count(15);scroll_contract();shot('11-users')
                         page.locator('#people-search').fill('unknown');expect(page.locator('.users-data .records-empty')).to_be_visible();page.locator('#people-search').fill('')
                         before=dbfile.read_text();page.locator('[data-people-action=new]').click();expect(page.locator('.people-grants input')).to_have_count(14);shot('12-add')
-                        page.locator('#people-form [type=submit]').click();notice('Họ tên và Email không được để trống!');shot('13-required-notice');dismiss();expect(page.locator('[data-error=name]')).to_have_text('Thông tin không hợp lệ!');shot('14-invalid')
+                        page.locator('#people-form [type=submit]').click();notice('Họ tên và Email không được để trống!');shot('13-required-notice');dismiss();expect(page.locator('[data-error=name]')).to_have_text('Không bỏ trống thông tin');shot('14-invalid')
                         page.locator('[name=name]').fill('Người dùng thử');page.locator('[name=email]').fill('browser@example.test');page.locator('[name=role]').select_option('CanBo')
                         page.locator('#people-form [type=submit]').click();expect(page.locator('.records-confirm')).to_contain_text('Xác nhận lưu phân quyền?');shot('15-confirm-add')
                         page.locator('.records-confirm [data-close]').click();notice('Đã hủy thao tác!');assert dbfile.read_text()==before;shot('16-cancel-add');dismiss()
@@ -87,7 +87,7 @@ def main():
                         page.locator(f'[data-people-action=delete][data-id={uid}]').click();shot('22-confirm-delete');before=dbfile.read_text();page.locator('.records-confirm [data-close]').click();notice('Đã hủy thao tác!');assert before==dbfile.read_text();shot('23-cancel-delete');dismiss()
                         page.locator(f'[data-people-action=delete][data-id={uid}]').click();page.locator('.confirm-ok').click();notice('Xóa thành công!');shot('24-deleted');dismiss();expect(page.locator(f'[data-id={uid}]')).to_have_count(0)
                         # Backend failure preserves the editor and entered values for retry.
-                        page.locator('[data-people-action=new]').click();page.locator('[name=name]').fill('Giữ nội dung');page.locator('[name=email]').fill('retry@example.test')
+                        page.locator('[data-people-action=new]').click();page.locator('[name=name]').fill('Giữ nội dung');page.locator('[name=email]').fill('retry@example.test');page.locator('[name=role]').select_option('QuanLy')
                         page.route('**/api/users',lambda route:route.fulfill(status=503,content_type='application/json',body='{"error":"Không thể lưu dữ liệu!"}') if route.request.method=='POST' else route.continue_())
                         page.locator('#people-form [type=submit]').click();page.locator('.confirm-ok').click();expect(page.locator('.records-confirm .records-error')).to_have_text('Không thể lưu dữ liệu!');expect(page.locator('[name=name]')).to_have_value('Giữ nội dung');shot('25-save-error')
                         page.locator('.records-confirm [data-close]').click();dismiss();page.unroute('**/api/users')

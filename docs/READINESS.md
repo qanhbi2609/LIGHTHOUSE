@@ -8,6 +8,14 @@ các mục kiến trúc, dữ liệu và màn hình. Đây chưa phải đối c
 Figma chưa truy cập được do proxy trả 403. Số 66 Frame Quản lý và 8 Frame Sinh viên
 trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại trong lần này.
 
+## Cập nhật UC07/UC08/UC09 — 14/11/2026
+
+Nguồn hiện tại có 33 ảnh UC07–UC09. UC08 bổ sung lỗi tại trường và chọn vai trò,
+UC09 có trang tổng hợp 10 mục, snapshot báo cáo đã lưu, ảnh/nhận xét, xem trước và
+tải PDF thật với Roboto nhúng. 52 tests API, browser UC07/08/09 và 8 viewport đạt;
+xem [SCREEN-UPDATE-UC07-UC09.md](SCREEN-UPDATE-UC07-UC09.md). Không reset DB
+hoặc cấu hình Render. Các ghi chép Browser Print của UC09 bên dưới đã được thay thế.
+
 ## Màn hình cập nhật UC01/UC02 — 14/11/2026
 
 Đã đối chiếu 19 PNG trong `màn hình update.rar` (chỉ có UC01/UC02). Giữ dữ liệu và
@@ -93,7 +101,7 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 | UC08.2 sửa / xác nhận / hủy | Grant UI/API dùng chung, hiệu lực ngay trên phiên hiện hành, audit JSON | Audit SQL |
 | UC08.3 xóa quyền / xác nhận / hủy | Thu hồi quyền/phiên, vô hiệu hóa, ẩn danh sách, giữ lịch sử; có xác nhận/hủy | Audit SQL |
 | UC09.1 lập / xem trước / lưu / nháp / không dữ liệu | Có demo tổng hợp và nháp | Đủ các mục SRS: sức khỏe, sinh hoạt, hỗ trợ, thách thức, hoạt động, nhận xét; bộ lọc UI |
-| UC09.2 xuất PDF / in | Browser Print | PDF tạo tự động đúng mẫu, ảnh, chữ ký và dữ liệu đã lưu |
+| UC09.2 xuất PDF / in | Backend PDF, Roboto nhúng, ảnh và snapshot đã lưu | Tiếp tục đối chiếu template/chữ ký với tiêu chí Final |
 | UC09.3 xem báo cáo / lỗi truy xuất | Có demo | Không thay đổi nội dung khi xem; quyền theo vai trò; đối chiếu mẫu |
 | UC10 lịch sử / lọc ngày / khoảng sai / rỗng | Có API demo | Test đủ lỗi và bộ lọc; audit bất biến và dữ liệu được truy cập theo NFR-09 |
 | UC11.1 gửi kết quả / tệp sai / thiếu thông tin / gửi lại | Có API demo | Danh sách môn nợ/học lại, cảnh báo, chi tiết chứng chỉ và form theo SRS |

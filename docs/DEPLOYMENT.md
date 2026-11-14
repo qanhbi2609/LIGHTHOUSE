@@ -14,7 +14,9 @@ kết nối trong phiên làm việc này, chưa tạo dịch vụ hoặc đăng
 
 ## Development
 
-Node.js >=20 (đã kiểm tra với 24.22.1), không có npm dependencies hay bước build UI.
+Node.js >=20 (đã kiểm tra với 24.22.1), không cần npm install hay bước build UI.
+UC09 dùng pdf-lib/fontkit đã ghim trong `backend/vendor/` và font Roboto cục bộ;
+giữ các file này khi triển khai để endpoint PDF hoạt động.
 Trong cloud, dùng checkout có sẵn, không tạo worktree trừ khi người dùng yêu cầu.
 
 ```bash

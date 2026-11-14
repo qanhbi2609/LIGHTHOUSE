@@ -24,3 +24,10 @@
 }
 
 .alumni-data .records-data-scroll::-webkit-scrollbar{width:6px}.alumni-data .records-data-scroll::-webkit-scrollbar-track{margin-top:18px}.alumni-data .records-data-scroll::-webkit-scrollbar-thumb{background:#6698f2;border-radius:6px}
+
+.people-editor-new .people-fields input[name=id]{background:#f1f1f1;border-color:#aaa}
+.people-editor .people-fields select.invalid{border-color:#ff6464}
+.alumni-workspace .search svg,.users-workspace .search svg{flex:0 0 18px;color:#819bc0}
+#alumni-search>button{display:flex;align-items:center;justify-content:center;gap:8px}
+
+.people-editor-new:has(.invalid){height:916px}

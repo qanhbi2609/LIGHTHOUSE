@@ -210,10 +210,42 @@ if(parts[1]==='users'&&id&&method==='DELETE'){
  for(const [key,session] of sessions)if(session.id===id)sessions.delete(key);
  log(actor,'Xóa phân quyền',id);save();return reply(res,200,{message:'Xóa thành công!'});
 }
-if(p==='/api/reports'&&method==='GET'){allow(req,'reports.view');return reply(res,200,{items:db.reports.map(r=>({...r,authorName:db.users.find(u=>u.id===r.author)?.name}))});}
-if(p==='/api/reports/summary'&&method==='GET'){allow(req,'reports.view');return reply(res,200,{summary:counts()});}
-if(p==='/api/reports'&&method==='POST'){const actor=allow(req,'reports.edit'),a=await read();if(!date(a.from)||!date(a.to)||a.from>a.to)error(400,'Khoảng thời gian không hợp lệ!');const row={id:nextId(db.reports,'BC'),type:required(a.type,'loại báo cáo'),from:a.from,to:a.to,content:clean(a.content,10000),notes:clean(a.notes,10000),files:Array.isArray(a.files)?a.files.slice(0,6).map(f=>storeFile(f,'report')):[],status:a.confirm?'Đã lưu':'Bản nháp',author:actor.id,created:current(),updated:current(),summary:counts()};db.reports.unshift(row);log(actor,'Lập báo cáo',row.id);save();return reply(res,201,{item:row,message:a.confirm?'Lưu thành công':'Đã giữ bản nháp'});}
-if(parts[1]==='reports'&&id&&method==='PATCH'){const actor=allow(req,'reports.edit'),r=find(db.reports,id,'báo cáo'),a=await read();if(Object.hasOwn(a,'content'))r.content=clean(a.content,10000);if(Object.hasOwn(a,'notes'))r.notes=clean(a.notes,10000);if(Object.hasOwn(a,'confirm'))r.status=a.confirm?'Đã lưu':'Bản nháp';if(Array.isArray(a.files))r.files.push(...a.files.slice(0,6).map(f=>storeFile(f,'report')));r.updated=current();log(actor,'Chỉnh sửa báo cáo',id);save();return reply(res,200,{message:'Cập nhật thành công!',item:r});}
+const reportData=require('./report-data');
+const reportWithAuthor=r=>({...r,authorName:r.authorName||db.users.find(u=>u.id===r.author)?.name||r.author});
+if(p==='/api/reports'&&method==='GET'){allow(req,'reports.view');return reply(res,200,{items:db.reports.map(reportWithAuthor)});}
+if(p==='/api/reports/summary'&&method==='GET'){
+ allow(req,'reports.view');const from=u.searchParams.get('from'),to=u.searchParams.get('to');
+ if(from!==null||to!==null)return reply(res,200,{item:reportData.aggregate(db,from,to,u.searchParams.get('type')||'Tổng hợp tháng')});
+ return reply(res,200,{summary:counts()});
+}
+if(parts[1]==='reports'&&id&&id!=='summary'&&method==='GET'){
+ allow(req,'reports.view');const r=reportWithAuthor(find(db.reports,id,'báo cáo'));
+ if(parts[3]==='pdf'){const bytes=await require('./report-pdf').reportPDF(r,uploadsDir);res.writeHead(200,{'Content-Type':'application/pdf','Content-Disposition':`attachment; filename="${r.id.replace(/[^A-Za-z0-9_-]/g,'')}.pdf"`,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});return res.end(bytes);}
+ return reply(res,200,{item:r});
+}
+function reportUploads(files){
+ if(files===undefined)return {urls:[],details:[]};if(!Array.isArray(files)||files.length>6)error(400,'Chỉ được tải lên tối đa 6 tệp');
+ if(files.reduce((sum,f)=>sum+Buffer.from(String(f?.data||'').split(',')[1]||'','base64').length,0)>8_000_000)error(400,'Tổng dung lượng tệp tối đa 8 MB');
+ const urls=[],details=[];try{for(const file of files){const url=storeFile(file,'report',2_000_000);if(!url)error(400,'Tệp đính kèm không hợp lệ');urls.push(url);details.push({url,name:clean(file.name)||path.basename(url),mime:file.mime,size:Buffer.from(file.data.split(',')[1],'base64').length});}return {urls,details};}catch(e){for(const url of urls){try{fs.unlinkSync(path.join(uploadsDir,path.basename(url)))}catch{}}throw e;}
+}
+function rollbackReportFiles(uploaded){for(const url of uploaded.urls){try{fs.unlinkSync(path.join(uploadsDir,path.basename(url)))}catch{}}try{fs.unlinkSync(dataFile+'.tmp')}catch{}}
+if(p==='/api/reports'&&method==='POST'){
+ const actor=allow(req,'reports.edit'),a=await read();reportData.validate(a.from,a.to,a.type);const type=required(a.type,'loại báo cáo');
+ const generated=a.generated?reportData.aggregate(db,a.from,a.to,type):null;if(generated&&!generated.hasData)error(400,'Chưa có dữ liệu.');
+ const content=generated?generated.sections.map(s=>`${s.number}. ${s.title}\n${s.text}`).join('\n\n'):clean(a.content,10000),notes=clean(a.notes,10000);
+ const uploaded=reportUploads(a.files),row={id:nextId(db.reports,'BC'),type,from:a.from,to:a.to,content,notes,files:uploaded.urls,fileDetails:uploaded.details,status:a.confirm?'Đã lưu':'Bản nháp',author:actor.id,authorName:actor.name,created:current(),updated:current(),summary:counts(),...(generated?{reportData:generated}:{})};
+ const previous=[...db.reports],history=[...db.history];try{db.reports.unshift(row);log(actor,'Lập báo cáo',row.id);save();}catch(e){db.reports=previous;db.history=history;rollbackReportFiles(uploaded);throw e;}return reply(res,201,{item:row,message:a.confirm?'Lưu thành công!':'Đã giữ bản nháp'});
+}
+if(parts[1]==='reports'&&id&&method==='PATCH'){
+ const actor=allow(req,'reports.edit'),r=find(db.reports,id,'báo cáo'),a=await read(),changes={};
+ if(Object.hasOwn(a,'content')&&!r.reportData)changes.content=clean(a.content,10000);
+ if(Object.hasOwn(a,'notes'))changes.notes=clean(a.notes,10000);if(Object.hasOwn(a,'confirm'))changes.status=a.confirm?'Đã lưu':'Bản nháp';
+ if(Array.isArray(a.files)&&r.files.length+a.files.length>6)error(400,'Chỉ được tải lên tối đa 6 tệp');
+ const existingSize=(r.files||[]).reduce((sum,url)=>{if(!/^\/uploads\/[a-zA-Z0-9._-]+$/.test(url))return sum;try{return sum+fs.statSync(path.join(uploadsDir,path.basename(url))).size;}catch{return sum;}},0);
+ if(Array.isArray(a.files)&&a.files.length&&existingSize+a.files.reduce((sum,f)=>sum+Buffer.from(String(f?.data||'').split(',')[1]||'','base64').length,0)>8_000_000)error(400,'Tổng dung lượng tệp tối đa 8 MB');
+ const uploaded=reportUploads(a.files),previous=structuredClone(r),history=[...db.history];
+ try{Object.assign(r,changes);r.files.push(...uploaded.urls);r.fileDetails=[...(r.fileDetails||[]),...uploaded.details];r.updated=current();log(actor,'Chỉnh sửa báo cáo',id);save();}catch(e){for(const key of Object.keys(r))delete r[key];Object.assign(r,previous);db.history=history;rollbackReportFiles(uploaded);throw e;}return reply(res,200,{message:'Cập nhật thành công!',item:r});
+}
 if(p==='/api/history'&&method==='GET'){allow(req,'history.view');const from=norm(u.searchParams.get('from')),to=norm(u.searchParams.get('to'));if((from&&!date(from))||(to&&!date(to))||(from&&to&&from>to))error(400,'Khoảng thời gian không hợp lệ!');const items=db.history.filter(x=>(!from||x.time.slice(0,10)>=from)&&(!to||x.time.slice(0,10)<=to));return reply(res,200,{items});}
 error(404,'Không tìm thấy API');}
 function serve(req,res,u){const pathname=u.pathname==='/'?'index.html':u.pathname.slice(1);const file=path.resolve(root,decodeURIComponent(pathname));const fileUpload=u.pathname.startsWith('/uploads/')?path.resolve(uploadsDir,u.pathname.slice(9)):null;const full=fileUpload||file;const allowed=fileUpload?full.startsWith(uploadsDir+path.sep):full.startsWith(root+path.sep);if(!allowed||!fs.existsSync(full)||!fs.statSync(full).isFile()){res.writeHead(404);res.end('Not found');return;}
