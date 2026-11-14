@@ -117,6 +117,7 @@ def main():
                             status=400, json={'error': 'Mã xác thực hết hạn!'}))
                         submit()
                         expect(page.locator('.auth-notice')).to_have_text('Mã xác thực hết hạn!')
+                        expect(page.locator('.auth-otp')).not_to_have_attribute('aria-invalid','true')
                         shot('06-expired-code')
                         dismiss()
                         page.unroute('**/api/auth/verify')

@@ -14,7 +14,7 @@ Các ảnh là nguồn tham chiếu mới, thay thế phần trình bày UC01/UC
 | Quên mật khẩu; Quên mật khẩu (1) | Thêm nút quay lại; lỗi trống/sai định dạng dưới email, không dịch nút Tiếp tục khi hiện lỗi |
 | Quên mật khẩu thông báo email không hợp lệ; Frame 4 | Email không có trong hệ thống dùng thông báo “Kiểm tra lại địa chỉ Email” |
 | Nhập mã xác minh | Nút quay lại trang email, giữ địa chỉ đã nhập; bốn ô số, đếm ngược/gửi lại |
-| Mã không hợp lệ, mã hết hạn; Frame 2/3 | Khung mã có viền đỏ, thông báo tương ứng trên banner; giữ dữ liệu để sửa/thử lại |
+| Mã không hợp lệ, mã hết hạn; Frame 2/3 | Mã sai có viền đỏ; mã hết hạn giữ viền thường như ảnh. Banner thông báo tương ứng; giữ dữ liệu để sửa/thử lại |
 | Tạo mật khẩu mới | Nút quay lại bước xác minh, xóa token trong state khi quay lại để bắt buộc xác minh lại |
 | Lỗi nhập mật khẩu mới | Có thể hiện đồng thời lỗi độ mạnh và lỗi xác nhận, như ảnh; giữ biểu mẫu |
 | Đổi mật khẩu thành công | Giữ dấu tích, hướng dẫn và nút đăng nhập |

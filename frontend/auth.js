@@ -48,7 +48,7 @@ async function submit(e){
    const email=String(values.email||'').trim();if(!/^\S+@\S+\.\S+$/.test(email)){document.querySelector('#auth-email-error').textContent=email?'Email không hợp lệ':'Vui lòng nhập Email';form.elements.email.setAttribute('aria-invalid','true');return;}
    const d=await api('auth/forgot',{method:'POST',body:{email}});if(Object.hasOwn(d,'demoCode')&&d.demoCode===null){notice('Kiểm tra lại địa chỉ Email');return;}state.email=email;state.maskedEmail=d.maskedEmail;state.resendAt=Date.now()+d.resendAfter*1000;show('verify');
   }else if(state.view==='verify'){
-   const code=[0,1,2,3].map(i=>values['digit'+i]).join('');if(!/^\d{4}$/.test(code)){document.querySelector('.auth-otp').setAttribute('aria-invalid','true');notice('Mã xác thực không hợp lệ');return;}
+   document.querySelector('.auth-otp').removeAttribute('aria-invalid');const code=[0,1,2,3].map(i=>values['digit'+i]).join('');if(!/^\d{4}$/.test(code)){document.querySelector('.auth-otp').setAttribute('aria-invalid','true');notice('Mã xác thực không hợp lệ');return;}
    const d=await api('auth/verify',{method:'POST',body:{email:state.email,code}});state.resetToken=d.resetToken;show('reset');
   }else if(state.view==='reset'){
    const passwordError=document.querySelector('#error-password'),confirmError=document.querySelector('#error-confirmPassword');passwordError.textContent='';confirmError.textContent='';
@@ -60,7 +60,7 @@ async function submit(e){
   }
  }catch(error){
   if(state.view==='login'&&error.message==='Email hoặc mật khẩu sai!'){document.querySelector('#auth-login-error').textContent='Email hoặc mật khẩu sai.';for(const key of ['email','password'])form.elements[key].setAttribute('aria-invalid','true');}
-  else{if(state.view==='verify')document.querySelector('.auth-otp').setAttribute('aria-invalid','true');notice(error.message);}
+  else{if(state.view==='verify'&&!error.message.includes('hết hạn'))document.querySelector('.auth-otp').setAttribute('aria-invalid','true');notice(error.message);}
  }finally{button.disabled=false;}
 }
 return {mount(options){({api,onLogin,onRegister}=options);show(options.view||'login');}};
