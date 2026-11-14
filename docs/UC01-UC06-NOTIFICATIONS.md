@@ -5,6 +5,9 @@ Nguồn mới `màn hình update.rar` và hành vi hiện tại được ghi t�
 [SCREEN-UPDATE-UC01-UC02.md](SCREEN-UPDATE-UC01-UC02.md); ưu tiên tài liệu mới
 cho lỗi tại trường, nút quay lại và vùng Minh chứng chung.
 
+Cập nhật UC05/UC06 theo 27 PNG mới: [SCREEN-UPDATE-UC05-UC06.md](SCREEN-UPDATE-UC05-UC06.md).
+Giữ thông báo trong bảng; bổ sung kiểm tra lỗi API giữ form để thử lại.
+
 Đối chiếu ngày 13/11/2026: `50K141.02.3007.Design-đã nén.pdf`, phần 6.1.2,
 trang PDF 44–88; đọc cả banner trong hình minh họa và sự kiện trong bảng đặc tả.
 Dùng SRS để làm rõ trường hợp lỗi/hủy khi bảng Design chỉ dẫn tới hình thông báo.

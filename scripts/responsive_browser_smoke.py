@@ -56,6 +56,8 @@ def main():
                                 for label in page.locator('.navitem span').all():assert label.bounding_box()['width']>100
                                 brand=page.locator('.sidebar-brand');assert brand.evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                                 shot(screen+'-menu');page.locator('.sidebar-backdrop').click(position={'x':width-30,'y':height-30})
+                            if screen=='rooms':
+                                for summary in page.locator('.room-card p').all():assert summary.evaluate('e=>e.scrollHeight<=e.clientHeight+1')
                             shot(screen)
                         page.evaluate("L.go('students')");ready(page);page.locator('[data-action=detail][data-id=LH001]').click()
                         for tab in ['personal','grades','goals','supports','images']:
@@ -73,6 +75,30 @@ def main():
                         page.evaluate("L.go('rooms')");ready(page);page.locator('#room-new').click()
                         expect(page.locator('.room-picker')).to_be_visible();no_overflow('room-picker');save=page.locator('.room-picker [type=submit]');save.scroll_into_view_if_needed();b=save.bounding_box();assert b['y']+b['height']<=height+1;shot('room-picker');page.locator('.room-picker [data-close]').click()
                         page.locator('.records-notice-layer').click(position={'x':2,'y':2})
+                        for action in ['detail','edit']:
+                            page.locator(f'[data-room=A102] [data-room-action={action}]').click()
+                            dialog=page.locator('.rooms-detail' if action=='detail' else '.room-picker')
+                            expect(dialog).to_be_visible();no_overflow('room-'+action)
+                            box=dialog.bounding_box();assert box['y']>=0 and box['y']+box['height']<=height+1
+                            if action=='detail':
+                                close=page.get_by_role('button',name='Đóng thông tin phòng',exact=True);b=close.bounding_box();assert b['y']>=box['y'] and b['y']+b['height']<box['y']+100
+                                scroll=page.locator('.rooms-detail-data');assert scroll.evaluate('e=>e.clientHeight>30')
+                                fixed=page.locator('.rooms-detail header').bounding_box();scroll.evaluate('e=>e.scrollTop=e.scrollHeight');assert page.locator('.rooms-detail header').bounding_box()==fixed
+                            else:
+                                fixed=dialog.locator('footer').bounding_box();dialog.locator('.room-picker-list').evaluate('e=>e.scrollTop=e.scrollHeight');assert dialog.locator('footer').bounding_box()==fixed
+                            shot('room-'+action);dialog.locator('[data-close]').click()
+                            if action=='edit':page.locator('.records-notice-layer').click(position={'x':2,'y':2})
+                        for kind in ['goals','grades']:
+                            page.evaluate('(s)=>L.go(s)',kind);ready(page);page.locator('[data-assessment-id]').first.click()
+                            dialog=page.locator('.assessment-dialog');expect(dialog).to_be_visible();no_overflow('assessment-'+kind)
+                            box=dialog.bounding_box();assert box['y']>=0 and box['y']+box['height']<=height+1
+                            fixed=[dialog.locator(sel).bounding_box() for sel in ['header','footer']]
+                            scroll=dialog.locator('.assessment-dialog-scroll');assert scroll.evaluate('e=>e.clientHeight>30');scroll.evaluate('e=>e.scrollTop=e.scrollHeight')
+                            assert fixed==[dialog.locator(sel).bounding_box() for sel in ['header','footer']]
+                            assert fixed[1]['y']+fixed[1]['height']<=height+1;shot('assessment-'+kind)
+                            if kind=='grades':
+                                page.locator('#grade-proof').click();expect(page.locator('.records-preview-crop')).to_be_visible();shot('assessment-grade-proof');page.get_by_role('button',name='Đóng minh chứng',exact=True).click()
+                            dialog.locator('.assessment-close').click();page.locator('.records-notice-layer').click(position={'x':2,'y':2})
                         page.evaluate("L.go('users')");ready(page);page.locator('[data-people-action=new]').click()
                         expect(page.locator('.people-editor')).to_be_visible();no_overflow('people-editor');b=page.locator('.people-editor [type=submit]').bounding_box();assert b['y']+b['height']<=height+1;shot('people-editor');page.locator('.people-editor [data-close]').click()
                         page.locator('.records-notice-layer').click(position={'x':2,'y':2})

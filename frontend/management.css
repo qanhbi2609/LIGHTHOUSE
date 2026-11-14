@@ -12,23 +12,26 @@
 .rooms-toolbar h2{font-size:22px;line-height:28px;margin:0}.rooms-toolbar button{height:44px;padding:8px 20px;font-size:20px;border-radius:12px}.rooms-toolbar button span{font-size:32px;line-height:24px}
 .rooms-card-scroll{min-height:0;flex:1;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .rooms-workspace .room-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 24px}
-.rooms-workspace .room-card{height:224px;padding:24px;border:1px solid #b4c4df;border-radius:16px;display:flex;flex-direction:column;background:#fff;min-width:0}
+.rooms-workspace .room-card{height:auto;min-height:224px;padding:24px;border:1px solid #b4c4df;border-radius:16px;display:flex;flex-direction:column;background:#fff;min-width:0}
 .rooms-workspace .room-header{display:flex;justify-content:space-between;align-items:center;margin:0}
 .rooms-workspace .room-header h3{font-size:40px;line-height:48px;color:#d99300;font-weight:700;margin:0}
 .room-state{font:400 12px/16px Roboto,Arial,sans-serif;border-radius:6px;padding:4px 12px;white-space:nowrap;display:inline-block}
 .room-state.available{background:#dbeafe;color:#005cff}.room-state.full{background:#ffe3e7;color:#e52300}.room-state.vacant{background:#d5ffce;color:#008323}
 .rooms-workspace .room-capacity{font-size:20px;line-height:24px;margin:12px 0;color:#1e3a8a}
-.rooms-workspace .room-card p{font-size:12px;line-height:24px;color:#64748b;margin:0;overflow-wrap:anywhere}
+.rooms-workspace .room-card p{font-size:12px;line-height:18px;color:#64748b;margin:0;overflow-wrap:anywhere;flex:none;overflow:visible}
+.rooms-workspace .room-card .room-bottom{padding-top:8px}
 .rooms-workspace .room-bottom{margin-top:auto;margin-bottom:10px;justify-content:flex-end;display:flex}.rooms-workspace .actions{gap:10px}
 .rooms-workspace .room-card button{font-size:14px;height:36px;padding:8px 18px}
 .rooms-detail{width:1000px;max-width:calc(100vw - 48px);max-height:calc(100dvh - 60px);padding:28px;border-radius:20px;background:white;display:flex;flex-direction:column;overflow:hidden}
-.rooms-detail h2{font-size:28px;line-height:36px;margin:0 0 24px;color:#1e3a8a}.rooms-detail-summary{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:20px;flex-shrink:0;align-items:start}
+.rooms-detail header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;flex-shrink:0}
+.room-detail-close{flex:0 0 30px;margin-left:auto;background:transparent;border:0;color:#222;font-size:28px;padding:0;width:30px;height:36px;line-height:36px;font-weight:400}
+.rooms-detail h2{font-size:28px;line-height:36px;margin:0;color:#1e3a8a}.rooms-detail-summary{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:20px;flex-shrink:0;align-items:start}
 .rooms-detail-summary>div{display:flex;flex-direction:column;gap:5px;font-size:14px;color:#334155}.rooms-detail-summary strong{color:#1e3a8a;font-size:14px}
-.rooms-detail h3{font-size:18px;margin:24px 0 20px;flex-shrink:0;color:#1e3a8a}
+.rooms-detail h3{font-size:18px;margin:24px 0 22px;flex-shrink:0;color:#1e3a8a}
 .rooms-detail-data{overflow:auto;min-height:0;border:1px solid #dce4f2;border-radius:8px;scrollbar-width:thin}
 .rooms-detail table{width:100%;table-layout:fixed;border-collapse:collapse;color:#334155}.rooms-detail th{height:60px;background:#eef4ff;color:#1e3a8a;font-size:12px;padding:20px;text-align:left;position:sticky;top:0}
 .rooms-detail td{height:72px;padding:20px;font-size:14px;color:#334155;border-bottom:1px solid #e2e8f0}.rooms-detail tr:nth-child(even){background:#f8faff}
-.rooms-detail footer{display:flex;justify-content:flex-end;padding-top:20px;flex-shrink:0}.rooms-detail footer button{height:36px;font-size:14px;padding:8px 18px}
+.rooms-workspace .search svg,.room-picker .search svg,.assessment-filters .search svg{flex:0 0 18px;color:#819bc0}
 .room-picker{width:600px;max-width:calc(100vw - 40px);height:670px;max-height:calc(100dvh - 64px);padding:24px;background:white;border-radius:20px;display:flex;flex-direction:column;color:#334155}
 .room-picker-new{height:770px}.room-picker header{display:flex;align-items:center;gap:50px;flex-shrink:0;margin-bottom:20px}.room-picker h2{font-size:28px;line-height:34px;margin:0;color:#1e3a8a}
 .picker-close,.assessment-close{margin-left:auto;background:transparent;border:0;color:#222;font-size:30px;padding:0;width:30px;height:30px;line-height:30px;font-weight:400}
@@ -73,10 +76,11 @@ body:has(.registration-shell) .records-notice{width:max-content;max-width:calc(1
 .grade-assessment .assessment-label{margin-left:20px}.grade-assessment .records-link{margin:0 0 18px 34px}.grade-assessment textarea{width:calc(100% - 40px);margin:0 20px;height:82px;min-height:82px;resize:vertical;border:1px solid #d8d8d8;border-radius:10px;padding:14px;font:400 14px/20px Roboto,Arial,sans-serif;color:#334155}.grade-assessment textarea::placeholder{color:#a3b1c5}.grade-assessment .records-error{margin-left:20px}
 .grade-assessment footer{margin-top:20px}.grade-assessment footer button{font-size:12px;font-weight:700;min-height:48px;padding:8px 16px}.grade-assessment footer .secondary{background:#e5e5e5;color:#111}.grade-assessment .assessment-student span{line-height:14px}
 @media(min-width:1600px){.rooms-picker-layer .room-picker{transform:translateX(22px)}.assessments-workspace:not(.assessments-grades) .assessment-panel{margin-bottom:48px!important}.assessments-grades .assessment-panel{margin-bottom:22px!important}}
-@media(min-height:951px){.goal-assessment{transform:translateY(-46px)}}
+@media(min-width:1101px){.assessments-workspace:not(.assessments-grades) .records-grid-table{border-top:1px solid #aaa;border-radius:16px 16px 0 0;overflow:hidden}.assessments-workspace:not(.assessments-grades) .records-columns th{border-top:0}}
+@media(min-height:951px){.rooms-detail{transform:translateY(-28px)}.goal-assessment{transform:translateY(-46px)}}
 @media(max-width:1600px){.assessment-stats{grid-template-columns:repeat(2,minmax(0,1fr));max-width:100%}.assessment-filters{align-items:flex-start;flex-wrap:wrap;gap:12px}.assessment-filters .toolrow{width:100%;justify-content:space-between}.assessment-filters .search{flex:1}.assessment-filters input[type=date]{width:160px}.assessment-filters select{width:170px}}
 @media(max-height:850px){
-.rooms-workspace{padding-top:20px}.rooms-workspace .rooms-search{padding:16px}.rooms-search h2{margin-bottom:12px}.rooms-toolbar{margin:16px 0;height:40px}.rooms-toolbar h2{font-size:20px}.rooms-workspace .room-card{height:180px;padding:18px}.rooms-workspace .room-header h3{font-size:32px;line-height:38px}.rooms-workspace .room-capacity{margin:8px 0;font-size:18px}.rooms-workspace .room-card p{line-height:18px}
+.rooms-workspace{padding-top:20px}.rooms-workspace .rooms-search{padding:16px}.rooms-search h2{margin-bottom:12px}.rooms-toolbar{margin:16px 0;height:40px}.rooms-toolbar h2{font-size:20px}.rooms-workspace .room-card{height:auto;min-height:180px;padding:18px}.rooms-workspace .room-header h3{font-size:32px;line-height:38px}.rooms-workspace .room-capacity{margin:8px 0;font-size:18px}.rooms-workspace .room-card p{line-height:18px}
 .room-picker{padding:20px}.room-picker header{margin-bottom:16px}.room-picker h2{font-size:24px}.room-picker-new .room-new-fields{margin:4px 0 20px}.room-picker-new .room-picker-hint{margin:16px 0}.room-picker-subheading>strong{font-size:14px}
 .assessments-workspace{padding-top:20px;gap:20px}.assessment-stats>div{height:100px;gap:8px}.assessment-stats span{font-size:38px;line-height:44px}.assessment-panel>h2{font-size:20px;margin:16px 16px 12px;line-height:24px}.assessment-tabs{margin:0 16px}.assessment-tabs .tab{height:40px;font-size:14px;padding:10px 18px}.assessment-filters{margin:12px 16px 16px}.assessment-filters h3{font-size:18px}.assessment-panel .records-columns th{height:54px}.assessment-panel .records-data-scroll td{height:60px;padding:10px 16px}
 .assessment-dialog .assessment-values{margin-top:20px;margin-bottom:20px;gap:20px}.assessment-dialog header{margin-bottom:16px}.grade-assessment .assessment-values{gap:20px}.grade-assessment .records-link{margin-bottom:12px}

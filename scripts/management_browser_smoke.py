@@ -87,6 +87,7 @@ def main():
                         page.evaluate("L.go('rooms')")
                         room('A101','detail')
                         expect(page.locator('.rooms-detail-summary')).to_contain_text('Còn chỗ3')
+                        expect(page.get_by_role('button',name='Đóng thông tin phòng',exact=True)).to_be_visible()
                         shot('18-room-detail')
                         page.locator('.rooms-detail [data-close]').click()
                         room('A101','edit')
@@ -128,6 +129,12 @@ def main():
                         for id in ['LH001','LH002']:
                             picker.locator(f'input[value={id}]').check()
                         shot('24-room-new')
+                        before=dbfile.read_text()
+                        page.route('**/api/rooms',lambda r:r.fulfill(status=503,json={'error':'Không lưu được phòng. Vui lòng thử lại.'}),times=1)
+                        picker.locator('[type=submit]').click();notice('Không lưu được phòng. Vui lòng thử lại.');dismiss()
+                        assert dbfile.read_text()==before
+                        expect(picker.locator('[name=id]')).to_have_value('A105');expect(picker.locator('input:checked')).to_have_count(2)
+                        shot('28-room-save-error')
                         picker.locator('[type=submit]').click();notice('Tạo mới thành công!');shot('23-room-created');dismiss()
                         room('A104','delete');shot('27-room-delete-confirm');before=dbfile.read_text()
                         page.locator('.records-confirm [data-close]').click();notice('Đã hủy thao tác!');shot('26-room-delete-cancel');dismiss()
@@ -154,7 +161,13 @@ def main():
                         assert dbfile.read_text()==before
                         page.locator('[data-assessment-id]').click()
                         page.locator('[name=assessment-rating][value="Chưa đạt"]').check()
-                        page.locator('#save-goal-review').click();page.locator('.confirm-ok').click()
+                        page.locator('#save-goal-review').click()
+                        before=dbfile.read_text()
+                        page.route('**/api/goals/*/review',lambda r:r.fulfill(status=503,json={'error':'Không lưu được đánh giá. Vui lòng thử lại.'}),times=1)
+                        page.locator('.confirm-ok').click();expect(page.locator('.records-confirm .records-error')).to_have_text('Không lưu được đánh giá. Vui lòng thử lại.')
+                        assert dbfile.read_text()==before
+                        expect(page.locator('[name=assessment-rating][value="Chưa đạt"]')).to_be_checked()
+                        shot('29-goal-save-error');page.locator('.confirm-ok').click()
                         notice('Cập nhật thành công!');shot('04-goal-saved');dismiss()
                         expect(page.locator('.assessment-stats span').first).to_have_text('19')
 
@@ -174,6 +187,11 @@ def main():
                         page.locator('[data-assessment-id]').click();page.locator('#grade-request').click()
                         expect(page.locator('#grade-note-error')).to_have_text('Vui lòng nhập nội dung yêu cầu bổ sung.')
                         page.locator('#grade-request-note').fill('Bổ sung minh chứng bảng điểm')
+                        before=dbfile.read_text()
+                        page.route('**/api/grades/*/review',lambda r:r.fulfill(status=503,json={'error':'Không gửi được yêu cầu. Vui lòng thử lại.'}),times=1)
+                        page.locator('#grade-request').click();expect(page.locator('#grade-note-error')).to_have_text('Không gửi được yêu cầu. Vui lòng thử lại.')
+                        expect(page.locator('#grade-request-note')).to_have_value('Bổ sung minh chứng bảng điểm');assert dbfile.read_text()==before
+                        shot('30-grade-save-error')
                         page.locator('#grade-request').click();notice('Gửi yêu cầu thành công!');shot('10-grade-returned');dismiss()
                         expect(page.locator('.assessment-stats span').last).to_have_text('17')
                         page.locator('#assessment-status').select_option('Yêu cầu gửi lại')

@@ -2,6 +2,9 @@
 @media(max-width:760px) and (max-height:700px){
  .records-profile-view[data-profile-section=images] .student-tab-body{overflow:auto;display:block}
  .records-profile-view[data-profile-section=images] .profile-photo-timeline{height:200px;min-height:160px}
+ .assessments-workspace{overflow:auto}
+ .assessments-workspace .assessment-panel{flex:none}
+ .assessments-workspace .records-grid-table{height:260px;min-height:260px;flex:none}
 }
 body{min-width:0}
 .dashboard>.sidebar{width:185px;flex:0 0 185px;height:100dvh;min-height:0;padding:34px 0 0 14px;position:sticky;top:0;border-radius:0 71px 0 0;background:linear-gradient(104deg,#93c5fd 10%,#bfdbfe 50%,#eef4ff 80%);overflow:hidden}
