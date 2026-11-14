@@ -124,6 +124,20 @@ def main():
                         expect(page.locator('.profile-table-scroll')).to_contain_text('01/10–31/10/2026')
                         shot('uc04-supports')
                         check_proof('uc04-invoice')
+                        page.locator('[data-action=add-support]').click()
+                        shot('uc04-add-support')
+                        page.locator('.records-support [data-close]').click()
+                        page.locator('.records-notice-layer').click(position={'x':5,'y':5})
+                        page.locator('[data-tab=images]').click()
+                        expect(page.locator('.profile-photo')).to_have_count(11)
+                        expect(page.locator('.profile-photo img').first).to_have_js_property('naturalWidth',120)
+                        timeline=page.locator('.profile-photo-timeline')
+                        fixed=[page.locator(sel).bounding_box() for sel in ['.student-profile-heading','.student-tabbar','.profile-image-tools']]
+                        shot('uc04-images')
+                        timeline.hover();page.mouse.wheel(0,400);page.wait_for_timeout(350)
+                        assert timeline.evaluate('e=>e.scrollTop')>0
+                        assert fixed==[page.locator(sel).bounding_box() for sel in ['.student-profile-heading','.student-tabbar','.profile-image-tools']]
+                        shot('uc04-images-scrolled')
                         assert not errors, errors
                         page.close()
                 finally:

@@ -4,6 +4,14 @@ Chỉ dùng repository `qanhbi2609/LIGHTHOUSE`. Không cần tạo repository kh
 Nhánh thay đổi hiện tại: `codex/staging-readiness`. Chưa có tài khoản hosting được
 kết nối trong phiên làm việc này, chưa tạo dịch vụ hoặc đăng ký tên miền.
 
+## Cập nhật môi trường nhóm — 14/11/2026
+
+- Website đang dùng: https://lighthouse-cola.onrender.com/.
+- Render service: `srv-dbrglcetlv9c738flu40`, [Dashboard](https://dashboard.render.com/web/srv-dbrglcetlv9c738flu40).
+- Theo cấu hình người dùng đã xác nhận, dịch vụ theo dõi `codex/staging-readiness`, Auto Deploy sau khi CI thành công. Tiếp tục đẩy đúng nhánh này; không chuyển sang `main` hoặc tạo hosting mới.
+- Cloud hiện đẩy GitHub được. Truy cập trực tiếp Render qua proxy vẫn trả CONNECT 403 khi kiểm tra UC03/04; chưa thể xác nhận trạng thái Live từ Cloud. Theo dõi commit/CI trên GitHub và đối chiếu cùng commit trong Render Dashboard. Chỉ khi deploy đó Live, tải lại website (Ctrl+F5) để kiểm tra bản mới.
+- Các mục chưa có URL/chưa kết nối và đề xuất nhánh staging bên dưới là ghi chép lúc khởi tạo, không thay thế cấu hình đang dùng ở trên.
+
 ## Development
 
 Node.js >=20 (đã kiểm tra với 24.22.1), không có npm dependencies hay bước build UI.

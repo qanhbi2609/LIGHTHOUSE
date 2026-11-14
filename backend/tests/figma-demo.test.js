@@ -48,3 +48,11 @@ test('Restarting the comparison demo preserves saved edits instead of reseeding 
  assert.equal(fs.readFileSync(file,'utf8'),before);
  assert.equal(fs.readFileSync(path.join(dir,'data/lighthouse.json'),'utf8'),original);
 });
+test('UC04 updated reference gallery is idempotent and preserves team edits and existing images',()=>{
+ const {upgradeUC34}=require('../fixtures/uc03-04-update');
+ const base=()=>({demoFixture:{},students:[{id:'LH001',name:'Mai Hồng Ngọc'}],images:[],history:[],studentRevisions:[]});
+ const fresh=base();assert.equal(upgradeUC34(fresh),true);assert.equal(fresh.images.length,11);assert.equal(upgradeUC34(fresh),false);assert.equal(fresh.images.length,11);
+ for(const edited of [Object.assign(base(),{images:[{id:'HA001',studentId:'LH001',url:'/uploads/user.png'}]}),Object.assign(base(),{studentRevisions:[{studentId:'LH001'}]}),Object.assign(base(),{history:[{subject:'LH001',action:'Xóa ảnh'}]})]){
+  const before=structuredClone({...edited,demoFixture:{}});upgradeUC34(edited);assert.deepEqual(edited.images,before.images);assert.deepEqual(edited.students,before.students);
+ }
+});

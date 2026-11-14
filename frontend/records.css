@@ -35,17 +35,18 @@
 .records-error{color:#c52222;font-size:12px;line-height:17px;margin:6px 0 0}.records-error:empty{display:none}
 .records-overlay{position:fixed;inset:0;background:#0008;z-index:90;display:flex;align-items:center;justify-content:center;font-family:Roboto,Arial,sans-serif;color:#002f6c}
 .records-overlay button:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
-.records-review{width:1400px;max-width:calc(100vw - 48px);height:min(896px,calc(100dvh - 80px));display:flex;flex-direction:column;border-radius:20px;background:#fff;border:1px solid #ddd;overflow:hidden}
-.records-review>h2{margin:0;padding:22px 28px 0;height:52px;flex-shrink:0;font-size:24px;line-height:29px;border-bottom:1px solid #ddd}
+.records-review{position:relative;width:1400px;max-width:calc(100vw - 48px);height:min(920px,calc(100dvh - 80px));display:flex;flex-direction:column;border-radius:20px;background:#fff;border:1px solid #ddd;overflow:hidden}
+.records-review>h2{margin:0;padding:46px 28px 0;height:76px;flex-shrink:0;font-size:24px;line-height:29px;border-bottom:1px solid #ddd}
+.review-close{position:absolute;top:14px;right:20px;border:0;background:transparent;color:#111;font:400 28px/32px Arial,sans-serif;padding:0;width:32px;height:32px}
 .records-review form{display:flex;flex-direction:column;min-height:0;flex:1}
 .review-scroll{padding:12px 60px 0 52px;display:grid;grid-template-columns:minmax(0,870fr) minmax(0,376fr);gap:40px;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .review-information h3{font-size:18px;line-height:22px;margin:20px 0}.review-information h3:first-child{margin-top:0}
 .review-personal-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px 24px}
-.review-field label{display:block;font-size:14px;line-height:17px;font-weight:700;margin-bottom:6px}
+.review-field label{display:block;font-size:14px;line-height:17px;font-weight:700;margin-bottom:4px}
 .review-value{border:1px solid #d8d8d8;border-radius:10px;background:#f1f6ff;padding:12px 13px;min-height:44px;font-size:14px;line-height:18px;overflow-wrap:anywhere}
 .review-education-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px}
 .review-description{grid-column:span 2}.review-description .review-value{min-height:170px;white-space:pre-wrap}
-.review-proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}.review-proof-grid strong{display:block;font-size:14px;line-height:18px;margin-bottom:6px}.review-proof-grid .records-link{display:block;margin-bottom:3px;overflow-wrap:anywhere}
+.review-proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}.review-proof-grid strong{display:block;font-size:14px;line-height:18px;margin-bottom:6px}.review-proof-grid .records-link{display:block;margin-bottom:0;overflow-wrap:anywhere}
 .review-decision{border-left:1px solid #ddd;margin-left:-20px;padding:20px 0 0 20px}
 .review-decision label{display:block;font-size:14px;line-height:17px;font-weight:700;margin-bottom:20px}
 .review-decision select,.review-decision textarea{width:100%;height:44px;background:white;border:1px solid #d8d8d8;border-radius:10px;padding:10px 13px;color:#002f6c;font:400 14px Roboto,Arial,sans-serif}
@@ -100,6 +101,38 @@
 .records-goal h2{font-size:24px;color:#1e3a8a;margin:0}.records-goal header button{background:none;border:0;padding:0;font-size:30px;color:#222}
 .records-goal strong{font-size:14px;line-height:18px;display:block}.goal-summary{display:grid;grid-template-columns:135px 1fr;gap:28px 20px;align-items:center;font-size:14px;margin-bottom:42px}
 .goal-description{white-space:pre-wrap;margin:8px 0 40px;min-height:100px}
+/* Updated UC04 keeps the filter and section heading outside the photo scroll. */
+.records-profile-view[data-profile-section=images] .student-profile{flex:1;margin-bottom:36px}
+.records-profile-view[data-profile-section=images] .student-tab-body{display:flex;flex-direction:column;overflow:hidden}
+.records-profile-view .profile-image-tools{flex-shrink:0;background:#f1f6ff;border-radius:8px;padding:8px 10px;gap:8px}
+.records-profile-view .profile-image-tools input[type=month]{width:200px;height:34px}
+.records-profile-view .profile-image-tools .add-photo-button{margin:0;height:34px;display:flex;align-items:center;padding:8px 14px;font-size:14px;font-weight:700;white-space:nowrap}
+.profile-photo-timeline{overflow:auto;min-height:0;flex:1;padding:0 20px;border-top:1px solid #aaa;scrollbar-width:thin;scrollbar-color:#b5b5b5 transparent}
+.profile-photo-timeline h4{font-size:14px;margin:8px 0 24px;color:#111}
+.records-profile-view .profile-photo-timeline .student-photo-gallery{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.records-profile-view .profile-photo-timeline .student-photo-gallery>div{width:120px}
+.records-profile-view .profile-photo-timeline .profile-photo img{width:120px;height:160px;object-fit:cover;border-radius:12px}
+.profile-photo-timeline .student-photo-gallery small{display:none}
+.profile-photo-timeline .student-photo-gallery>div{position:relative}
+.profile-photo-timeline .student-photo-gallery button[data-action=delete-image]{position:absolute;right:4px;top:4px;opacity:0;padding:4px 8px;min-height:24px}
+.profile-photo-timeline .student-photo-gallery>div:hover button[data-action=delete-image],.profile-photo-timeline .student-photo-gallery>div:focus-within button[data-action=delete-image]{opacity:1}
+@media(hover:none){.profile-photo-timeline .student-photo-gallery button[data-action=delete-image]{opacity:1}}
+.records-workspace button[data-action=add-support]{align-self:flex-start;margin-top:16px;font-size:14px;min-height:36px}
+.records-support{width:600px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);overflow:auto;border-radius:20px;background:white;padding:24px;color:#002f6c}
+.records-support header{display:flex;align-items:center;justify-content:space-between;margin:2px 0 44px;padding:0 12px}
+.records-support h2{margin:0;font-size:24px;line-height:29px;color:#1e3a8a}
+.records-support [data-close]{border:0;background:transparent;font:400 28px/32px Arial,sans-serif;padding:0;color:#111}
+.support-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 24px}
+.support-fields label{display:flex;flex-direction:column;gap:6px;font:700 14px/17px Roboto,Arial,sans-serif;min-width:0}
+.support-fields input:not([type=file]){height:44px;width:100%;min-width:0;border:1px solid #d8d8d8;border-radius:10px;background:white;padding:10px 12px;color:#002f6c;font:400 14px Roboto,Arial,sans-serif}
+.support-fields .support-evidence{grid-column:1/-1;margin-top:20px}
+.support-upload{position:relative;display:flex;gap:4px;align-items:center;width:250px;max-width:100%;height:26px;border:1px solid #aaa;border-radius:20px;background:#f5f5f5;padding:2px 12px;color:#64748b;font-weight:400;overflow:hidden;cursor:pointer}
+.support-upload span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.support-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.support-upload:focus-within{outline:3px solid #93c5fd;outline-offset:2px}
+.support-evidence small{font-size:11px;font-weight:400;color:#64748b}
+.records-support footer{display:flex;justify-content:flex-end;margin-top:24px}
+.records-support [type=submit]{width:80px;height:50px;border:0;border-radius:10px;font:700 20px Roboto,Arial,sans-serif}
 @media(min-width:1600px){
 .dashboard:has(.records-student-list,.records-profile-view) .content-shell{padding-top:28px}
 .dashboard:has(.student-edit) .content-shell{padding:49px 46px 24px 18px}
@@ -129,3 +162,4 @@
 .records-profile-view[data-profile-section=supports] .profile-table-scroll td{height:56px}
 .records-profile-view .student-profile-actions button.small{height:36px;min-height:36px;font-size:14px;padding:8px 18px}
 @media(max-width:1100px){.records-profile-view .student-profile-heading{display:flex}}
+@media(max-width:760px){.records-support{padding:20px}.records-support header{padding:0;margin-bottom:24px}.records-support h2{font-size:20px}.support-fields{grid-template-columns:1fr;gap:16px}.support-fields .support-evidence{margin-top:4px}.profile-photo-timeline{padding:0 8px}.records-profile-view .profile-photo-timeline .student-photo-gallery{gap:12px}}

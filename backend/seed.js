@@ -31,6 +31,7 @@ fs.mkdirSync(dir,{recursive:true});if(!fs.existsSync(file)||process.argv.include
  if(comparison)require('./fixtures/figma').applyFigmaFixture(db);
  if(comparison)require('./fixtures/uc05-06').upgradeUC56(db);
  if(comparison)require('./fixtures/uc07-08').upgradeUC78(db);
+ if(comparison)require('./fixtures/uc03-04-update').upgradeUC34(db);
  fs.writeFileSync(file,JSON.stringify(db,null,2)+'\n');
 }
 if(comparison){
@@ -41,6 +42,10 @@ if(comparison){
  }
  if(require('./fixtures/uc07-08').upgradeUC78(existing)){
   const backup=file+'.before-uc07-08.bak';if(!fs.existsSync(backup))fs.copyFileSync(file,backup);
+  fs.writeFileSync(file+'.tmp',JSON.stringify(existing,null,2)+'\n');fs.renameSync(file+'.tmp',file);
+ }
+ if(require('./fixtures/uc03-04-update').upgradeUC34(existing)){
+  const backup=file+'.before-uc03-04-update.bak';if(!fs.existsSync(backup))fs.copyFileSync(file,backup);
   fs.writeFileSync(file+'.tmp',JSON.stringify(existing,null,2)+'\n');fs.renameSync(file+'.tmp',file);
  }
  const uploads=path.resolve(process.env.LIGHTHOUSE_UPLOADS_DIR||path.join(__dirname,'uploads'));

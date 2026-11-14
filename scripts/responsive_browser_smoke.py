@@ -60,6 +60,16 @@ def main():
                         page.evaluate("L.go('students')");ready(page);page.locator('[data-action=detail][data-id=LH001]').click()
                         for tab in ['personal','grades','goals','supports','images']:
                             page.locator(f'[data-tab={tab}]').click();no_overflow('profile-'+tab);shot('profile-'+tab)
+                            if tab=='supports':
+                                page.locator('[data-action=add-support]').click();expect(page.locator('.records-support')).to_be_visible();no_overflow('support-editor')
+                                save=page.locator('.records-support [type=submit]');save.scroll_into_view_if_needed();b=save.bounding_box();assert b['y']+b['height']<=height+1;shot('support-editor')
+                                page.locator('.records-support [data-close]').click();page.locator('.records-notice-layer').click(position={'x':2,'y':2})
+                            if tab=='images':
+                                expect(page.locator('.profile-photo-timeline .profile-photo')).to_have_count(11)
+                                assert page.locator('.profile-photo-timeline').evaluate('e=>e.clientHeight>30')
+                                if height<=1080:
+                                    fixed=page.locator('.profile-image-tools').bounding_box();page.locator('.profile-photo-timeline').evaluate('e=>e.scrollTop=400');assert page.locator('.profile-image-tools').bounding_box()==fixed
+
                         page.evaluate("L.go('rooms')");ready(page);page.locator('#room-new').click()
                         expect(page.locator('.room-picker')).to_be_visible();no_overflow('room-picker');save=page.locator('.room-picker [type=submit]');save.scroll_into_view_if_needed();b=save.bounding_box();assert b['y']+b['height']<=height+1;shot('room-picker');page.locator('.room-picker [data-close]').click()
                         page.locator('.records-notice-layer').click(position={'x':2,'y':2})

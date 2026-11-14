@@ -1,4 +1,8 @@
 /* Shared shell: compact sidebar from the supplied report screenshot, at actual CSS pixels. */
+@media(max-width:760px) and (max-height:700px){
+ .records-profile-view[data-profile-section=images] .student-tab-body{overflow:auto;display:block}
+ .records-profile-view[data-profile-section=images] .profile-photo-timeline{height:200px;min-height:160px}
+}
 body{min-width:0}
 .dashboard>.sidebar{width:185px;flex:0 0 185px;height:100dvh;min-height:0;padding:34px 0 0 14px;position:sticky;top:0;border-radius:0 71px 0 0;background:linear-gradient(104deg,#93c5fd 10%,#bfdbfe 50%,#eef4ff 80%);overflow:hidden}
 .dashboard>.sidebar .sidebar-brand{font-size:19px;line-height:23px;letter-spacing:0;margin:0 14px 36px 0;font-weight:400}
@@ -84,7 +88,7 @@ body{min-width:0}
  .records-profile-view .student-profile-heading h2{font-size:18px;line-height:24px}.records-profile-view .student-profile-heading>span:last-child{font-size:12px}
  .records-profile-view .student-tabbar{overflow:auto;flex-wrap:nowrap}.student-tabbar .tab{white-space:nowrap;flex:none}
  .profile-table-scroll{overflow:auto}.profile-table-scroll table{min-width:600px}.records-profile-view .student-info-grid{gap:16px}
- .profile-image-tools{flex-wrap:wrap;gap:8px}.profile-image-tools input[type=month],.alumni-profile .profile-image-tools input{width:calc(50% - 12px);min-width:0}.profile-image-tools .add-photo-button{margin:0;font-size:12px}
+ .profile-image-tools{flex-wrap:wrap;gap:8px}.records-profile-view .profile-image-tools input[type=month],.alumni-profile .profile-image-tools input{width:calc(50% - 12px);min-width:0}.profile-image-tools .add-photo-button{margin:0;font-size:12px}
  .alumni-workspace{padding-bottom:12px}.alumni-workspace .records-list-panel{padding:12px}#alumni-search{gap:8px}#alumni-search .search{width:auto;flex:1;min-width:0;height:40px}#alumni-search input{font-size:13px!important}#alumni-search button{height:40px;padding:8px 12px;font-size:14px!important}
  .alumni-list-heading{align-items:flex-start;gap:8px;flex-direction:column;margin:16px 0}.alumni-list-heading h2{font-size:17px}.alumni-list-heading>span{font-size:12px}
  .people-editor{padding:20px 16px}.people-editor h2{font-size:20px;line-height:26px;margin:0}.people-fields{grid-template-columns:1fr}.people-grant-heading{gap:16px}.people-grants label{font-size:13px}.people-editor footer button{height:44px}

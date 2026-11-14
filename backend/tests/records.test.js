@@ -45,3 +45,27 @@ test('UC04 invalid changes are atomic; valid edits keep a full prior revision',a
  assert.equal(db.studentRevisions.at(-1).studentId,'LH001');
  assert.equal(db.history[0].subject,'LH001');
 });
+test('UC04 support validates before writes, enforces grants and saves the original invoice',async()=>{
+ const png={name:'Original invoice.png',mime:'image/png',data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII='};
+ const file=path.join(process.env.LIGHTHOUSE_DATA_DIR,'lighthouse.json');
+ const snapshot=()=>({db:fs.readFileSync(file,'utf8'),uploads:fs.readdirSync(process.env.LIGHTHOUSE_UPLOADS_DIR).sort()});
+ const before=snapshot();
+ for(const body of [{name:''},{name:'Invalid',amount:-1},{name:'Invalid',amount:'NaN'},{name:'Invalid',date:'2026-02-30'},{name:'Invalid',evidenceFile:{...png,data:'data:image/png;base64,YmFk'}}]){
+  assert.equal((await request('supports','POST',{studentId:'LH001',...body})).status,400);assert.deepEqual(snapshot(),before);
+ }
+ assert.equal((await request('supports','POST',{studentId:'LH001',name:'Forbidden',evidenceFile:png},canbo)).status,403);assert.deepEqual(snapshot(),before);
+ const created=await request('supports','POST',{studentId:'LH001',name:'Synthetic tuition',type:'Học phí',amount:8500000,date:'2026-11-14',evidenceFile:png});
+ assert.equal(created.status,201);assert.equal(created.data.item.evidenceName,png.name);
+ const detail=(await request('students/LH001')).data.item;
+ const row=detail.supports.find(s=>s.id===created.data.item.id);assert.equal(row.amount,8500000);assert.equal(row.date,'2026-11-14');
+ const proof=await fetch(url+row.evidence);assert.equal(proof.status,200);assert.deepEqual(Buffer.from(await proof.arrayBuffer()),Buffer.from(png.data.split(',')[1],'base64'));
+ assert.equal(db.history[0].action,'Thêm hỗ trợ');assert.equal(db.history[0].subject,'LH001');
+});
+test('UC04 deleting a reference image preserves the asset still used by another profile',async()=>{
+ const file={mime:'image/png',data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII='};
+ const created=await request('images','POST',{studentId:'LH001',file});assert.equal(created.status,201);
+ db.images.push({...created.data.item,id:'SHARED-PROOF',studentId:'LH002'});
+ assert.equal((await request('images/'+created.data.item.id,'DELETE')).status,200);
+ assert.equal((await fetch(url+created.data.item.url)).status,200);
+ assert.ok(db.images.some(i=>i.id==='SHARED-PROOF'));
+});
