@@ -30,7 +30,7 @@ test('UC03 and UC04 demo data match screenshot rows, counts and related profile 
  assert.deepEqual(regs.slice(0,7).map(r=>r.created),['2026-10-21','2026-10-06','2026-09-27','2026-09-13','2026-08-24','2026-08-09','2026-07-18']);
  assert.equal(regs[5].dob,'1999-06-01');assert.equal(regs[5].documents.length,3);
  const students=(await request('/api/students')).data.items;
- assert.equal(students.length,33);assert.equal(new Set(students.map(s=>s.id)).size,33);
+ assert.equal(students.length,35);assert.equal(new Set(students.map(s=>s.id)).size,35);
  assert.deepEqual(students.slice(0,3).map(s=>s.name),['Mai Hồng Ngọc','Nguyễn Khoa Tóc Tiên','Vũ Cát Tường']);
  const s=(await request('/api/students/LH001')).data.item;
  assert.equal(s.name,'Mai Hồng Ngọc');assert.equal(s.cohort,'2023-2027');assert.equal(s.files.length,2);

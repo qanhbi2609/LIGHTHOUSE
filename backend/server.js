@@ -7,6 +7,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const {URL}=require('node:url');
+const grants=require('../frontend/permissions');
 const root=path.resolve(__dirname,'../frontend');
 const {comparison,dataDir,dataFile}=require('./storage');
 const uploadsDir=path.resolve(process.env.LIGHTHOUSE_UPLOADS_DIR||path.join(__dirname,'uploads'));
@@ -44,9 +45,15 @@ function publicUser(u){if(!u)return null;const {passwordHash,...rest}=u;return r
 const MANAGER_ROLES=['QuanLy','GiamDoc','CanBo'];
 function tokenUser(req){const t=(req.headers.authorization||'').replace(/^Bearer /,'');const ses=sessions.get(t);if(!ses||ses.expires<Date.now())return null;return db.users.find(x=>x.id===ses.id&&x.active)||null;}
 function user(req){const u=tokenUser(req);if(!u)error(401,'Vui lòng đăng nhập');return u;}
-function can(u,permission){return (u.permissions||[]).includes('*')||(u.permissions||[]).includes(permission)}
+function can(u,permission){return grants.has(u.permissions||[],permission)}
 function allow(req,permission){const u=user(req);if(u.role==='SinhVien'||!can(u,permission))error(403,'Bạn không có quyền thực hiện chức năng này');return u;}
-function admin(req){const u=user(req);if(!(u.permissions||[]).includes('*'))error(403,'Chỉ quản lý được phân quyền cao mới có thể thực hiện');return u;}
+function admin(req){const u=user(req);if(!['QuanLy','GiamDoc'].includes(u.role)||!can(u,'users.manage'))error(403,'Chỉ quản lý được phân quyền cao mới có thể thực hiện');return u;}
+function validateGrants(value,role){
+ if(!Array.isArray(value)||value.some(k=>typeof k!=='string'||!['*','students.edit','rooms.edit','history.view','users.view','registrations.view','grades.view',...grants.items.map(i=>i[0])].includes(k)))error(400,'Quyền không hợp lệ!');
+ if(value.includes('users.manage')&&!['QuanLy','GiamDoc'].includes(role))error(400,'Chỉ quản lý hoặc giám đốc được cấp quyền quản lý người dùng!');
+ if(value.includes('*')&&!['QuanLy','GiamDoc'].includes(role))error(400,'Vai trò không được cấp toàn quyền!');
+ return role==='SinhVien'?[]:[...new Set(value)];
+}
 function log(u,action,subject){db.history.unshift({id:nextId(db.history,'LS'),userId:u.id,actor:u.name,action,subject,time:current()});}
 function studentDocuments(s){const registration=db.registrations.find(r=>r.id===s.registrationId);return (s.files?.length?s.files:registration?.documents?.length?registration.documents:registration?.files||[]).map((f,i)=>typeof f==='string'?{url:f,name:'Giấy tờ liên quan '+(i+1),created:registration?.created||s.joined}:f);}
 function studentScope(u,s){return u.role!=='SinhVien'||u.studentId===s.id}
@@ -115,9 +122,10 @@ r.status=a.status;r.note=note;log(actor,'Xử lý hồ sơ',r.id+' → '+r.statu
 }
 if(parts[1]==='registrations'&&id&&parts[3]==='accept'&&method==='POST'){const actor=allow(req,'registrations.review'),r=find(db.registrations,id,'hồ sơ');if(db.students.some(s=>s.registrationId===id))error(409,'Hồ sơ đã được tiếp nhận');if(r.status!=='Đạt yêu cầu')error(400,'Hồ sơ chưa đủ điều kiện tiếp nhận!');const studentId=nextId(db.students,'LH'),usrId=nextId(db.users,'ND');const temp='Temp@'+crypto.randomInt(100000,999999);const stud={id:studentId,registrationId:r.id,userId:usrId,name:r.name,email:r.email,cccd:r.cccd,dob:r.dob,hometown:r.hometown,address:r.address,phone:r.phone,cohort:'',studentCode:'',school:r.school,major:r.major,family:r.family,room:null,status:'Đang hỗ trợ',joined:today(),endDate:'',endReason:''};db.students.push(stud);db.users.push({id:usrId,name:r.name,email:r.email,role:'SinhVien',studentId,permissions:[],passwordHash:hash(temp),active:true});r.status='Đã tiếp nhận';log(actor,'Tiếp nhận hồ sơ',r.id+' / '+studentId);save();return reply(res,201,{item:stud,demoStudentPassword:process.env.NODE_ENV==='production'?undefined:temp,message:'Đã tạo hồ sơ sinh viên thành công!'});}
 if(p==='/api/students'&&method==='GET'){const actor=user(req),q=norm(u.searchParams.get('q'));if(actor.role!=='SinhVien'&&!can(actor,'students.view'))error(403,'Không có quyền xem hồ sơ');const arr=db.students.filter(s=>studentScope(actor,s)&&(!q||[s.id,s.name,s.school,s.major,s.room].some(x=>same(x,q))));return reply(res,200,{items:arr});}
-if(parts[1]==='students'&&id&&parts.length===3&&method==='GET'){const actor=user(req),s=find(db.students,id,'sinh viên');if(actor.role!=='SinhVien'&&!can(actor,'students.view'))error(403,'Không có quyền xem hồ sơ');if(!studentScope(actor,s))error(403,'Bạn không có quyền xem hồ sơ này');return reply(res,200,{item:{...s,files:studentDocuments(s),images:db.images.filter(x=>x.studentId===id),goals:db.goals.filter(x=>x.studentId===id&&['Đạt','Chưa đạt'].includes(x.status)),grades:db.grades.filter(x=>x.studentId===id&&x.status==='Hợp lệ'),supports:db.supports.filter(x=>x.studentId===id)}});}
+if(parts[1]==='students'&&id&&parts.length===3&&method==='GET'){const actor=user(req),s=find(db.students,id,'sinh viên');if(actor.role!=='SinhVien'&&!can(actor,'students.view')&&!(s.status==='Đã kết thúc hỗ trợ'&&can(actor,'alumni.view')))error(403,'Không có quyền xem hồ sơ');if(!studentScope(actor,s))error(403,'Bạn không có quyền xem hồ sơ này');return reply(res,200,{item:{...s,files:studentDocuments(s),images:db.images.filter(x=>x.studentId===id),goals:db.goals.filter(x=>x.studentId===id&&['Đạt','Chưa đạt'].includes(x.status)),grades:db.grades.filter(x=>x.studentId===id&&x.status==='Hợp lệ'),supports:db.supports.filter(x=>x.studentId===id)}});}
 if(parts[1]==='students'&&id&&parts.length===3&&method==='PATCH'){
-const actor=allow(req,'students.edit'),s=find(db.students,id,'sinh viên'),a=await read(),changes={};
+const actor=user(req),s=find(db.students,id,'sinh viên'),a=await read(),changes={};
+if(actor.role==='SinhVien'||(!can(actor,'students.edit')&&!(can(actor,'alumni.edit')&&Object.hasOwn(a,'status')&&Object.keys(a).every(k=>['status','endDate','endReason'].includes(k)))))error(403,'Bạn không có quyền thực hiện chức năng này');
 for(const k of ['name','email','phone','cccd','dob','hometown','address','school','major','family','cohort','studentCode'])if(Object.hasOwn(a,k))changes[k]=clean(a[k]);
 if(Object.hasOwn(changes,'name')&&!changes.name)error(400,'Dữ liệu không hợp lệ: họ tên');
 if(Object.hasOwn(changes,'email')&&!/^\S+@\S+\.\S+$/.test(changes.email))error(400,'Dữ liệu không hợp lệ: email');
@@ -128,10 +136,11 @@ if(Object.hasOwn(a,'status')){if(!['Đang hỗ trợ','Tạm dừng hỗ trợ',
 (db.studentRevisions||=[]).push({id:nextId(db.studentRevisions||[],'RV'),studentId:s.id,userId:actor.id,time:current(),before:JSON.parse(JSON.stringify(s))});
 Object.assign(s,changes);log(actor,'Chỉnh sửa hồ sơ',s.id);save();return reply(res,200,{item:s,message:'Lưu hồ sơ thành công!'});
 }
-if(p==='/api/alumni'&&method==='GET'){allow(req,'alumni.view');const q=norm(u.searchParams.get('q'));return reply(res,200,{items:db.students.filter(s=>s.status==='Đã kết thúc hỗ trợ'&&(!q||same(s.name,q)||same(s.id,q)))});}
-if(p==='/api/rooms'&&method==='GET'){allow(req,'rooms.view');return reply(res,200,{items:db.rooms.map(r=>({...r,students:db.students.filter(s=>s.room===r.id)}))});}
+if(p==='/api/alumni'&&method==='GET'){allow(req,'alumni.view');const q=norm(u.searchParams.get('q'));return reply(res,200,{items:db.students.filter(s=>s.status==='Đã kết thúc hỗ trợ'&&(!q||[s.name,s.id,s.email].some(v=>same(v,q))))});}
+if(p==='/api/rooms/residents'&&method==='GET'){allow(req,'rooms.view');return reply(res,200,{items:db.students.map(({id,name,room,status})=>({id,name,room,status}))});}
+if(p==='/api/rooms'&&method==='GET'){allow(req,'rooms.view');return reply(res,200,{items:db.rooms.map(r=>({...r,students:db.students.filter(s=>s.room===r.id).map(({id,name,room,status})=>({id,name,room,status}))}))});}
 if(p==='/api/rooms'&&method==='POST'){
-const actor=allow(req,'rooms.edit'),a=await read(),id=required(a.id,'mã phòng').toUpperCase(),capacity=Number(a.capacity);
+const actor=allow(req,'rooms.create'),a=await read(),id=required(a.id,'mã phòng').toUpperCase(),capacity=Number(a.capacity);
 if(!/^[A-Z0-9][A-Z0-9_-]{0,19}$/.test(id))error(400,'Thông tin không hợp lệ!');
 if(capacity!==ROOM_CAPACITY)error(400,'Sức chứa mỗi phòng phải là 6 sinh viên');
 if(db.rooms.some(r=>r.id===id))error(409,'Tên phòng đã tồn tại');
@@ -140,8 +149,8 @@ const ids=[...new Set(a.studentIds||[])];if(ids.length>ROOM_CAPACITY)error(400,'
 const residents=ids.map(sId=>find(db.students,sId,'sinh viên'));if(residents.some(s=>s.status==='Đã kết thúc hỗ trợ'))error(400,'Không thể xếp Alumni vào phòng');
 db.rooms.push({id,capacity});for(const s of residents)s.room=id;log(actor,'Tạo phòng',id);save();return reply(res,201,{message:'Tạo mới thành công!'});
 }
-if(parts[1]==='rooms'&&id&&method==='PUT'){const actor=allow(req,'rooms.edit'),r=find(db.rooms,id,'phòng'),a=await read(),ids=Array.isArray(a.studentIds)?[...new Set(a.studentIds)]:[];if(ids.length>r.capacity)error(400,'Phòng đầy!');for(const sId of ids){const s=find(db.students,sId,'sinh viên');if(s.status==='Đã kết thúc hỗ trợ')error(400,'Không thể xếp Alumni vào phòng');}for(const s of db.students)if(s.room===id&&!ids.includes(s.id))s.room=null;for(const sId of ids)find(db.students,sId,'sinh viên').room=id;log(actor,'Sửa bố trí phòng',id);save();return reply(res,200,{message:'Cập nhật thành công!'});}
-if(parts[1]==='rooms'&&id&&method==='DELETE'){const actor=allow(req,'rooms.edit');find(db.rooms,id,'phòng');db.rooms=db.rooms.filter(x=>x.id!==id);for(const s of db.students)if(s.room===id)s.room=null;log(actor,'Xóa phòng',id);save();return reply(res,200,{message:'Xóa phòng thành công!'});}
+if(parts[1]==='rooms'&&id&&method==='PUT'){const actor=allow(req,'rooms.assign'),r=find(db.rooms,id,'phòng'),a=await read(),ids=Array.isArray(a.studentIds)?[...new Set(a.studentIds)]:[];if(ids.length>r.capacity)error(400,'Phòng đầy!');for(const sId of ids){const s=find(db.students,sId,'sinh viên');if(s.status==='Đã kết thúc hỗ trợ')error(400,'Không thể xếp Alumni vào phòng');}for(const s of db.students)if(s.room===id&&!ids.includes(s.id))s.room=null;for(const sId of ids)find(db.students,sId,'sinh viên').room=id;log(actor,'Sửa bố trí phòng',id);save();return reply(res,200,{message:'Cập nhật thành công!'});}
+if(parts[1]==='rooms'&&id&&method==='DELETE'){const actor=allow(req,'rooms.delete');find(db.rooms,id,'phòng');db.rooms=db.rooms.filter(x=>x.id!==id);for(const s of db.students)if(s.room===id)s.room=null;log(actor,'Xóa phòng',id);save();return reply(res,200,{message:'Xóa phòng thành công!'});}
 if(p==='/api/images'&&method==='POST'){const actor=allow(req,'students.edit'),a=await read();find(db.students,a.studentId,'sinh viên');if(!['image/png','image/jpeg'].includes(a.file?.mime))error(400,'Định dạng không phù hợp!');const url=storeFile(a.file,a.studentId);if(!url.startsWith('/uploads/'))error(400,'Thiếu ảnh');const row={id:nextId(db.images,'HA'),studentId:a.studentId,url,created:current()};db.images.push(row);log(actor,'Thêm hình ảnh',a.studentId);save();return reply(res,201,{item:row,message:'Tải ảnh thành công!'});}
 if(parts[1]==='images'&&id&&method==='DELETE'){const actor=allow(req,'students.edit'),img=find(db.images,id,'hình ảnh');db.images=db.images.filter(x=>x.id!==id);try{fs.unlinkSync(path.join(uploadsDir,path.basename(img.url)))}catch{}log(actor,'Xóa hình ảnh',img.studentId);save();return reply(res,200,{message:'Đã xóa hình ảnh!'});}
 if(p==='/api/goals'&&method==='GET'){const actor=user(req),q=norm(u.searchParams.get('q'));if(actor.role!=='SinhVien'&&!can(actor,'goals.view'))error(403,'Không có quyền xem mục tiêu');return reply(res,200,{items:db.goals.filter(g=>(actor.role!=='SinhVien'||g.studentId===actor.studentId)&&(!q||same(g.name,q)||same(g.studentId,q))).map(g=>({...g,studentName:db.students.find(x=>x.id===g.studentId)?.name}))});}
@@ -155,9 +164,31 @@ if(parts[1]==='grades'&&id&&parts[3]==='resubmit'&&method==='PATCH'){const actor
 if(p==='/api/supports'&&method==='GET'){const actor=user(req);if(actor.role!=='SinhVien'&&!can(actor,'students.view'))error(403,'Không có quyền xem hỗ trợ');return reply(res,200,{items:db.supports.filter(s=>actor.role!=='SinhVien'||s.studentId===actor.studentId)});}
 if(p==='/api/supports'&&method==='POST'){const actor=allow(req,'students.edit'),a=await read();find(db.students,a.studentId,'sinh viên');const row={id:nextId(db.supports,'HT'),studentId:a.studentId,name:required(a.name,'tên hỗ trợ'),type:clean(a.type),amount:Number(a.amount||0),date:date(a.date)?a.date:today(),evidence:''};if(row.amount<0)error(400,'Số tiền không hợp lệ');db.supports.push(row);log(actor,'Thêm hỗ trợ',row.studentId);save();return reply(res,201,{message:'Cập nhật thành công!'});}
 if(p==='/api/users'&&method==='GET'){allow(req,'users.view');return reply(res,200,{items:db.users.map(publicUser)});}
-if(p==='/api/users'&&method==='POST'){const actor=admin(req),a=await read(),email=required(a.email,'email').toLowerCase();if(db.users.some(x=>x.email===email))error(409,'Email đã tồn tại');if(!['QuanLy','CanBo','GiamDoc','SinhVien'].includes(a.role))error(400,'Vai trò không hợp lệ');if(norm(a.password).length<8)error(400,'Mật khẩu cần tối thiểu 8 ký tự');const row={id:nextId(db.users,'ND'),name:required(a.name,'họ tên'),email,role:a.role,studentId:clean(a.studentId)||null,permissions:a.role==='SinhVien'?[]:(Array.isArray(a.permissions)?a.permissions:[]),passwordHash:hash(a.password),active:true};db.users.push(row);log(actor,'Thêm người dùng',row.id);save();return reply(res,201,{message:'Cập nhật thành công!',item:publicUser(row)});}
-if(parts[1]==='users'&&id&&method==='PATCH'){const actor=admin(req),row=find(db.users,id,'người dùng'),a=await read();if(Object.hasOwn(a,'permissions')&&Array.isArray(a.permissions))row.permissions=a.permissions.map(x=>clean(x,64));if(Object.hasOwn(a,'active'))row.active=!!a.active;if(Object.hasOwn(a,'role')&&['QuanLy','CanBo','GiamDoc','SinhVien'].includes(a.role))row.role=a.role;if(Object.hasOwn(a,'name'))row.name=required(a.name,'họ tên');log(actor,'Sửa phân quyền',id);save();return reply(res,200,{message:'Cập nhật thành công!',item:publicUser(row)});}
-if(parts[1]==='users'&&id&&method==='DELETE'){const actor=admin(req);if(actor.id===id)error(400,'Không thể tự xóa tài khoản đang đăng nhập');const row=find(db.users,id,'người dùng');row.active=false;log(actor,'Vô hiệu hóa người dùng',id);save();return reply(res,200,{message:'Đã xóa người dùng! (Đã vô hiệu hóa tài khoản để giữ lịch sử)'});}
+if(p==='/api/users'&&method==='POST'){
+ const actor=admin(req),a=await read(),email=required(a.email,'email').toLowerCase();
+ if(!/^\S+@\S+\.\S+$/.test(email))error(400,'Email không hợp lệ!');
+ if(db.users.some(x=>x.email.toLowerCase()===email))error(409,'Email đã tồn tại!');
+ const name=required(a.name,'họ tên');if(!['QuanLy','CanBo','GiamDoc','SinhVien'].includes(a.role))error(400,'Vai trò không hợp lệ');
+ const permissions=validateGrants(a.permissions,a.role),password=a.password===undefined?'Temp@'+crypto.randomBytes(16).toString('hex'):String(a.password);
+ if(password.length<8)error(400,'Mật khẩu cần tối thiểu 8 ký tự');
+ const row={id:nextId(db.users,'ND'),name,email,role:a.role,studentId:null,permissions,passwordHash:hash(password),active:true};
+ db.users.push(row);log(actor,'Thêm người dùng',row.id);save();return reply(res,201,{message:'Cập nhật thành công!',item:publicUser(row)});
+}
+if(parts[1]==='users'&&id&&method==='PATCH'){
+ const actor=admin(req),row=find(db.users,id,'người dùng'),a=await read(),changes={};
+ if(Object.hasOwn(a,'name'))changes.name=required(a.name,'họ tên');
+ const role=a.role===undefined?row.role:a.role;if(!['QuanLy','CanBo','GiamDoc','SinhVien'].includes(role))error(400,'Vai trò không hợp lệ');
+ changes.role=role;changes.permissions=validateGrants(a.permissions===undefined?row.permissions:a.permissions,role);
+ if(Object.hasOwn(a,'active'))changes.active=!!a.active;
+ if(actor.id===id&&(!['QuanLy','GiamDoc'].includes(role)||!grants.has(changes.permissions,'users.manage')||changes.active===false))error(400,'Không thể tự thu hồi quyền quản lý đang sử dụng!');
+ Object.assign(row,changes);log(actor,'Sửa phân quyền',id);save();return reply(res,200,{message:'Cập nhật thành công!',item:publicUser(row)});
+}
+if(parts[1]==='users'&&id&&method==='DELETE'){
+ const actor=admin(req);if(actor.id===id)error(400,'Không thể tự xóa tài khoản đang đăng nhập');
+ const row=find(db.users,id,'người dùng');row.permissions=[];row.active=false;
+ for(const [key,session] of sessions)if(session.id===id)sessions.delete(key);
+ log(actor,'Xóa phân quyền',id);save();return reply(res,200,{message:'Xóa thành công!'});
+}
 if(p==='/api/reports'&&method==='GET'){allow(req,'reports.view');return reply(res,200,{items:db.reports.map(r=>({...r,authorName:db.users.find(u=>u.id===r.author)?.name}))});}
 if(p==='/api/reports/summary'&&method==='GET'){allow(req,'reports.view');return reply(res,200,{summary:counts()});}
 if(p==='/api/reports'&&method==='POST'){const actor=allow(req,'reports.edit'),a=await read();if(!date(a.from)||!date(a.to)||a.from>a.to)error(400,'Khoảng thời gian không hợp lệ!');const row={id:nextId(db.reports,'BC'),type:required(a.type,'loại báo cáo'),from:a.from,to:a.to,content:clean(a.content,10000),notes:clean(a.notes,10000),files:Array.isArray(a.files)?a.files.slice(0,6).map(f=>storeFile(f,'report')):[],status:a.confirm?'Đã lưu':'Bản nháp',author:actor.id,created:current(),updated:current(),summary:counts()};db.reports.unshift(row);log(actor,'Lập báo cáo',row.id);save();return reply(res,201,{item:row,message:a.confirm?'Lưu thành công':'Đã giữ bản nháp'});}

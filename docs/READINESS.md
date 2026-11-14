@@ -8,6 +8,24 @@ các mục kiến trúc, dữ liệu và màn hình. Đây chưa phải đối c
 Figma chưa truy cập được do proxy trả 403. Số 66 Frame Quản lý và 8 Frame Sinh viên
 trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại trong lần này.
 
+## Cập nhật UC07/UC08 — 14/11/2026
+
+Đã tiếp tục từ `f9a6b86`, đối chiếu 26 PNG trong ZIP và Design PDF trang 89–98,
+bao gồm banner thiếu tên/email trong ảnh nhỏ của trang 96. Chi tiết và các khác biệt
+nguồn tại [UC07-UC08.md](UC07-UC08.md).
+
+- 39/39 tests API đạt; bổ sung 5 kiểm tra UC07/UC08 về dữ liệu, quyền, lưu nguyên tử
+  và nâng cấp giữ chỉnh sửa.
+- Bộ browser UC07/UC08 tạo 60 ảnh ở 1920×1080 và 1366×768; kiểm tra các tab,
+  minh chứng, gallery, thông báo, lưu/hủy/lỗi, quyền chỉ xem, căn cột và scrollbar.
+- Đã chạy lại bảy bộ browser: tổng quát, UC01, UC02, UC03/04, dữ liệu Figma,
+  UC05/06 và UC07/08. Test dùng dữ liệu tạm riêng.
+- Giữ 6 người/phòng, Roboto/Ribeye cục bộ và sidebar đủ menu không cuộn.
+- Dữ liệu nâng cấp một lần có backup, giữ hồ sơ/room/grant đã chỉnh sửa; dùng mã
+  riêng cho Trần Cẩm Tú thay cho mã LH023 bị trùng trong ảnh.
+- Chưa có xác nhận pixel-perfect/Figma trực tiếp; hệ thống vẫn là demo JSON,
+  không thay thế các điều kiện Final bên dưới.
+
 ## Kết quả đã chạy
 
 - 34/34 tests đạt, không skip: 13 integration tests API, 5 kiểm tra UC01, 3 kiểm tra UC02, 3 kiểm tra UC03/UC04, 3 kiểm tra dữ liệu theo ảnh, 5 kiểm tra UC04–UC06 và 2 kiểm tra chuyển đổi sức chứa.
@@ -54,11 +72,11 @@ Tất cả các dòng dưới đây còn cần đối chiếu Frame, trạng th�
 | UC05.5 xóa / xác nhận / hủy | Dialog theo ảnh; hủy không ghi, xóa trả sinh viên về chưa bố trí | Audit SQL |
 | UC06.1 đánh giá mục tiêu / xác nhận / hủy | Radio, giai đoạn sáu tháng, bộ lọc và xác nhận/hủy đã kiểm tra | Nghiệm thu đặc tả đầy đủ và SQL |
 | UC06.2 duyệt kết quả / yêu cầu gửi lại / xác nhận / hủy | Hai nút riêng, xem minh chứng, ghi chú bắt buộc khi yêu cầu gửi lại; chỉ kết quả hợp lệ vào lịch sử UC04 | Email thật, storage minh chứng riêng tư |
-| UC07.1 xem alumni / tab | Có demo | Đủ dữ liệu lịch sử và giấy tờ từ hồ sơ gốc |
-| UC07.2 tra cứu alumni / rỗng | Có demo | Cột, nút Tìm và empty state đúng Frame |
-| UC08.1 thêm / xác nhận / hủy | Có demo | Màn hình xác nhận riêng, danh mục quyền thống nhất với SDD |
-| UC08.2 sửa / xác nhận / hủy | Có demo | Ma trận quyền, thu hồi quyền phiên hiện hành và audit SQL |
-| UC08.3 xóa quyền / xác nhận / hủy | Demo vô hiệu hóa tài khoản | Xác nhận với đặc tả về xóa quyền so với xóa/vô hiệu hóa tài khoản |
+| UC07.1 xem alumni / tab | Đã đối chiếu ZIP, dùng hồ sơ chung UC04 và quyền đọc Alumni riêng | Giấy tờ gốc chưa có asset; SQL/storage bền vững |
+| UC07.2 tra cứu alumni / rỗng | Đã chỉnh cột, tìm tên/mã/email, thông báo và empty state | Nghiệm thu dữ liệu thực |
+| UC08.1 thêm / xác nhận / hủy | Đã chỉnh theo 14 quyền Design, xác nhận và validation | Email kích hoạt thực, SQL |
+| UC08.2 sửa / xác nhận / hủy | Grant UI/API dùng chung, hiệu lực ngay trên phiên hiện hành, audit JSON | Audit SQL |
+| UC08.3 xóa quyền / xác nhận / hủy | Thu hồi quyền/phiên, vô hiệu hóa, ẩn danh sách, giữ lịch sử; có xác nhận/hủy | Audit SQL |
 | UC09.1 lập / xem trước / lưu / nháp / không dữ liệu | Có demo tổng hợp và nháp | Đủ các mục SRS: sức khỏe, sinh hoạt, hỗ trợ, thách thức, hoạt động, nhận xét; bộ lọc UI |
 | UC09.2 xuất PDF / in | Browser Print | PDF tạo tự động đúng mẫu, ảnh, chữ ký và dữ liệu đã lưu |
 | UC09.3 xem báo cáo / lỗi truy xuất | Có demo | Không thay đổi nội dung khi xem; quyền theo vai trò; đối chiếu mẫu |

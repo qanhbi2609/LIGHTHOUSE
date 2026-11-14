@@ -7,8 +7,8 @@ const pill=r=>`<span class="room-state ${r.students.length===0?'vacant':r.studen
 const action=(text,kind,id,cls='secondary')=>`<button type="button" class="${cls}" data-room-action="${kind}" data-id="${esc(id)}">${text}</button>`;
 async function show(reset=false){
  if(reset){query='';searched=false;}
- setTitle('Quản lý phòng ở');[{items:rooms},{items:students}]=await Promise.all([api('rooms'),api('students')]);
- put(`<div class="records-workspace rooms-workspace"><section class="panel rooms-search"><h2>Tìm phòng theo sinh viên</h2><form id="room-search-form"><div class="search"><span aria-hidden="true">⌕</span><input id="room-student-input" aria-label="Tìm phòng theo sinh viên" placeholder="Nhập tên hoặc mã quản lý sinh viên" value="${esc(query)}"></div><button class="primary" type="submit">Tìm</button></form><div id="room-search-result"></div></section><div class="rooms-toolbar"><h2>Danh sách phòng · ${rooms.length} phòng</h2>${permitted('rooms.edit')?'<button type="button" class="primary" id="room-new"><span aria-hidden="true">＋</span> Tạo phòng</button>':''}</div><div class="rooms-card-scroll"><div class="room-grid">${rooms.map(r=>`<article class="room-card" data-room="${esc(r.id)}"><div class="room-header"><h3>${esc(r.id)}</h3>${pill(r)}</div><div class="room-capacity">${r.students.length}/${r.capacity} sinh viên</div><p>${esc(r.students.map(s=>s.id+' '+s.name).join(' · ')||'Chưa có sinh viên trong phòng.')}</p><div class="room-bottom"><div class="actions">${action('Xem','detail',r.id)}${permitted('rooms.edit')?action('Sửa','edit',r.id,'primary')+action('Xoá','delete',r.id,'danger-button'):''}</div></div></article>`).join('')}</div></div></div>`);
+ setTitle('Quản lý phòng ở');[{items:rooms},{items:students}]=await Promise.all([api('rooms'),api('rooms/residents')]);
+ put(`<div class="records-workspace rooms-workspace"><section class="panel rooms-search"><h2>Tìm phòng theo sinh viên</h2><form id="room-search-form"><div class="search"><span aria-hidden="true">⌕</span><input id="room-student-input" aria-label="Tìm phòng theo sinh viên" placeholder="Nhập tên hoặc mã quản lý sinh viên" value="${esc(query)}"></div><button class="primary" type="submit">Tìm</button></form><div id="room-search-result"></div></section><div class="rooms-toolbar"><h2>Danh sách phòng · ${rooms.length} phòng</h2>${permitted('rooms.create')?'<button type="button" class="primary" id="room-new"><span aria-hidden="true">＋</span> Tạo phòng</button>':''}</div><div class="rooms-card-scroll"><div class="room-grid">${rooms.map(r=>`<article class="room-card" data-room="${esc(r.id)}"><div class="room-header"><h3>${esc(r.id)}</h3>${pill(r)}</div><div class="room-capacity">${r.students.length}/${r.capacity} sinh viên</div><p>${esc(r.students.map(s=>s.id+' '+s.name).join(' · ')||'Chưa có sinh viên trong phòng.')}</p><div class="room-bottom"><div class="actions">${action('Xem','detail',r.id)}${(permitted('rooms.assign')?action('Sửa','edit',r.id,'primary'):'')+(permitted('rooms.delete')?action('Xoá','delete',r.id,'danger-button'):'')}</div></div></article>`).join('')}</div></div></div>`);
  document.querySelectorAll('[data-room-action]').forEach(b=>b.onclick=()=>({detail,edit,delete:remove})[b.dataset.roomAction](b.dataset.id));
  $('#room-new')?.addEventListener('click',()=>edit());
  $('#room-search-form').onsubmit=e=>{e.preventDefault();query=$('#room-student-input').value.trim();searched=true;find(true);};if(searched)find();
@@ -23,8 +23,8 @@ async function detail(id){
  layer(`<section class="rooms-detail" role="dialog" aria-modal="true" aria-label="Thông tin phòng ${esc(id)}"><h2>${esc(id)} · Thông tin chi tiết phòng ở</h2><div class="rooms-detail-summary">${[['Tên phòng',id],['Sức chứa',r.capacity+' sinh viên'],['Số sinh viên đang ở',r.students.length+' sinh viên'],['Còn chỗ',r.capacity-r.students.length]].map(([k,v])=>`<div><strong>${k}</strong><span>${esc(v)}</span></div>`).join('')}${pill(r)}</div><h3>Danh sách sinh viên hiện tại</h3><div class="rooms-detail-data"><table><thead><tr><th>MÃ QUẢN LÝ</th><th>HỌ TÊN</th><th>PHÒNG HIỆN TẠI</th></tr></thead><tbody>${r.students.map(s=>`<tr><td>${esc(s.id)}</td><td>${esc(s.name)}</td><td>${esc(id)}</td></tr>`).join('')||'<tr><td colspan="3">Chưa có sinh viên trong phòng.</td></tr>'}</tbody></table></div><footer><button type="button" class="secondary" data-close>Đóng</button></footer></section>`,'rooms-detail-layer');
 }
 async function edit(id){
- if(!permitted('rooms.edit'))return;
- const [{items:rs},{items:ss}]=await Promise.all([api('rooms'),api('students')]);
+ if(!permitted(id?'rooms.assign':'rooms.create'))return;
+ const [{items:rs},{items:ss}]=await Promise.all([api('rooms'),api('rooms/residents')]);
  const r=rs.find(r=>r.id===id),creating=!id;if(id&&!r)return notice('Không tìm thấy phòng.');
  const selected=new Set(r?.students.map(s=>s.id)||[]),original=new Set(selected);
  const ordered=ss.filter(s=>s.status!=='Đã kết thúc hỗ trợ').sort((a,b)=>Number(original.has(b.id))-Number(original.has(a.id)));
@@ -45,7 +45,7 @@ async function edit(id){
  };
 }
 async function remove(id){
- if(!permitted('rooms.edit'))return;const {items}=await api('rooms'),r=items.find(r=>r.id===id);if(!r)return;
+ if(!permitted('rooms.delete'))return;const {items}=await api('rooms'),r=items.find(r=>r.id===id);if(!r)return;
  confirm(`Xác nhận xoá phòng?\n\nPhòng ${id} · Sức chứa ${r.capacity} · Đang ở ${r.students.length}/${r.capacity} · Còn chỗ ${r.capacity-r.students.length}.`,async()=>{await api('rooms/'+id,{method:'DELETE'});await show();notice('Xoá phòng thành công!');});
 }
 return {show,detail,edit,remove,find:()=>{query=$('#room-student-input').value.trim();searched=true;find();}};

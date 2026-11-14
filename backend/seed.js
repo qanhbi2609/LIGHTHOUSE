@@ -30,6 +30,7 @@ const db={users,students,registrations,rooms:[{id:'A101',capacity:6},{id:'A102',
 fs.mkdirSync(dir,{recursive:true});if(!fs.existsSync(file)||process.argv.includes('--reset')){
  if(comparison)require('./fixtures/figma').applyFigmaFixture(db);
  if(comparison)require('./fixtures/uc05-06').upgradeUC56(db);
+ if(comparison)require('./fixtures/uc07-08').upgradeUC78(db);
  fs.writeFileSync(file,JSON.stringify(db,null,2)+'\n');
 }
 if(comparison){
@@ -38,8 +39,15 @@ if(comparison){
   const backup=file+'.before-uc05-06.bak';if(!fs.existsSync(backup))fs.copyFileSync(file,backup);
   fs.writeFileSync(file+'.tmp',JSON.stringify(existing,null,2)+'\n');fs.renameSync(file+'.tmp',file);
  }
+ if(require('./fixtures/uc07-08').upgradeUC78(existing)){
+  const backup=file+'.before-uc07-08.bak';if(!fs.existsSync(backup))fs.copyFileSync(file,backup);
+  fs.writeFileSync(file+'.tmp',JSON.stringify(existing,null,2)+'\n');fs.renameSync(file+'.tmp',file);
+ }
  const uploads=path.resolve(process.env.LIGHTHOUSE_UPLOADS_DIR||path.join(__dirname,'uploads'));
  fs.mkdirSync(uploads,{recursive:true});
+ for(const name of fs.readdirSync(path.join(__dirname,'fixtures')).filter(n=>/^alumni-.*\.png$/.test(n))){
+  const dest=path.join(uploads,name);if(!fs.existsSync(dest))fs.copyFileSync(path.join(__dirname,'fixtures',name),dest);
+ }
  for(const kind of ['family','grades','invoice']){
   const dest=path.join(uploads,`figma-${kind}.png`);
   if(!fs.existsSync(dest))fs.copyFileSync(path.join(__dirname,'fixtures',`figma-${kind}.png`),dest);
