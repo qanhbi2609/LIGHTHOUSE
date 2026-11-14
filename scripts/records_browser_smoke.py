@@ -71,7 +71,7 @@ def main():
                             sidebar_layout(page)
                             sidebar = page.locator('.sidebar').bounding_box()
                             panel = page.locator('.records-list-panel').bounding_box()
-                            assert sidebar['width'] == 260
+                            assert sidebar['width'] == 185
                             assert panel['x'] - sidebar['width'] == 32
                             assert abs(width - panel['x'] - panel['width'] - 32) < 1
                             assert page.evaluate('document.documentElement.scrollHeight <= innerHeight')
@@ -99,8 +99,8 @@ def main():
                         check_scroll()
                         shot('17-uc03-list')
                         if width == 1920:
-                            assert page.locator('.sidebar').bounding_box()['width'] == 260
-                            assert page.locator('.records-list-panel').bounding_box()['x'] == 292
+                            assert page.locator('.sidebar').bounding_box()['width'] == 185
+                            assert page.locator('.records-list-panel').bounding_box()['x'] == 217
                             assert abs(page.locator('.records-stats').bounding_box()['y'] - 175) < 1
                         # Search and status filter are independent; counters do not shrink to search results.
                         counts = page.locator('.records-stat strong').all_text_contents()

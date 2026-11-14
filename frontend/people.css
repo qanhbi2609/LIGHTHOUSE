@@ -1,4 +1,4 @@
-/* UC07/08: reference-specific data scrolling, never a scrolling sidebar. */
+/* UC07/08: reference-specific data scrolling. */
 .alumni-workspace{padding-top:20px;padding-bottom:84px}.alumni-workspace .records-list-panel{padding:24px}
 #alumni-search{display:flex;gap:14px;flex-shrink:0}#alumni-search .search{width:650px;height:48px}#alumni-search button{height:48px;padding:0 22px}
 .alumni-list-heading{display:flex;align-items:center;justify-content:space-between;margin:18px 0 20px;flex-shrink:0}.alumni-list-heading h2{font-size:18px;margin:0}.alumni-list-heading>span{font-size:14px;color:#64748b}
@@ -19,10 +19,6 @@
 .alumni-workspace #alumni-search .search{border-color:#dbe4f2;background:white}.alumni-workspace #alumni-search input{font-size:16px}.alumni-workspace #alumni-search .primary{background:#2148e8;font-size:18px}
 @media(min-height:951px) and (min-width:761px){
 .dashboard:has(.alumni-workspace,.alumni-profile) .content-shell{padding:24px 40px}
-.dashboard:has(.alumni-workspace,.alumni-profile) .sidebar-group{gap:5px}
-.dashboard:has(.alumni-workspace,.alumni-profile) .sidebar .navitem{min-height:50px}
-.dashboard:has(.alumni-workspace,.alumni-profile) .sidebar .navitem.active{min-height:50px;padding-left:14px}
-.dashboard:has(.alumni-workspace,.alumni-profile) .sidebar .navitem.active:before{display:none}
 .alumni-profile[data-profile-section=images] .student-profile{margin-bottom:28px}
 .alumni-profile[data-profile-section=personal] .student-profile{padding:28px}
 }

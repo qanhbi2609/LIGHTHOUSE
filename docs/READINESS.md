@@ -8,6 +8,14 @@ các mục kiến trúc, dữ liệu và màn hình. Đây chưa phải đối c
 Figma chưa truy cập được do proxy trả 403. Số 66 Frame Quản lý và 8 Frame Sinh viên
 trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại trong lần này.
 
+## Sidebar và tương thích màn hình — 14/11/2026
+
+Yêu cầu mới theo ảnh Quản lý báo cáo: sidebar desktop 185 px, giữ cả icon và tên
+mục, logo nằm trong viền. Thay thế các ghi chép sidebar 260 px trước đây; các trang
+sử dụng cùng kích thước. Điện thoại có nút mở menu đầy đủ, không dùng sidebar chỉ icon.
+UC01 dùng bố cục flow/card co giãn ở cửa sổ nhỏ hoặc thấp, không ép card về 384 px.
+Chi tiết và giới hạn kiểm tra tại [RESPONSIVE.md](RESPONSIVE.md).
+
 ## Cập nhật UC07/UC08 — 14/11/2026
 
 Đã tiếp tục từ `f9a6b86`, đối chiếu 26 PNG trong ZIP và Design PDF trang 89–98,
