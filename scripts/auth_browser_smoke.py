@@ -74,11 +74,15 @@ def main():
                         expect(page.locator('[name=password]')).to_have_attribute('type', 'text')
                         page.get_by_role('button', name='Ẩn mật khẩu', exact=True).click()
                         submit()
-                        expect(page.locator('.auth-notice')).to_have_text('Email hoặc mật khẩu sai!')
+                        expect(page.locator('#auth-login-error')).to_have_text('Email hoặc mật khẩu sai.')
+                        expect(page.locator('.auth-login input[aria-invalid=true]')).to_have_count(2)
                         shot('02-login-error')
-                        dismiss()
                         page.get_by_role('button', name='Quên mật khẩu?', exact=True).click()
                         shot('03-forgot')
+                        submit();expect(page.locator('#auth-email-error')).to_have_text('Vui lòng nhập Email')
+                        shot('03a-empty-email')
+                        page.get_by_role('button',name='Quay lại',exact=True).click();expect(page.locator('.auth-login')).to_be_visible()
+                        page.get_by_role('button',name='Quên mật khẩu?',exact=True).click()
                         page.locator('[name=email]').fill('missing@example.test')
                         submit()
                         expect(page.locator('.auth-notice')).to_have_text('Kiểm tra lại địa chỉ Email')
@@ -92,6 +96,10 @@ def main():
                         expect(page.locator('.auth-otp input')).to_have_count(4)
                         expect(page.locator('#auth-resend')).to_be_disabled()
                         shot('04-verify')
+                        page.get_by_role('button',name='Quay lại',exact=True).click();expect(page.locator('.auth-forgot input[name=email]')).to_have_value(email)
+                        # Request a fresh code through an isolated API response to avoid cooldown.
+                        page.route('**/api/auth/forgot',lambda route:route.fulfill(status=200,json={'maskedEmail':'th**@example.test','resendAfter':60}))
+                        submit();expect(page.locator('.auth-verify')).to_be_visible();page.unroute('**/api/auth/forgot')
 
                         def fill_code(code):
                             for i, digit in enumerate(code):
@@ -100,6 +108,7 @@ def main():
                         fill_code('0000')
                         submit()
                         expect(page.locator('.auth-notice')).to_have_text('Mã xác thực không hợp lệ')
+                        expect(page.locator('.auth-otp')).to_have_attribute('aria-invalid','true')
                         shot('05-invalid-code')
                         dismiss()
                         # Exercise expiry rendering without waiting five minutes.

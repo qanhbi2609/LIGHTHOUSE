@@ -106,7 +106,7 @@ const family=a.familyFiles||[],education=a.schoolFiles||[],legacy=a.files||[];
 if(family.length+education.length+legacy.length>6)error(400,'Chỉ được tải lên tối đa 6 tệp');
 const written=[],documents=[];const upload=(f,group)=>{const url=storeFile(f,'registration');if(!url)error(400,'Tệp minh chứng không hợp lệ');written.push(url);documents.push({url,name:clean(f.name)||'Giấy tờ minh chứng',group,created:current()});return url;};
 let familyFiles,schoolFiles,files;
-try{familyFiles=family.map(f=>upload(f,'family'));schoolFiles=education.map(f=>upload(f,'school'));files=[...familyFiles,...schoolFiles,...legacy.map(f=>upload(f,'family'))];}
+try{familyFiles=family.map(f=>upload(f,'family'));schoolFiles=education.map(f=>upload(f,'school'));files=[...familyFiles,...schoolFiles,...legacy.map(f=>upload(f,a.evidenceMode==='combined'?'general':'family'))];}
 catch(e){for(const url of written)fs.unlinkSync(path.join(uploadsDir,path.basename(url)));throw e;}
 const item={id:nextId(db.registrations,'HS'),name,email,phone,dob,cccd,hometown:clean(a.hometown),address:clean(a.address),school,major,family:clean(a.family,2000),description:clean(a.description,5000),files,familyFiles,schoolFiles,documents,status:'Chờ kiểm tra',note:'',created:today()};
 db.registrations.push(item);save();return reply(res,201,{item,message:'Đăng ký thành công!'});

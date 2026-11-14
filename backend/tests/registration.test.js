@@ -30,3 +30,13 @@ test('UC02 invalid second proof rolls back new upload without deleting existing 
  const r=await post({...valid,email:'invalid-proof@example.test',familyFiles:[file],schoolFiles:[{mime:'image/png',data:'data:image/png;base64,aW52YWxpZA=='}]});
  assert.equal(r.status,400);assert.equal(db.registrations.length,count);assert.equal(fs.readdirSync(process.env.LIGHTHOUSE_UPLOADS_DIR).length,2);
 });
+test('UC02 combined evidence preserves names, files and a neutral group without changing older registrations',async()=>{
+ const old=JSON.stringify(db.registrations);
+ const r=await post({...valid,email:'combined@example.test',evidenceMode:'combined',files:[{...file,name:'hoan-canh.png'},{...file,name:'hoc-ba.png'}]});
+ assert.equal(r.status,201);assert.deepEqual(r.data.item.documents.map(d=>d.group),['general','general']);
+ assert.deepEqual(r.data.item.documents.map(d=>d.name),['hoan-canh.png','hoc-ba.png']);
+ assert.equal(r.data.item.files.length,2);assert.deepEqual(r.data.item.familyFiles,[]);assert.deepEqual(r.data.item.schoolFiles,[]);
+ assert.equal(JSON.stringify(db.registrations.slice(0,-1)),old);
+ const saved=JSON.parse(fs.readFileSync(path.join(dir,'data/lighthouse.json'),'utf8')).registrations.at(-1);
+ assert.deepEqual(saved.documents,r.data.item.documents);
+});

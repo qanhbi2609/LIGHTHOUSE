@@ -92,3 +92,18 @@
 
 @media(min-width:761px) and (min-height:951px){.auth-shell:has(.auth-login){padding-bottom:43px}}
 @media(min-width:761px) and (max-height:950px){.auth-shell:has(.auth-login){padding-bottom:25px}}
+/* Updated UC01 exports: back navigation and inline field errors. */
+.auth-back{position:absolute;top:50px;left:60px;width:32px;height:32px;display:grid;place-items:center;border:0;padding:0;background:transparent;color:#111;cursor:pointer}
+.auth-back svg{width:24px;height:24px}.auth-card .auth-inline-error{font:400 12px/17px Roboto,Arial,sans-serif;color:red;margin:6px 6px 0;min-height:17px}
+.auth-card .auth-inline-error:empty{display:none}.auth-card input[aria-invalid=true],.auth-otp[aria-invalid=true]{border-color:red}
+.auth-login-form:has(#auth-login-error:not(:empty)) .auth-remember{margin-top:20px}
+.auth-otp input:not([type=checkbox]){border-bottom:0;font-size:48px;height:50px;width:60px;line-height:1}
+.auth-notice{background:#4d4d4d}
+@media(min-width:761px) and (min-height:951px){
+ .auth-login-form{top:337px}.auth-forgot form{margin-top:40px}.auth-forgot .auth-primary{margin-top:32px}
+}
+@media(max-width:1200px),(max-height:950px){.auth-back{position:static;margin:0 0 16px;flex:none}}
+.auth-otp input:not([type=checkbox]){width:43px}.auth-otp input:placeholder-shown{border-bottom:3px solid #cbd5e1}
+.auth-forgot form{position:relative}.auth-forgot .auth-inline-error{position:absolute;top:56px;left:10px;margin:0}
+@media(min-width:1201px) and (min-height:951px){.auth-login-form:has(#auth-login-error:not(:empty)) .auth-login-actions{margin-top:180px}}
+.auth-reset input[aria-invalid=true]{border-color:#e2e8f0}

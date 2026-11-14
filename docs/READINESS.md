@@ -8,6 +8,13 @@ các mục kiến trúc, dữ liệu và màn hình. Đây chưa phải đối c
 Figma chưa truy cập được do proxy trả 403. Số 66 Frame Quản lý và 8 Frame Sinh viên
 trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại trong lần này.
 
+## Màn hình cập nhật UC01/UC02 — 14/11/2026
+
+Đã đối chiếu 19 PNG trong `màn hình update.rar` (chỉ có UC01/UC02). Giữ dữ liệu và
+API cũ, thay lỗi đăng nhập bằng lỗi tại trường, thêm back cho khôi phục mật khẩu,
+đổi bố cục UC02 và tải minh chứng chung theo ảnh mới. Xem
+[SCREEN-UPDATE-UC01-UC02.md](SCREEN-UPDATE-UC01-UC02.md) cho ánh xạ và kiểm tra.
+
 ## Sidebar và tương thích màn hình — 14/11/2026
 
 Yêu cầu mới theo ảnh Quản lý báo cáo: sidebar desktop 185 px, giữ cả icon và tên
