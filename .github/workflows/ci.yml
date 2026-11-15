@@ -35,7 +35,7 @@ jobs:
       - name: Browser — browser
         run: |
           mkdir -p artifacts/logs
-          python scripts/browser_browser_smoke.py 2>&1 | tee artifacts/logs/browser.log
+          python scripts/browser_smoke.py 2>&1 | tee artifacts/logs/browser.log
       - name: Browser — auth
         run: |
           mkdir -p artifacts/logs
