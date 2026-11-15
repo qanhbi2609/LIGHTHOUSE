@@ -8,6 +8,14 @@ các mục kiến trúc, dữ liệu và màn hình. Đây chưa phải đối c
 Figma chưa truy cập được do proxy trả 403. Số 66 Frame Quản lý và 8 Frame Sinh viên
 trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại trong lần này.
 
+## Sửa lỗi lần 3 — 15/11/2026
+
+Theo PDF 3 trang và quyết định hoãn database: bỏ nút tải trong preview, chỉnh
+hàng bộ lọc/vùng cuộn UC06, khóa tài khoản kết thúc hỗ trợ, tự tạo mật khẩu DDMM
+khi tiếp nhận và giữ form khi Hủy xác nhận. Xem
+[FIX-ROUND3-2026-11-15.md](FIX-ROUND3-2026-11-15.md). Chưa chuyển Supabase hoặc
+thay cấu hình/storage trên Render.
+
 ## Sửa lỗi lần 2 — 15/11/2026
 
 PDF mới ưu tiên hơn các ghi chép trước: reset bộ lọc khi sidebar, active/pending

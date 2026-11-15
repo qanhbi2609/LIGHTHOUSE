@@ -26,3 +26,8 @@ body .auth-card .auth-inline-error,body .registration-shell .registration-error,
 .records-preview>img,.records-preview>iframe{max-height:calc(100dvh - 130px);max-width:100%;object-fit:contain}
 
 .records-preview{background:#fff;border-radius:12px;box-shadow:0 8px 32px #0f172a30}.support-upload{max-width:100%;overflow:hidden}.support-upload>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.review-upload input{width:100%;box-sizing:border-box}
+
+/* Round 3: title and controls stay on one desktop row; smaller screens wrap. */
+@media(min-width:1101px){.assessment-filters{flex-wrap:nowrap;align-items:center;gap:16px}.assessment-filters h3{font-size:clamp(14px,1.1vw,20px);flex-shrink:0}.assessment-filters .toolrow{width:auto;flex:1;min-width:0;flex-wrap:nowrap;justify-content:flex-end;gap:8px}.assessment-filters .assessment-date{width:clamp(125px,11vw,165px);flex-shrink:0}.assessment-filters .search{width:auto;flex:1;min-width:140px}}
+@media(max-width:1100px){.assessment-filters{flex-wrap:wrap;gap:12px}.assessment-filters .toolrow{width:100%;display:flex;flex-wrap:wrap;gap:8px}.assessment-filters .assessment-date{width:calc(50% - 4px);max-width:200px}.assessment-filters .search{width:100%;flex:1 0 100%}}
+@media(max-height:850px),(max-width:1100px){.assessments-workspace{overflow:auto}.assessments-workspace .assessment-panel{flex:none;min-height:440px}.assessments-workspace .records-grid-table{height:300px;min-height:300px;flex:none}.assessment-stats{flex-shrink:0}}

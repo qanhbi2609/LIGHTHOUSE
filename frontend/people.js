@@ -41,7 +41,7 @@ async function edit(id){
   const permissions=checks.filter(c=>c.checked).map(c=>c.value);
   // Keep effective dependencies/read grants not represented by their own checkbox.
   if(u&&role.value!=='SinhVien')for(const key of u.permissions)if(!catalogue.items.some(i=>i[0]===key)&&catalogue.allowed(role.value,key))permissions.push(key);
-  confirm('Xác nhận lưu phân quyền?',async()=>{try{await api(creating?'users':'users/'+id,{method:creating?'POST':'PATCH',body:{name,email,role:role.value,permissions:[...new Set(permissions)],...(password?{password}:{})}});await refreshMe();close();await users();notice('Cập nhật thành công!');}catch(error){$('#people-error',el).textContent=error.message;throw error;}},()=>{close();notice('Đã hủy thao tác!');});
+  confirm('Xác nhận lưu phân quyền?',async()=>{try{await api(creating?'users':'users/'+id,{method:creating?'POST':'PATCH',body:{name,email,role:role.value,permissions:[...new Set(permissions)],...(password?{password}:{})}});await refreshMe();close();await users();notice('Cập nhật thành công!');}catch(error){$('#people-error',el).textContent=error.message;throw error;}},()=>notice('Đã hủy thao tác!'));
  };
 }
 

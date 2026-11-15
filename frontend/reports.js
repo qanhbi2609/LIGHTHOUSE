@@ -41,7 +41,7 @@ function editor(){
  document.querySelectorAll('[data-remove-file]').forEach(b=>b.onclick=()=>{URL.revokeObjectURL(d.files.splice(Number(b.dataset.removeFile),1)[0].preview);editor();});
  $('#report-save')?.addEventListener('click',()=>confirm('Xác nhận lưu thông tin báo cáo?',async()=>{
   const files=await Promise.all(d.files.map(({file})=>new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(new Error('Không đọc được tệp'));r.onload=()=>resolve({name:file.name,mime:file.type,data:r.result});r.readAsDataURL(file);})));await api('reports',{method:'POST',body:{type:d.type,from:d.from,to:d.to,notes:d.notes,files,generated:true,confirm:true}});release();Object.assign(filters,{from:'',to:'',query:'',type:''});await show();notice('Lưu thành công!');
- },()=>{release();guard(show);notice('Đã hủy thao tác!');}));
+ },()=>notice('Đã hủy thao tác!')));
 }
 async function detail(id){viewed=(await api('reports/'+id)).item;const r=viewed;setTitle('Quản lý báo cáo · Xem báo cáo đã lưu');
  put(`<div class="records-workspace reports-workspace report-detail"><div class="report-compose-scroll"><div class="report-compose-body"><section class="panel report-content-card"><h3>${esc(r.reportData?.title||r.type)}</h3><p class="report-muted">Loại: ${esc(r.type)}　 Kỳ: ${prettyDate(r.from)}–${prettyDate(r.to)}</p><p class="report-muted">Người lập: ${esc(r.authorName||r.author)}　 Ngày lập: ${prettyDate(r.created)}</p>${sectionsHTML(r)}<h4>Nhận xét và đề xuất</h4><p class="report-preserve">${esc(r.notes||'Chưa có nhận xét.')}</p><footer class="report-detail-actions">${button('Quay lại','back')}</footer></section><aside class="panel report-images"><h4>Hình ảnh đính kèm (${r.files?.length||0})</h4>${attachmentHTML(r)}</aside></div></div></div>`);

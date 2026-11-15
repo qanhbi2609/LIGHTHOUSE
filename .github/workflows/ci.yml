@@ -45,6 +45,7 @@ jobs:
           python scripts/student_history_browser_smoke.py
           python scripts/ui_fixes_browser_smoke.py
           python scripts/round2_browser_smoke.py
+          python scripts/round3_browser_smoke.py
           python scripts/responsive_browser_smoke.py
       - uses: actions/upload-artifact@v4
         if: always()

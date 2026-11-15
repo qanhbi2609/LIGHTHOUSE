@@ -157,7 +157,7 @@ def main():
                         page.locator('[data-assessment-id=MT107]').click();expect(page.locator('.goal-assessment')).to_be_visible();shot('05-goal-detail')
                         expect(page.locator('.assessment-dialog')).to_contain_text('01/07/2026–31/12/2026')
                         before=dbfile.read_text();page.locator('#save-goal-review').click();shot('06-goal-confirm')
-                        page.locator('.records-confirm [data-close]').click();notice('Đã hủy thao tác!');shot('03-goal-cancel');dismiss()
+                        page.locator('.records-confirm [data-close]').click();notice('Đã hủy thao tác!');shot('03-goal-cancel');dismiss();page.locator('.goal-assessment [data-close]').click()
                         assert dbfile.read_text()==before
                         page.locator('[data-assessment-id=MT107]').click()
                         page.locator('[name=assessment-rating][value="Chưa đạt"]').check()
@@ -182,7 +182,7 @@ def main():
                         expect(page.locator('.records-preview-crop img')).to_have_js_property('naturalWidth',1920)
                         shot('11-grade-proof');page.get_by_role('button',name='Đóng minh chứng',exact=True).click()
                         page.locator('#grade-approve').click();shot('12-grade-confirm');before=dbfile.read_text()
-                        page.locator('.records-confirm [data-close]').click();notice('Đã hủy thao tác!');shot('08-grade-cancel');dismiss()
+                        page.locator('.records-confirm [data-close]').click();notice('Đã hủy thao tác!');shot('08-grade-cancel');dismiss();page.locator('.grade-assessment [data-close]').click()
                         assert dbfile.read_text()==before
                         page.locator('[data-assessment-id=KQ101]').click();page.locator('#grade-request').click()
                         expect(page.locator('#grade-note-error')).to_have_text('Vui lòng nhập nội dung yêu cầu bổ sung.')

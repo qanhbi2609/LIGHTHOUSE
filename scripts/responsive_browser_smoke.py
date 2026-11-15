@@ -114,8 +114,8 @@ def main():
                         page.locator('#report-from').fill('2026-10-01');page.locator('#report-to').fill('2026-10-31');page.locator('#report-range-form [type=submit]').click()
                         expect(page.locator('#report-save')).to_be_visible();no_overflow('report-editor');page.locator('#report-notes').fill('Nhận xét responsive')
                         page.locator('#report-save').scroll_into_view_if_needed();b=page.locator('#report-save').bounding_box();assert b['y']+b['height']<=height+1;shot('report-editor')
-                        page.locator('#report-save').click();page.locator('.records-confirm [data-close]').click();expect(page.locator('.reports-list')).to_be_visible()
-                        page.locator('.lh-feedback button').click();assert (Path(tmp)/'data/figma-demo-v1.json').read_text()==before
+                        page.locator('#report-save').click();page.locator('.records-confirm [data-close]').click();expect(page.locator('.report-editor')).to_be_visible()
+                        page.locator('.lh-feedback button').click();assert (Path(tmp)/'data/figma-demo-v1.json').read_text()==before;page.evaluate("L.go('reports')")
                         page.locator('[data-report-action=preview]').first.click();expect(page.locator('.report-paper')).to_have_count(2);no_overflow('report-pdf-preview');shot('report-pdf-preview')
                         page.evaluate("""async()=>fetch('/api/grades/KQ101/review',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+sessionStorage.getItem('lh_token')},body:JSON.stringify({status:'Yêu cầu gửi lại',note:'Bổ sung minh chứng'})})""")
                         page.get_by_text('Đăng xuất',exact=True).click();login(page,'sinhvien@lighthouse.test');expect(page.locator('#toast')).not_to_be_visible()

@@ -22,14 +22,14 @@ function confirm(message,action,onCancel=()=>notice('Đã hủy thao tác!')){
 function preview(url,region){
  if(!/^\/uploads\/[a-zA-Z0-9._-]+$/.test(url)){notice('Không tìm thấy minh chứng.');return;}
  const pdf=/\.pdf$/i.test(url);
- let content=pdf?`<iframe src="${esc(url)}" title="Nội dung minh chứng PDF"></iframe>`:`<img src="${esc(url)}" alt="Minh chứng">`;
+ let content=pdf?`<iframe src="${esc(url)}#toolbar=0" title="Nội dung minh chứng PDF"></iframe>`:`<img src="${esc(url)}" alt="Minh chứng">`;
  if(/^\/uploads\/figma-(family|grades|invoice)\.png$/.test(url)&&Array.isArray(region)&&region.length===4&&region.every(Number.isFinite)){
   const [x,y,w,h]=region;if(x>=0&&y>=0&&w>0&&h>0&&x+w<=1920&&y+h<=1080){
    const scale=Math.min(1,innerWidth*.9/w,innerHeight*.7/h);
    content=`<div class="records-preview-crop" style="width:${w*scale}px;height:${h*scale}px"><img src="${esc(url)}" alt="Minh chứng từ ảnh mẫu" style="width:${1920*scale}px;height:${1080*scale}px;left:${-x*scale}px;top:${-y*scale}px"></div>`;
   }
  }
- layer(`<section class="records-preview" role="dialog" aria-modal="true" aria-label="Xem minh chứng">${content}<button type="button" data-close aria-label="Đóng minh chứng">×</button><a class="proof-download" href="${esc(url)}?download=1" download>Tải xuống tệp</a></section>`,'records-preview-layer');
+ layer(`<section class="records-preview" role="dialog" aria-modal="true" aria-label="Xem minh chứng">${content}<button type="button" data-close aria-label="Đóng minh chứng">×</button></section>`,'records-preview-layer');
 }
 function gridTable(columns,widths,rows,classes=''){
  const cols=`<colgroup>${widths.map(w=>`<col style="width:${w}%">`).join('')}</colgroup>`;

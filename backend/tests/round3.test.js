@@ -1,0 +1,21 @@
+'use strict';
+const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const dir=fs.mkdtempSync(path.join(os.tmpdir(),'lighthouse-round3-'));Object.assign(process.env,{LIGHTHOUSE_DEMO_DATASET:'workflow',LIGHTHOUSE_DATA_DIR:dir+'/data',LIGHTHOUSE_UPLOADS_DIR:dir+'/uploads'});
+const {server,db}=require('../server');let base,manager;
+async function call(route,method='GET',body,token=manager){const r=await fetch(base+'/api/'+route,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+(token||'')},body:body===undefined?undefined:JSON.stringify(body)});return {status:r.status,data:await r.json()};}
+const png={name:'proof.png',mime:'image/png',data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII='};
+const registration={name:'New student',email:'new@example.test',phone:'0901234567',dob:'2005-09-05',cccd:'001001000001',hometown:'Đà Nẵng',address:'Địa chỉ',family:'Hoàn cảnh',school:'Trường',major:'Ngành',description:'Kế hoạch',files:[png]};
+before(async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));base='http://127.0.0.1:'+server.address().port;manager=(await call('auth/login','POST',{email:'quanly@lighthouse.test',password:'Demo@123'},'')).data.token;});
+after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true});});
+test('round3 intake creates one account only after acceptance with zero-padded DDMM password and no plaintext response',async()=>{
+ const count=db.users.length;const r=await call('registrations','POST',registration,'');assert.equal(r.status,201);assert.equal(db.users.length,count);const id=r.data.item.id;assert.equal((await call('registrations/'+id+'/accept','POST')).status,400);await call('registrations/'+id,'PATCH',{status:'Đạt yêu cầu'});const accepted=await call('registrations/'+id+'/accept','POST');assert.equal(accepted.status,201);assert.equal(accepted.data.demoStudentPassword,undefined);assert.equal(db.users.length,count+1);assert.equal((await call('registrations/'+id+'/accept','POST')).status,409);assert.equal(db.users.filter(u=>u.studentId===accepted.data.item.id).length,1);
+ const login=await call('auth/login','POST',{email:registration.email,password:'0509'},'');assert.equal(login.status,200);assert.equal(login.data.user.passwordHash,undefined);assert.notEqual(db.users.at(-1).passwordHash,'0509');
+});
+test('round3 intake rejects duplicate account email without partial creation',async()=>{
+ const r=await call('registrations','POST',{...registration,email:'quanly@lighthouse.test'},'');await call('registrations/'+r.data.item.id,'PATCH',{status:'Đạt yêu cầu'});const before=JSON.stringify(db);assert.equal((await call('registrations/'+r.data.item.id+'/accept','POST')).status,409);assert.equal(JSON.stringify(db),before);
+});
+test('round3 admin email/password edits authenticate; ending support disables all sessions but preserves records',async()=>{
+ const u=db.users.find(u=>u.email===registration.email);const first=(await call('auth/login','POST',{email:registration.email,password:'0509'},'')).data.token;
+ assert.equal((await call('users/'+u.id,'PATCH',{email:'changed@example.test',password:'Changed@123'})).status,200);assert.equal((await call('auth/login','POST',{email:registration.email,password:'0509'},'')).status,401);const second=(await call('auth/login','POST',{email:'changed@example.test',password:'Changed@123'},'')).data.token;assert.ok(second);const counts={users:db.users.length,students:db.students.length};
+ assert.equal((await call('students/'+u.studentId,'PATCH',{status:'Đã kết thúc hỗ trợ',endReason:'Rời trước thời hạn'})).status,200);assert.equal(u.active,false);for(const token of [first,second])assert.equal((await call('auth/me','GET',undefined,token)).status,401);assert.equal((await call('auth/login','POST',{email:'changed@example.test',password:'Changed@123'},'')).status,401);assert.ok(!(await call('users')).data.items.filter(u=>u.active).some(x=>x.id===u.id));assert.equal(db.users.length,counts.users);assert.equal(db.students.length,counts.students);assert.ok(db.history.some(h=>h.action==='Chỉnh sửa hồ sơ'&&h.subject===u.studentId));
+});

@@ -29,7 +29,7 @@ function period(g){if(g.periodFrom&&g.periodTo)return `${prettyDate(g.periodFrom
 async function reviewGoal(id){
  const {items}=await api('goals'),g=items.find(g=>g.id===id);if(!g)return;const editable=permitted('goals.review');
  const {el,close}=layer(`<section class="assessment-dialog goal-assessment" role="dialog" aria-modal="true" aria-label="Chi tiết mục tiêu"><header><h2>Chi tiết mục tiêu</h2><button type="button" class="assessment-close" aria-label="Đóng" data-close>×</button></header><div class="assessment-dialog-scroll">${student(g)}<div class="assessment-values">${row('Giai đoạn 6 tháng',period(g))}${row('Ngày gửi',prettyDate(g.sent))}${row('Mục tiêu',g.name)}</div><strong class="assessment-label">Kế hoạch sinh viên đã cung cấp</strong><div class="assessment-plan">${esc(g.detail)}</div>${editable?`<fieldset class="assessment-rating"><legend>Đánh giá</legend>${['Đạt','Chưa đạt'].map(s=>`<label><input type="radio" name="assessment-rating" value="${s}" ${(g.status==='Chưa đạt'?s==='Chưa đạt':s==='Đạt')?'checked':''}>${s}</label>`).join('')}</fieldset>`:`<p>Đánh giá: ${esc(g.status)}</p>`}</div><footer>${editable?'<button type="button" class="primary" id="save-goal-review">Lưu</button>':'<button type="button" class="secondary" data-close>Đóng</button>'}</footer></section>`,'assessment-dialog-layer',done=>{done();if(editable)notice('Đã hủy thao tác!');});
- $('#save-goal-review',el)?.addEventListener('click',()=>confirm('Xác nhận lưu đánh giá?',async()=>{await api('goals/'+id+'/review',{method:'PATCH',body:{status:$('[name=assessment-rating]:checked',el).value,feedback:g.feedback||''}});close();await show('goals');notice('Cập nhật thành công!');},()=>{close();notice('Đã hủy thao tác!');}));
+ $('#save-goal-review',el)?.addEventListener('click',()=>confirm('Xác nhận lưu đánh giá?',async()=>{await api('goals/'+id+'/review',{method:'PATCH',body:{status:$('[name=assessment-rating]:checked',el).value,feedback:g.feedback||''}});close();await show('goals');notice('Cập nhật thành công!');},()=>notice('Đã hủy thao tác!')));
 }
 async function reviewGrade(id){
  const {items}=await api('grades'),g=items.find(g=>g.id===id);if(!g)return;const editable=permitted('grades.review');
@@ -38,7 +38,7 @@ async function reviewGrade(id){
  const save=status=>{
   const note=$('#grade-request-note',el).value.trim();if(status==='Yêu cầu gửi lại'&&!note){$('#grade-note-error',el).textContent='Vui lòng nhập nội dung yêu cầu bổ sung.';$('#grade-request-note',el).focus();return;}
   const commit=async()=>{await api('grades/'+id+'/review',{method:'PATCH',body:{status,note}});close();await show('grades');notice(status==='Hợp lệ'?'Cập nhật thành công!':'Gửi yêu cầu thành công!');};
-  if(status==='Hợp lệ')confirm('Xác nhận lưu thông tin kết quả học tập?',commit,()=>{close();notice('Đã hủy thao tác!');});
+  if(status==='Hợp lệ')confirm('Xác nhận lưu thông tin kết quả học tập?',commit,()=>notice('Đã hủy thao tác!'));
   else{const b=$('#grade-request',el);b.disabled=true;commit().catch(error=>{$('#grade-note-error',el).textContent=error.message;}).finally(()=>b.disabled=false);}
  };
  $('#grade-request',el)?.addEventListener('click',()=>save('Yêu cầu gửi lại'));$('#grade-approve',el)?.addEventListener('click',()=>save('Hợp lệ'));
