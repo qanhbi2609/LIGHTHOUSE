@@ -1,0 +1,188 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1794741013822,
+  "projectRoot": "c:\\web\\LIGHTHOUSE",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": ">=20",
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "npm",
+    "runtime": "Node.js 20"
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "scripts"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "api": {
+      "path": "api",
+      "purpose": "API routes",
+      "fileCount": 1,
+      "lastAccessed": 1794741013378,
+      "keyFiles": [
+        "handler.js"
+      ]
+    },
+    "backend": {
+      "path": "backend",
+      "purpose": null,
+      "fileCount": 7,
+      "lastAccessed": 1794741013380,
+      "keyFiles": [
+        "attachments.js",
+        "package.json",
+        "report-data.js",
+        "report-pdf.js",
+        "seed.js"
+      ]
+    },
+    "database": {
+      "path": "database",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1794741013401,
+      "keyFiles": [
+        "01_sqlserver_schema.sql"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 16,
+      "lastAccessed": 1794741013402,
+      "keyFiles": [
+        "DEPLOYMENT.md",
+        "FIX-ROUND2-2026-11-15.md",
+        "FIX-ROUND3-2026-11-15.md",
+        "READINESS.md",
+        "RESPONSIVE.md"
+      ]
+    },
+    "frontend": {
+      "path": "frontend",
+      "purpose": null,
+      "fileCount": 26,
+      "lastAccessed": 1794741013403,
+      "keyFiles": [
+        "app.js",
+        "assessments.js",
+        "auth.css",
+        "auth.js",
+        "dates.js"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 13,
+      "lastAccessed": 1794741013404,
+      "keyFiles": [
+        "auth_browser_smoke.py",
+        "browser_smoke.py",
+        "figma_data_browser_smoke.py",
+        "management_browser_smoke.py",
+        "people_browser_smoke.py"
+      ]
+    },
+    "backend\\fixtures": {
+      "path": "backend\\fixtures",
+      "purpose": "Test fixtures",
+      "fileCount": 20,
+      "lastAccessed": 1794741013406,
+      "keyFiles": [
+        "alumni-grades.png",
+        "alumni-invoice.png",
+        "alumni-photo-0.png"
+      ]
+    },
+    "backend\\tests": {
+      "path": "backend\\tests",
+      "purpose": "Test files",
+      "fileCount": 13,
+      "lastAccessed": 1794741013407,
+      "keyFiles": [
+        "auth-recovery.test.js",
+        "figma-demo.test.js",
+        "management.test.js"
+      ]
+    },
+    "backend\\vendor": {
+      "path": "backend\\vendor",
+      "purpose": "Third-party code",
+      "fileCount": 6,
+      "lastAccessed": 1794741013408,
+      "keyFiles": [
+        "fontkit-1.1.1.js",
+        "FONTKIT-PACKAGE.json",
+        "FONTKIT-README.md"
+      ]
+    },
+    "frontend\\assets": {
+      "path": "frontend\\assets",
+      "purpose": "Static assets",
+      "fileCount": 2,
+      "lastAccessed": 1794741013410,
+      "keyFiles": [
+        "auth-background.png",
+        "auth-logo.png"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "api/handler.js",
+      "accessCount": 5.9975931751149165,
+      "lastAccessed": 1794741116213,
+      "type": "file"
+    },
+    {
+      "path": "frontend/auth.js",
+      "accessCount": 1.9991606415529621,
+      "lastAccessed": 1794741162753,
+      "type": "file"
+    },
+    {
+      "path": "frontend",
+      "accessCount": 1,
+      "lastAccessed": 1794741168342,
+      "type": "directory"
+    },
+    {
+      "path": "frontend/auth.css",
+      "accessCount": 5.990745056720944,
+      "lastAccessed": 1794741509824,
+      "type": "directory"
+    }
+  ],
+  "userDirectives": []
+}

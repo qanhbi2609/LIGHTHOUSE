@@ -36,10 +36,10 @@
 .student-goal-fields [aria-invalid=true],.student-grade-fields [aria-invalid=true]{border-color:#e44}
 .student-goal-readonly h3{font-size:18px;color:#1e3a8a}.student-preserve{white-space:pre-wrap;overflow-wrap:anywhere}.student-sent{color:#64748b;font-size:14px}
 .student-grades{padding-top:24px}.student-grade-scroll{min-height:0;overflow:auto;flex:1;scrollbar-width:thin;overscroll-behavior:contain}
-.student-grades .student-grade-card{padding:28px 36px;margin:0 0 24px;border-radius:20px;background:white;min-height:calc(100dvh - 182px);display:flex;flex-direction:column}
-.student-grade-card h2{font-size:24px;line-height:29px;margin:0 0 40px;color:#1e3a8a}
-.student-grade-card form{display:flex;flex-direction:column;flex:1}
-.student-grade-fields{display:grid;grid-template-columns:100px minmax(0,300px);gap:40px 25px;align-items:start;padding-left:8px}
+.student-grades .student-grade-card{padding:28px 36px;margin:0 0 24px;border-radius:20px;background:white;display:flex;flex-direction:column}
+.student-grade-card h2{font-size:24px;line-height:29px;margin:0 0 20px;color:#1e3a8a}
+.student-grade-card form{display:flex;flex-direction:column}
+.student-grade-fields{display:grid;grid-template-columns:100px minmax(0,300px);gap:16px 25px;align-items:start;padding-left:8px}
 .student-grade-fields>label{font-size:14px;font-weight:700;line-height:18px;padding-top:12px}
 .student-grade-fields input:not([type=file]){width:100%;min-width:0;height:40px;border:1px solid #d8d8d8;border-radius:10px;padding:10px;color:#334155;background:white;font:400 14px/18px Roboto,Arial,sans-serif}
 .student-file-upload{position:relative;width:250px;max-width:100%;height:18px;display:flex;align-items:center;border:1px solid #aaa;border-radius:18px;background:#f5f5f5;color:#64748b;font:400 14px/16px Roboto,Arial,sans-serif;cursor:pointer;margin-top:12px;gap:2px;padding:0 10px}
@@ -47,14 +47,19 @@
 .student-file-upload svg{flex:0 0 14px}.student-file-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .student-grade-fields .records-error{display:block;max-width:100%;color:red;font-size:14px;line-height:18px;margin:2px 0 0}
 .student-grade-fields .records-error:empty{display:none}.student-debt-note{display:block;font-size:12px;color:#a16b00;line-height:18px}
-.student-grade-card footer{display:flex;justify-content:center;margin-top:auto;padding:40px 0 94px}.student-grade-card footer button{height:48px;min-width:120px;font-size:14px;border-radius:10px}
+.student-grade-card footer{display:flex;justify-content:flex-end;padding:24px 0 8px}.student-grade-card footer button{height:40px;min-width:120px;font-size:14px;border-radius:10px}
 .student-return-banner{flex-shrink:0;display:flex;align-items:center;gap:16px;padding:12px 20px;min-height:60px;border:1px solid #f4a078;border-radius:16px;background:#fff0e6;color:#b43800;margin-bottom:24px}
 .student-return-banner>span{width:36px;height:36px;border:4px solid #d62900;border-radius:50%;font-size:28px;font-weight:700;text-align:center;line-height:28px;flex:0 0 36px}.student-return-banner p{margin:0;font-size:16px}.student-return-banner button{margin-left:auto}
 .student-grade-history{display:flex;flex-direction:column;margin:0 0 24px!important}.student-grade-history .panel-top{flex-shrink:0}.student-grade-history h2{font-size:18px;margin:0}.student-grade-history .records-data-scroll{max-height:400px;flex:0 1 auto}
 .student-grade-dialog{max-height:calc(100dvh - 48px)}.student-grade-dialog>header{margin-bottom:25px}
 .student-grade-dialog .student-grade-fields{padding:0 40px;grid-template-columns:100px minmax(0,300px)}
 .student-request-note{margin:28px 20px 0;font-size:14px;line-height:20px}.student-request-note>strong{color:#002f6c}.student-request-note>p,.student-request-note.student-preserve{background:#eef4ff;border:1px solid #d8d8d8;border-radius:10px;padding:14px;min-height:100px;margin-top:14px;white-space:pre-wrap}
-.student-grade-dialog .student-request-note>p{min-height:150px}.student-old-proof{margin:16px 20px 0;overflow-wrap:anywhere}
+.student-grade-dialog .student-grade-fields{row-gap:14px}.student-grade-dialog .student-request-note{margin:14px 20px 0}.student-grade-dialog .student-request-note>p{min-height:100px}.student-old-proof{margin:16px 20px 0;overflow-wrap:anywhere}
+.student-grade-dialog .proof-file{display:none}
+.student-keep-files{display:none}
+.student-keep-files{border:none;padding:0 40px;margin:16px 0 0}
+.student-keep-files legend{font-size:13px;font-weight:600;color:#334155;padding:0;margin-bottom:8px;float:none;width:100%}
+.student-keep-files label{display:flex;align-items:center;gap:8px;font-size:13px;color:#334155;cursor:pointer;padding:4px 0}
 .student-grade-values{display:grid;grid-template-columns:120px 1fr;gap:18px;font-size:14px;margin:24px 0}.student-grade-dialog footer{padding-top:24px}
 @media(max-height:850px){.student-goals{padding-top:24px}.student-grade-card h2{margin-bottom:24px;font-size:20px}.student-grade-fields{row-gap:18px}.student-grade-card footer{padding-bottom:24px}.student-grades .student-grade-card{padding:24px}.student-grade-dialog .student-grade-fields{row-gap:18px}.history-workspace .history-table-heading{height:56px;min-height:56px}.history-workspace .history-row{min-height:64px}.student-return-banner{margin-bottom:16px}}
 @media(max-width:1100px){.student-goal-dialog,.student-grade-dialog{max-height:calc(100dvh - 24px);max-width:calc(100vw - 24px)}.history-workspace .history-table-heading,.history-workspace .history-row{min-width:750px}.history-workspace #history-results{min-width:750px}.history-table-scroll{overflow:auto}}

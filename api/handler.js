@@ -21,7 +21,8 @@ async function ensureReady() {
   await Promise.all([
     sql`CREATE TABLE IF NOT EXISTS app_state(id TEXT PRIMARY KEY,data JSONB NOT NULL,updated_at TIMESTAMPTZ DEFAULT NOW())`,
     sql`CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,user_id TEXT NOT NULL,expires_at TIMESTAMPTZ NOT NULL)`,
-    sql`CREATE TABLE IF NOT EXISTS uploads(filename TEXT PRIMARY KEY,mime_type TEXT NOT NULL,data TEXT NOT NULL,created_at TIMESTAMPTZ DEFAULT NOW())`
+    sql`CREATE TABLE IF NOT EXISTS uploads(filename TEXT PRIMARY KEY,mime_type TEXT NOT NULL,data TEXT NOT NULL,created_at TIMESTAMPTZ DEFAULT NOW())`,
+    sql`CREATE TABLE IF NOT EXISTS otp_requests(id SERIAL PRIMARY KEY,email TEXT NOT NULL,code TEXT NOT NULL,expires_at TIMESTAMPTZ NOT NULL)`
   ]);
   const rows = await sql`SELECT id FROM app_state WHERE id='main'`;
   if (!rows.length) {
@@ -267,7 +268,56 @@ module.exports = async function handler(req, res) {
       return reply(response, 200, { message: 'Đã đăng xuất' });
     }
     if (p === '/api/auth/me' && method === 'GET') return reply(response, 200, { item: publicUser(user(request)) });
-    if (['/api/auth/forgot', '/api/auth/verify', '/api/auth/reset'].includes(p)) error(410, 'Chức năng khôi phục mật khẩu đã được gỡ bỏ');
+    if (p === '/api/auth/forgot' && method === 'POST') {
+      const a = await read();
+      const email = norm(a.email).toLowerCase();
+      if (!/^\S+@\S+\.\S+$/.test(email)) error(400, 'Email không hợp lệ');
+      const who = db.users.find(x => x.email.toLowerCase() === email);
+      // Always return success to avoid user enumeration
+      if (who && accountEnabled(who)) {
+        const code = String(Math.floor(100000 + Math.random() * 900000));
+        const expiresAt = new Date(Date.now() + 10 * 60000).toISOString();
+        await sql`DELETE FROM otp_requests WHERE email=${email}`;
+        await sql`INSERT INTO otp_requests(email,code,expires_at) VALUES(${email},${code},${expiresAt})`;
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey) {
+          try {
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                from: process.env.RESEND_FROM || 'LIGHTHOUSE <onboarding@resend.dev>',
+                to: [email],
+                subject: '[LIGHTHOUSE] Mã OTP đặt lại mật khẩu',
+                html: `<div style="font-family:sans-serif;max-width:480px"><h2 style="color:#1a3a5c">LIGHTHOUSE</h2><p>Mã OTP đặt lại mật khẩu của bạn:</p><div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#1a3a5c;margin:20px 0">${code}</div><p>Mã có hiệu lực trong <strong>10 phút</strong>.</p><p style="color:#888;font-size:12px">Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.</p></div>`
+              })
+            });
+          } catch { /* log silently, don't expose email errors to client */ }
+          return reply(response, 200, { message: 'Đã gửi mã OTP đến email của bạn.' });
+        } else {
+          // Dev mode: return code in response so it can be tested without email
+          return reply(response, 200, { message: 'Đã gửi mã OTP đến email của bạn.', devOtp: code });
+        }
+      }
+      return reply(response, 200, { message: 'Đã gửi mã OTP đến email của bạn.' });
+    }
+    if (p === '/api/auth/reset' && method === 'POST') {
+      const a = await read();
+      const email = norm(a.email).toLowerCase();
+      const code = norm(a.otp);
+      const newPass = typeof a.password === 'string' ? a.password : '';
+      if (!email || !code || !newPass) error(400, 'Vui lòng điền đầy đủ thông tin');
+      accountPassword(newPass);
+      const rows = await sql`SELECT code,expires_at FROM otp_requests WHERE email=${email} AND code=${code}`;
+      if (!rows.length) error(400, 'Mã OTP không đúng');
+      if (new Date(rows[0].expires_at) < new Date()) { await sql`DELETE FROM otp_requests WHERE email=${email}`; error(400, 'Mã OTP đã hết hạn'); }
+      const who = db.users.find(x => x.email.toLowerCase() === email);
+      if (!who) error(400, 'Mã OTP không đúng');
+      await sql`DELETE FROM otp_requests WHERE email=${email}`;
+      atomic(() => { who.passwordHash = hashPw(newPass); log(who, 'Đặt lại mật khẩu', who.id); });
+      return reply(response, 200, { message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.' });
+    }
+    if (p === '/api/auth/verify' && method === 'POST') error(410, 'Dùng /api/auth/reset để đặt lại mật khẩu sau khi có OTP');
 
     // ── Registrations ──
     if (p === '/api/registrations' && method === 'POST') {

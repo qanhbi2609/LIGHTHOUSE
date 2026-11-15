@@ -33,10 +33,10 @@
 .auth-remember{display:flex;align-items:center;gap:15px;margin:20px 0 0 34px;font-size:14px;color:#64748b}
 .auth-remember input{appearance:none;width:15px;height:15px;margin:0;border:1px solid #1e3a8a;border-radius:4px;background:#fff}
 .auth-remember input:checked{appearance:auto;accent-color:#2563eb}
-.auth-login-actions{margin-top:203px;text-align:center}
+.auth-login-actions{margin-top:120px;text-align:center}
 .auth-link{padding:0;border:0;border-radius:0;background:transparent;color:#1e3a8a;font-size:14px;font-weight:400}
 .auth-login-actions>.auth-link{display:block;text-decoration:underline;margin:15px auto}
-.auth-register{display:block;width:380px;max-width:100%;height:50px;margin:auto;background:#eff6ff;color:#1e3a8a;border:0;border-radius:10px;font-size:18px;font-weight:700}
+.auth-register{display:block;width:380px;max-width:100%;height:50px;margin:28px auto 0;background:#eff6ff;color:#1e3a8a;border:0;border-radius:10px;font-size:18px;font-weight:700}
 .auth-forgot h1{margin-top:96px;font-size:32px;line-height:38px}
 .auth-forgot-help{text-align:center;margin-top:33px!important}
 .auth-forgot form{margin-top:32px}
@@ -70,7 +70,7 @@
  .auth-card input:not([type=checkbox]){height:40px;font-size:13px}
  .auth-login-form>.auth-field+.auth-field{margin-top:20px}
  .auth-remember{margin-top:15px;margin-left:20px;font-size:12px}
- .auth-login-actions{margin-top:110px}
+ .auth-login-actions{margin-top:55px}
  .auth-primary{height:40px;width:150px;font-size:14px}
  .auth-register{height:40px;font-size:15px}
  .auth-eye{top:5px}
@@ -107,3 +107,16 @@
 .auth-forgot form{position:relative}.auth-forgot .auth-inline-error{position:absolute;top:56px;left:10px;margin:0}
 @media(min-width:1201px) and (min-height:951px){.auth-login-form:has(#auth-login-error:not(:empty)) .auth-login-actions{margin-top:180px}}
 .auth-reset input[aria-invalid=true]{border-color:#e2e8f0}
+/* Forgot-password additions */
+.auth-forgot-wrap{text-align:center;margin-top:12px;display:block}
+.auth-forgot-link{padding:0;border:0;background:transparent;color:#2563eb;font:400 13px/17px Roboto,Arial,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.auth-forgot-link:hover{color:#1d4ed8}.auth-forgot-link:disabled{color:#94a3b8;cursor:not-allowed;text-decoration:none}
+.auth-forgot-title{font-size:20px;font-weight:700;color:#1e3a8a;margin:0 0 8px;text-align:center}
+.auth-forgot-desc{font-size:13px;color:#64748b;margin:0 0 20px;text-align:center;line-height:1.5}
+.auth-secondary{display:block;width:380px;max-width:100%;height:50px;margin:12px auto 0;background:#f1f5f9;color:#1e3a8a;border:1px solid #e2e8f0;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer}
+.auth-secondary:hover{background:#e2e8f0}
+.auth-login-form .auth-forgot-wrap{margin-top:12px}
+/* Forgot-password step form spacing */
+#forgot-step1 .auth-login-actions,#forgot-step2 .auth-login-actions{margin-top:20px}
+#forgot-step1,#forgot-step2{padding-top:270px}
+@media(min-width:761px) and (max-height:950px){#forgot-step1,#forgot-step2{padding-top:190px}}
