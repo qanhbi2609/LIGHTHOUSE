@@ -18,9 +18,11 @@ let _ready = false;
 async function ensureReady() {
   if (_ready) return;
   const sql = getSql();
-  await sql`CREATE TABLE IF NOT EXISTS app_state(id TEXT PRIMARY KEY,data JSONB NOT NULL,updated_at TIMESTAMPTZ DEFAULT NOW())`;
-  await sql`CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,user_id TEXT NOT NULL,expires_at TIMESTAMPTZ NOT NULL)`;
-  await sql`CREATE TABLE IF NOT EXISTS uploads(filename TEXT PRIMARY KEY,mime_type TEXT NOT NULL,data TEXT NOT NULL,created_at TIMESTAMPTZ DEFAULT NOW())`;
+  await Promise.all([
+    sql`CREATE TABLE IF NOT EXISTS app_state(id TEXT PRIMARY KEY,data JSONB NOT NULL,updated_at TIMESTAMPTZ DEFAULT NOW())`,
+    sql`CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,user_id TEXT NOT NULL,expires_at TIMESTAMPTZ NOT NULL)`,
+    sql`CREATE TABLE IF NOT EXISTS uploads(filename TEXT PRIMARY KEY,mime_type TEXT NOT NULL,data TEXT NOT NULL,created_at TIMESTAMPTZ DEFAULT NOW())`
+  ]);
   const rows = await sql`SELECT id FROM app_state WHERE id='main'`;
   if (!rows.length) {
     const seed = buildSeed();
@@ -93,7 +95,6 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const db = await loadDb();
   const sql = getSql();
   const ROOM_CAPACITY = 6;
 
@@ -101,18 +102,20 @@ module.exports = async function handler(req, res) {
   const pendingUploads = new Map(); // filename → {mime, data}
   const deletedUploads = new Set();
 
-  // Pre-load existing upload filenames for localProof checks
-  const uploadRows = await sql`SELECT filename FROM uploads`;
+  const rawToken = (req.headers.authorization || '').replace(/^Bearer /, '') ||
+    (/(?:^|; )lh_media=([a-f0-9]+)/.exec(req.headers.cookie || '') || [])[1] || '';
+
+  // ── Independent Neon reads run concurrently (one network round-trip instead of three) ──
+  const [db, uploadRows, sr] = await Promise.all([
+    loadDb(),
+    sql`SELECT filename FROM uploads`,
+    rawToken ? sql`SELECT user_id,expires_at FROM sessions WHERE token=${rawToken} AND expires_at>NOW()` : Promise.resolve([])
+  ]);
   const existingUploads = new Set(uploadRows.map(r => r.filename));
 
   // ── Session (pre-loaded for this request) ─────────────────────────────────
-  const rawToken = (req.headers.authorization || '').replace(/^Bearer /, '') ||
-    (/(?:^|; )lh_media=([a-f0-9]+)/.exec(req.headers.cookie || '') || [])[1] || '';
   let currentSession = null;
-  if (rawToken) {
-    const sr = await sql`SELECT user_id,expires_at FROM sessions WHERE token=${rawToken} AND expires_at>NOW()`;
-    if (sr.length) currentSession = { id: sr[0].user_id, expires: new Date(sr[0].expires_at).getTime() };
-  }
+  if (sr.length) currentSession = { id: sr[0].user_id, expires: new Date(sr[0].expires_at).getTime() };
 
   // ── Dirty flag ────────────────────────────────────────────────────────────
   let dirty = false;
@@ -582,12 +585,11 @@ module.exports = async function handler(req, res) {
     if (!res.headersSent) reply(res, e.status || 500, { error: e.status ? e.message : 'Đã xảy ra lỗi hệ thống!' });
   }
 
-  // ── Flush uploads to Neon ─────────────────────────────────────────────────
-  if (dirty) await saveDb(db);
-  for (const [filename, { mime, data }] of pendingUploads) {
-    await sql`INSERT INTO uploads(filename,mime_type,data,created_at) VALUES(${filename},${mime},${data},NOW()) ON CONFLICT(filename) DO NOTHING`;
-  }
-  for (const filename of deletedUploads) {
-    await sql`DELETE FROM uploads WHERE filename=${filename}`;
-  }
+  // ── Flush uploads to Neon (all independent writes run concurrently) ───────
+  await Promise.all([
+    dirty ? saveDb(db) : Promise.resolve(),
+    ...[...pendingUploads].map(([filename, { mime, data }]) =>
+      sql`INSERT INTO uploads(filename,mime_type,data,created_at) VALUES(${filename},${mime},${data},NOW()) ON CONFLICT(filename) DO NOTHING`),
+    ...[...deletedUploads].map(filename => sql`DELETE FROM uploads WHERE filename=${filename}`)
+  ]);
 };

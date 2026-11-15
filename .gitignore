@@ -7,3 +7,4 @@ backend/uploads/
 artifacts/
 __pycache__/
 *.pyc
+.vercel
