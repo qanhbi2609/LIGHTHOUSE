@@ -30,7 +30,7 @@ test('UC03 and UC04 demo data match screenshot rows, counts and related profile 
  assert.deepEqual(regs.slice(0,7).map(r=>r.created),['2026-10-21','2026-10-06','2026-09-27','2026-09-13','2026-08-24','2026-08-09','2026-07-18']);
  assert.equal(regs[5].dob,'1999-06-01');assert.equal(regs[5].documents.length,3);
  const students=(await request('/api/students')).data.items;
- assert.equal(students.length,35);assert.equal(new Set(students.map(s=>s.id)).size,35);
+ assert.equal(students.length,15);assert.equal(new Set(students.map(s=>s.id)).size,15);
  assert.deepEqual(students.slice(0,3).map(s=>s.name),['Mai Hồng Ngọc','Nguyễn Khoa Tóc Tiên','Vũ Cát Tường']);
  const s=(await request('/api/students/LH001')).data.item;
  assert.equal(s.name,'Mai Hồng Ngọc');assert.equal(s.cohort,'2023-2027');assert.equal(s.files.length,1);assert.equal(db.students.find(x=>x.id==='LH001').files.length,2);assert.ok(s.files.every(f=>f.url));
@@ -39,7 +39,7 @@ test('UC03 and UC04 demo data match screenshot rows, counts and related profile 
  assert.deepEqual(s.supports.map(x=>x.amount),[8500000,1500000,520000,1800000]);
  assert.equal(s.supports[1].endDate,'2026-10-31');
  assert.ok(db.rooms.every(r=>db.students.filter(s=>s.room===r.id).length<=6));
- const proof=await fetch(url+s.files[0].url);assert.equal(proof.status,200);assert.match(proof.headers.get('content-type'),/^image\/png/);
+ const proof=await fetch(url+s.files[0].url,{headers:{Authorization:"Bearer "+token}});assert.equal(proof.status,200);assert.match(proof.headers.get('content-type'),/^image\/png/);
 });
 test('Restarting the comparison demo preserves saved edits instead of reseeding each startup',async()=>{
  const changed=await request('/api/students/LH001',{method:'PATCH',body:JSON.stringify({name:'Edited comparison profile'})});assert.equal(changed.status,200);

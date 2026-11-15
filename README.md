@@ -10,7 +10,9 @@ Chỉ làm việc trong repository `qanhbi2609/LIGHTHOUSE`.
 Workflow CI chạy API và browser smoke; CD và URL công khai cần kết nối hosting.
 Chưa nghiệm thu Final, chưa triển khai Production.
 
-Latest cross-site UI/permission fixes and their checks: [32 requested fixes](docs/UI-FIXES-2026-11-14.md).
+Round 2 requirements and verification: [15/11 fixes](docs/FIX-ROUND2-2026-11-15.md).
+
+Previous cross-site UI/permission fixes and their checks: [32 requested fixes](docs/UI-FIXES-2026-11-14.md).
 
 ## Run locally (Windows)
 
@@ -65,10 +67,10 @@ cd backend
 npm test
 ```
 
-67 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
+74 automated API, screenshot-data, registration, recovery-security and migration checks exercise authentication, signup/acceptance, profile updates, rooms, goals, grades, roles, reports, and audit.
 
 See [UC05/UC06 screens and scrolling](docs/UC05-UC06.md) and the
-[UC01–UC06 notification audit](docs/UC01-UC06-NOTIFICATIONS.md). Ten workflow browser
+[UC01–UC06 notification audit](docs/UC01-UC06-NOTIFICATIONS.md). Eleven workflow browser
 suites run in CI at 1920×1080 and 1366×768, plus one responsive suite at eight viewports.
 
 ## Architecture

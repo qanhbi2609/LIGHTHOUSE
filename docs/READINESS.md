@@ -8,6 +8,13 @@ các mục kiến trúc, dữ liệu và màn hình. Đây chưa phải đối c
 Figma chưa truy cập được do proxy trả 403. Số 66 Frame Quản lý và 8 Frame Sinh viên
 trong `FIGMA_AUDIT.md` là ghi chép có sẵn, chưa được xác minh lại trong lần này.
 
+## Sửa lỗi lần 2 — 15/11/2026
+
+PDF mới ưu tiên hơn các ghi chép trước: reset bộ lọc khi sidebar, active/pending
+lists, bắt buộc/nhiều minh chứng, quyền Giám đốc chỉ xem, kiểm tra HTTP file và giờ
+Việt Nam. Xem [FIX-ROUND2-2026-11-15.md](FIX-ROUND2-2026-11-15.md). Không reset
+hoặc thay cấu hình triển khai; role cap mới thay thế quyền Giám đốc/CanBo cũ.
+
 ## Sửa lỗi chung theo phản hồi nhóm — 14/11/2026
 
 Nguồn mới gồm PDF 7 trang và văn bản 32 yêu cầu. Bỏ khôi phục mật khẩu, thông báo

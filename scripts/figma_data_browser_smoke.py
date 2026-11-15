@@ -81,11 +81,11 @@ def main():
                         page.locator('.review-cancel').click()
                         expect(page.locator('.lh-feedback')).to_have_count(0)
                         page.evaluate("L.go('students')")
-                        expect(page.locator('.student-data tbody tr')).to_have_count(35)
+                        expect(page.locator('.student-data tbody tr')).to_have_count(15)
                         scroll_contract('uc04-list')
                         page.locator('#student-search').fill('Marketing')
-                        expect(page.locator('.student-data tbody tr')).to_have_count(2)
-                        expect(page.locator('.student-data tbody')).to_contain_text('Đặng Thu Hà')
+                        expect(page.locator('.student-data tbody tr')).to_have_count(1)
+                        expect(page.locator('.student-data tbody')).not_to_contain_text('Đặng Thu Hà')
                         expect(page.locator('.student-data tbody')).to_contain_text('Mai Hồng Ngọc')
                         shot('uc04-search-Marketing')
                         page.locator('[data-action=detail][data-id=LH001]').click()
@@ -95,7 +95,7 @@ def main():
                         shot('uc04-personal')
 
                         def check_proof(name):
-                            page.locator('.student-profile [data-preview]').first.click()
+                            page.locator('.student-profile :is([data-preview],[data-file-preview])').first.click()
                             crop = page.locator('.records-preview-crop')
                             expect(crop).to_be_visible()
                             assert crop.bounding_box()['width'] < 800

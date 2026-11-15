@@ -70,10 +70,10 @@ test('UC06 retains original proof names and failed resubmissions leave grades an
  db.grades.find(g=>g.id===id).previewRegion=[0,0,1,1];
  const pdf={name:'Bang diem bo sung.pdf',mime:'application/pdf',data:'data:application/pdf;base64,'+Buffer.from('%PDF-1.4\n%%EOF').toString('base64')};
  assert.equal((await call('grades/'+id+'/resubmit','PATCH',{...body,evidenceFile:pdf},student)).status,200);
- row=(await call('grades')).data.items.find(g=>g.id===id);assert.equal(row.evidenceName,pdf.name);assert.notEqual(row.evidence,proof);assert.equal(row.previewRegion,undefined);
- assert.equal((await fetch(url+row.evidence)).status,200);
+ row=(await call('grades')).data.items.find(g=>g.id===id);assert.deepEqual(row.evidenceFiles.map(f=>f.name),[file.name,pdf.name]);assert.equal(row.evidence,proof);assert.equal(row.previewRegion,undefined);
+ assert.equal((await fetch(url+row.evidence,{headers:{Authorization:"Bearer "+student}})).status,200);
  assert.equal((await call('grades/'+id+'/review','PATCH',{status:'Hợp lệ'})).status,200);
- assert.equal((await call('students/LH001')).data.item.grades.find(g=>g.id===id).evidenceName,pdf.name);
+ assert.equal((await call('students/LH001')).data.item.grades.find(g=>g.id===id).evidenceName,file.name);
 });
 test('UC04 UC05 UC06 share the saved student identity instead of copying screenshot names',async()=>{
  const old=db.students.find(s=>s.id==='LH001').name,name='Sinh viên kiểm thử liên UC';

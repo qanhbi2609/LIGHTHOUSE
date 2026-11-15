@@ -20,14 +20,14 @@ test('UC09 summary and create enforce real calendar dates, report types and gran
  const before=snapshot();for(const body of [{...range,from:'2026-02-30'},{...range,to:'2026-09-01'},{...range,type:'Unknown'},{...range,files:'bad'},{...range,files:Array(7).fill(png)},{...range,from:'1900-01-01',to:'1900-01-31'}]){assert.equal((await call('reports','POST',body)).status,400);assert.deepEqual(snapshot(),before);}
  assert.equal((await call('reports/summary?from=2026-02-30&to=2026-03-01')).status,400);
  assert.equal((await call('reports','POST',range,viewer)).status,403);assert.equal((await call('reports/summary?from=2026-10-01&to=2026-10-31','GET',undefined,student)).status,403);assert.deepEqual(snapshot(),before);
- assert.equal((await call('reports/summary?from=2026-10-01&to=2026-10-31','GET',undefined,viewer)).status,200);
+ assert.equal((await call('reports/summary?from=2026-10-01&to=2026-10-31','GET',undefined,viewer)).status,403);
 });
 test('UC09 generated report stores an authoritative snapshot and preserves older reports',async()=>{
  const old=structuredClone(db.reports),expected=aggregate(db,range.from,range.to,range.type);
  const created=await call('reports','POST',{...range,content:'Forged totals',reportData:{metrics:{ending:9999}},notes:'Nhận xét tiếng Việt <script>plain text</script>',files:[png]});assert.equal(created.status,201);id=created.data.item.id;
  assert.deepEqual(created.data.item.reportData,expected);assert.notEqual(created.data.item.content,'Forged totals');assert.equal(created.data.item.fileDetails[0].name,png.name);assert.deepEqual(db.reports.slice(1),old);
- await call('supports','POST',{studentId:'LH001',name:'New data after report',amount:50000,date:'2026-10-20'});
- const saved=(await call('reports/'+id)).data.item;assert.deepEqual(saved.reportData,expected);
+ await call('supports','POST',{studentId:'LH001',name:'New data after report',type:'Y tế',evidenceFile:png,amount:50000,date:'2026-10-20'});
+ const saved=(await call('reports/'+id)).data.item;assert.deepEqual(saved.reportData,expected);assert.equal(db.supports.at(-1).name,'New data after report');
  await call('reports/'+id,'PATCH',{content:'Do not overwrite generated data'});assert.notEqual((await call('reports/'+id)).data.item.content,'Do not overwrite generated data');
 });
 test('UC09 invalid attachment rolls back new files and does not partially change reports or history',async()=>{
@@ -37,7 +37,7 @@ test('UC09 invalid attachment rolls back new files and does not partially change
 test('UC09 preserves draft compatibility and exports an actual PDF with embedded Vietnamese fonts',async()=>{
  const created=await call('reports','POST',{type:'Báo cáo tháng',from:'2026-10-01',to:'2026-10-31',content:'Báo cáo cũ vẫn giữ nguyên',confirm:false});assert.equal(created.status,201);assert.equal(created.data.item.status,'Bản nháp');
  assert.equal((await call('reports/'+created.data.item.id,'PATCH',{notes:'Đã xem',confirm:true})).status,200);assert.equal((await call('reports/'+created.data.item.id)).data.item.content,'Báo cáo cũ vẫn giữ nguyên');
- const response=await fetch(base+'/api/reports/'+id+'/pdf',{headers:{Authorization:'Bearer '+viewer}});assert.equal(response.status,200);assert.match(response.headers.get('content-type'),/application\/pdf/);assert.match(response.headers.get('content-disposition'),new RegExp(id+'\\.pdf'));
+ const response=await fetch(base+'/api/reports/'+id+'/pdf',{headers:{Authorization:'Bearer '+manager}});assert.equal(response.status,200);assert.match(response.headers.get('content-type'),/application\/pdf/);assert.match(response.headers.get('content-disposition'),new RegExp(id+'\\.pdf'));
  const bytes=Buffer.from(await response.arrayBuffer());assert.equal(bytes.subarray(0,5).toString(),'%PDF-');assert.ok(bytes.length>5000);
  const {PDFDocument}=require('../vendor/pdf-lib-1.17.1'),pdf=await PDFDocument.load(bytes);assert.equal(pdf.getPageCount(),2);assert.match(pdf.getTitle(),/10\/2026/);
  const fontkit=require('../vendor/fontkit-1.1.1'),font=fontkit.create(fs.readFileSync(path.resolve(__dirname,'../../frontend/assets/fonts/pdf/Roboto-Regular.ttf')));assert.ok(font.hasGlyphForCodePoint('ế'.codePointAt(0)));

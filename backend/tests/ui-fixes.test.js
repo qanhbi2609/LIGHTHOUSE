@@ -14,11 +14,11 @@ test('required registration identity cannot be omitted, blank or bypassed by int
  const r=await call('registrations','POST',{...valid,files:[png]},'');assert.equal(r.status,201);const id=r.data.item.id,row=db.registrations.find(r=>r.id===id);row.status='Đạt yêu cầu';row.address='';const current=JSON.stringify(db);assert.equal((await call('registrations/'+id+'/accept','POST')).status,400);assert.equal(JSON.stringify(db),current);
 });
 test('registration supplement note can only change in the matching status',async()=>{
- const r=await call('registrations','POST',{...valid,email:'review@example.test'},'');assert.equal(r.status,201);const route='registrations/'+r.data.item.id,before=disk();assert.equal((await call(route,'PATCH',{status:'Đạt yêu cầu',note:'Forbidden note'})).status,400);assert.equal(disk(),before);
+ const r=await call('registrations','POST',{...valid,email:'review@example.test',files:[png]},'');assert.equal(r.status,201);const route='registrations/'+r.data.item.id,before=disk();assert.equal((await call(route,'PATCH',{status:'Đạt yêu cầu',note:'Forbidden note'})).status,400);assert.equal(disk(),before);
  assert.equal((await call(route,'PATCH',{status:'Chờ bổ sung',note:'Bổ sung giấy tờ'})).status,200);assert.equal((await call(route,'PATCH',{status:'Đạt yêu cầu'})).status,200);assert.equal(db.registrations.find(x=>x.id===r.data.item.id).note,'Bổ sung giấy tờ');
 });
 test('support requires all fields, one of four types, nonnegative amount and a real date',async()=>{
- const body={studentId:'LH001',name:'Hỗ trợ kiểm thử',type:'Học phí',amount:0,date:'2026-11-14'};const before=disk();
+ const body={evidenceFile:png,studentId:'LH001',name:'Hỗ trợ kiểm thử',type:'Học phí',amount:0,date:'2026-11-14'};const before=disk();
  for(const key of ['name','type','amount','date']){const a={...body};delete a[key];assert.equal((await call('supports','POST',a)).status,400,key);}for(const patch of [{type:'Tài chính'},{amount:-1},{amount:true},{amount:''},{amount:'NaN'},{date:'2026-02-30'}])assert.equal((await call('supports','POST',{...body,...patch})).status,400);assert.equal(disk(),before);
  for(const type of ['Học phí','Phí sinh hoạt','Y tế','Chi phí khác'])assert.equal((await call('supports','POST',{...body,type})).status,201);
 });
@@ -34,16 +34,16 @@ test('new passwords are required, hashed and editable; email is editable and ID 
  const student=db.users.find(u=>u.role==='SinhVien'&&u.studentId),profile=db.students.find(s=>s.id===student.studentId);assert.equal((await call('users/'+student.id,'PATCH',{name:'Tên đồng nhất đã sửa'})).status,200);assert.equal(profile.name,'Tên đồng nhất đã sửa');assert.equal((await call('students/'+profile.id)).data.item.name,'Tên đồng nhất đã sửa');assert.equal((await call('auth/login','POST',{email:student.email,password:'Demo@123'},'')).data.user.name,'Tên đồng nhất đã sửa');
 });
 test('director has only prescribed capabilities, including on direct API requests',async()=>{
- const before=disk(),u=(await call('auth/me','GET',undefined,director)).data.item;assert.deepEqual([...u.permissions].sort(),['users.manage','users.view','students.view','alumni.view','reports.view','history.view'].sort());
- for(const route of ['users','students','alumni','reports','history'])assert.equal((await call(route,'GET',undefined,director)).status,200,route);
- for(const route of ['rooms','registrations','grades','goals'])assert.equal((await call(route,'GET',undefined,director)).status,403,route);
+ const before=disk(),u=(await call('auth/me','GET',undefined,director)).data.item;assert.deepEqual([...u.permissions].sort(),['students.view','reports.view','history.view'].sort());
+ for(const route of ['students','reports','history'])assert.equal((await call(route,'GET',undefined,director)).status,200,route);
+ for(const route of ['users','alumni','rooms','registrations','grades','goals'])assert.equal((await call(route,'GET',undefined,director)).status,403,route);
  assert.equal((await call('students/LH001','PATCH',{name:'Forbidden'},director)).status,403);assert.equal((await call('reports','POST',{type:'Báo cáo tháng'},director)).status,403);assert.equal(disk(),before);
 });
 test('backend caps grants by recipient role and granting actor; existing hashes remain unchanged',async()=>{
  const before=disk();for(const [role,permissions] of [['CanBo',['users.manage']],['CanBo',['users.view']],['GiamDoc',['rooms.view']],['GiamDoc',['reports.edit']],['QuanLy',['*']]])assert.equal((await call('users','POST',{name:'Invalid',email:'invalid@example.test',role,permissions,password:'2609'})).status,400);
  assert.equal((await call('users','POST',{name:'Overgrant',email:'overgrant@example.test',role:'CanBo',permissions:['rooms.create'],password:'2609'},director)).status,403);assert.equal(disk(),before);
  const hashes=db.users.map(u=>u.passwordHash);const created=await call('users','POST',{name:'Delegated',email:'delegated@example.test',role:'QuanLy',permissions:['users.manage'],password:'2609'});assert.equal(created.status,201);const delegated=(await call('auth/login','POST',{email:'delegated@example.test',password:'2609'},'')).data.token;
- assert.equal((await call('users','POST',{name:'Escalation',email:'escalate@example.test',role:'CanBo',permissions:['students.edit'],password:'2609'},delegated)).status,403);assert.deepEqual(db.users.slice(0,hashes.length).map(u=>u.passwordHash),hashes);
+ assert.equal((await call('users','POST',{name:'Escalation',email:'escalate@example.test',role:'CanBo',permissions:['students.edit'],password:'2609'},delegated)).status,201);assert.deepEqual(db.users.slice(0,hashes.length).map(u=>u.passwordHash),hashes);
 });
 test('status changes preserve profile and audit, and move the student to alumni without deleting it',async()=>{
  const row=db.students.find(s=>s.id==='LH002'),n=db.students.length;const r=await call('students/LH002','PATCH',{status:'Đã kết thúc hỗ trợ',endReason:'Rời trước thời hạn'});assert.equal(r.status,200);assert.equal(db.students.length,n);assert.equal(row.endReason,'Rời trước thời hạn');assert.equal(row.room,null);assert.ok((await call('alumni')).data.items.some(s=>s.id===row.id));assert.ok(db.history.some(h=>h.subject===row.id));

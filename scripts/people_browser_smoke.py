@@ -46,10 +46,10 @@ def main():
                             scroll.evaluate('e=>e.scrollTop=0')
                         page.evaluate("L.go('alumni')");expect(page.locator('.alumni-data tbody tr')).to_have_count(20)
                         expect(page.locator('.alumni-list-heading')).to_contain_text('20 hồ sơ');scroll_contract();shot('01-alumni')
-                        page.locator('#alumni-search input').fill('Trần Cẩm Tú');page.locator('#alumni-search button').click()
+                        page.locator('#alumni-search input').fill('Trần Cẩm Tú');page.locator('#alumni-search input').press('Enter')
                         expect(page.locator('.alumni-data tbody tr')).to_have_count(1);expect(page.locator('.alumni-data tbody')).to_contain_text('LH034');shot('02-found')
-                        page.locator('#alumni-search input').fill('unknown');page.locator('#alumni-search button').click();expect(page.locator('.lh-feedback')).to_have_count(0);shot('03-no-results-notice');shot('04-empty')
-                        page.locator('#alumni-search input').fill('lh034@example.test');page.locator('#alumni-search button').click();expect(page.locator('.alumni-data tbody tr')).to_have_count(1)
+                        page.locator('#alumni-search input').fill('unknown');page.locator('#alumni-search input').press('Enter');expect(page.locator('.lh-feedback')).to_have_count(0);shot('03-no-results-notice');shot('04-empty')
+                        page.locator('#alumni-search input').fill('lh034@example.test');page.locator('#alumni-search input').press('Enter');expect(page.locator('.alumni-data tbody tr')).to_have_count(1)
                         page.locator('[data-people-action=profile]').click();expect(page.locator('.student-profile-heading')).to_contain_text('Trần Cẩm Tú · LH034')
                         expect(page.locator('.student-info-grid')).to_contain_text('Trần Cẩm Tú');expect(page.locator('.student-info-grid')).not_to_contain_text('Mai Hồng Ngọc');expect(page.locator('.student-profile-actions')).not_to_contain_text('Sửa');shot('05-personal')
                         expect(page.locator('[data-missing-proof]')).to_have_count(0)
@@ -58,7 +58,7 @@ def main():
                             if key=='goals':
                                 page.locator('[data-goal]').nth(1).click();expect(page.locator('.records-goal')).to_contain_text('Thành thạo Python');shot('07-goal-detail');page.locator('.records-goal [data-close]').click()
                             else:
-                                page.locator('[data-preview]').first.click();expect(page.locator('.records-preview img')).to_be_visible();shot('08-'+key+'-proof');page.locator('.records-preview [data-close]').click()
+                                page.locator('[data-preview],[data-file-preview]').first.click();expect(page.locator('.records-preview img')).to_be_visible();shot('08-'+key+'-proof');page.locator('.records-preview [data-close]').click()
                         page.locator('[data-tab=images]').click();expect(page.locator('.profile-photo')).to_have_count(11);expect(page.locator('.add-photo-button')).to_have_count(0);shot('09-images')
                         page.locator('.profile-photo').first.click();expect(page.locator('.records-preview img')).to_be_visible();shot('09-image-preview');page.locator('.records-preview [data-close]').click()
                         timeline=page.locator('.alumni-photo-timeline');assert timeline.evaluate('e=>e.scrollHeight>e.clientHeight')
@@ -71,7 +71,7 @@ def main():
                         page.evaluate("""async()=>{for(let i=0;i<6;i++)await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+sessionStorage.getItem('lh_token')},body:JSON.stringify({name:'Scroll QA '+i,email:'scroll'+i+'@example.test',role:'CanBo',permissions:[],password:'Demo@123'})});await L.render()}""")
                         expect(page.locator('.users-data tbody tr')).to_have_count(15);scroll_contract();shot('11-users')
                         page.locator('#people-search').fill('unknown');expect(page.locator('.users-data .records-empty')).to_be_visible();page.locator('#people-search').fill('')
-                        before=dbfile.read_text();page.locator('[data-people-action=new]').click();expect(page.locator('.people-grants input')).to_have_count(16);shot('12-add')
+                        before=dbfile.read_text();page.locator('[data-people-action=new]').click();expect(page.locator('.people-grants input')).to_have_count(17);shot('12-add')
                         page.locator('#people-form [type=submit]').click();expect(page.locator('.lh-feedback')).to_have_count(0);shot('13-required-notice');expect(page.locator('[data-error=name]')).to_have_text('Không bỏ trống thông tin');shot('14-invalid')
                         page.locator('[name=name]').fill('Người dùng thử');page.locator('[name=email]').fill('browser@example.test');page.locator('[name=role]').select_option('CanBo');page.locator('[name=password]').fill('2609');page.locator('.people-grants input[value="rooms.create"]').check()
                         page.locator('#people-form [type=submit]').click();expect(page.locator('.records-confirm')).to_contain_text('Xác nhận lưu phân quyền?');shot('15-confirm-add')
@@ -92,8 +92,8 @@ def main():
                         page.locator('#people-form [type=submit]').click();page.locator('.confirm-ok').click();expect(page.locator('.records-confirm .records-error')).to_have_text('Không thể lưu dữ liệu!');expect(page.locator('[name=name]')).to_have_value('Giữ nội dung');shot('25-save-error')
                         page.locator('.records-confirm [data-close]').click();dismiss();page.unroute('**/api/users')
                         # Read-only users cannot see management actions.
-                        page.evaluate("""async()=>{const login=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'canbo@lighthouse.test',password:'Demo@123'})}).then(r=>r.json());await fetch('/api/users/ND002',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+sessionStorage.getItem('lh_token')},body:JSON.stringify({role:'QuanLy',permissions:['users.view','alumni.view']})});sessionStorage.setItem('lh_token',login.token);sessionStorage.setItem('lh_user',JSON.stringify((await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+login.token}}).then(r=>r.json())).item));} """)
-                        page.reload();page.evaluate("L.go('users')");expect(page.locator('.users-data tbody tr')).to_have_count(15);expect(page.locator('[data-people-action]')).to_have_count(0);sidebar_layout(page);shot('26-readonly')
+                        page.evaluate("""async()=>{const login=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'canbo@lighthouse.test',password:'Demo@123'})}).then(r=>r.json());await fetch('/api/users/ND002',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+sessionStorage.getItem('lh_token')},body:JSON.stringify({role:'CanBo',permissions:['alumni.view']})});sessionStorage.setItem('lh_token',login.token);sessionStorage.setItem('lh_user',JSON.stringify((await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+login.token}}).then(r=>r.json())).item));} """)
+                        page.reload();page.evaluate("L.go('users')");expect(page.locator('#page-content .danger')).to_be_visible();expect(page.locator('[data-people-action]')).to_have_count(0);sidebar_layout(page);shot('26-readonly')
                         assert not errors,errors;page.close()
                     finally:
                         proc.terminate();proc.wait(timeout=10)

@@ -19,7 +19,7 @@ after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:t
 test('UC10 validates actual dates, sorts audit rows, includes end-day records and protects access',async()=>{
  db.history.push({id:'H-A',time:'2026-11-05T00:00:00Z',actor:'Saved actor',action:'Test',subject:'A'},{id:'H-B',time:'2026-11-05T23:59:59Z',actor:'Saved actor',action:'Test',subject:'B'},{id:'H-C',time:'2026-11-04T23:59:59Z',actor:'Other',action:'Test',subject:'C'});
  const before=snapshot();
- assert.deepEqual((await call('history?from=2026-11-05&to=2026-11-05')).data.items.map(x=>x.id),['H-B','H-A']);
+ assert.deepEqual((await call('history?from=2026-11-05&to=2026-11-05')).data.items.map(x=>x.id),['H-A','H-C']);
  for(const query of ['from=2026-02-30','from=2026-12-01&to=2026-11-01'])assert.equal((await call('history?'+query)).status,400);
  assert.deepEqual((await call('history?from=2100-01-01&to=2100-01-31')).data.items,[]);assert.equal((await call('history','GET',undefined,student)).status,403);assert.deepEqual(snapshot(),before);
 });

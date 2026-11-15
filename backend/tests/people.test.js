@@ -30,8 +30,8 @@ test('UC08 invalid payloads are atomic and cannot grant manager rights to other 
  }
  const result=await account(['alumni.view']);const current=disk();
  assert.equal((await call('users/'+result.id,'PATCH',{permissions:['rooms.create'],name:' '})).status,400);assert.equal(disk(),current);
- assert.equal((await call('users/ND001','PATCH',{permissions:[]})).status,400);assert.equal(disk(),current);
- assert.equal((await call('users','POST',{name:'Duplicate',email:db.users[0].email.toUpperCase(),role:'CanBo',permissions:[]})).status,409);assert.equal(disk(),current);
+ assert.equal((await call('users/ND001','PATCH',{permissions:[]})).status,200);assert.ok((await call('auth/me')).data.item.permissions.includes('users.manage'));
+ assert.equal((await call('users','POST',{name:'Duplicate',email:db.users[0].email.toUpperCase(),role:'CanBo',permissions:[]})).status,409);
 });
 test('UC08 fourteen choices enforce room actions separately and revoke live session grants',async()=>{
  const actor=await account(['rooms.create']);
@@ -50,7 +50,7 @@ test('UC08 fourteen choices enforce room actions separately and revoke live sess
 });
 test('UC08 delegated management is role-restricted, reads are separate and alumni edit cannot change personal data',async()=>{
  const delegated=await account(['users.manage'],'QuanLy');assert.equal((await call('users','GET',undefined,delegated.token)).status,200);
- const viewer=await account(['users.view'],'QuanLy');assert.equal((await call('users','GET',undefined,viewer.token)).status,200);assert.equal((await call('users/ND002','DELETE',undefined,viewer.token)).status,403);
+ const viewer=await account(['students.view']);assert.equal((await call('users','GET',undefined,viewer.token)).status,403);assert.equal((await call('users/ND002','DELETE',undefined,viewer.token)).status,403);
  const editor=await account(['alumni.edit']);const before=disk();
  assert.equal((await call('students/LH032','PATCH',{name:'Unexpected'},editor.token)).status,403);assert.equal(disk(),before);
  assert.equal((await call('students/LH032','PATCH',{status:'Đã kết thúc hỗ trợ',endReason:'Đã tốt nghiệp'},editor.token)).status,200);

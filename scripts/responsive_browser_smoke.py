@@ -66,7 +66,7 @@ def main():
                         for tab in ['personal','grades','goals','supports','images']:
                             page.locator(f'[data-tab={tab}]').click();no_overflow('profile-'+tab);shot('profile-'+tab)
                             if tab=='supports':
-                                page.locator('[data-action=add-support]').click();expect(page.locator('.records-support')).to_be_visible();no_overflow('support-editor')
+                                page.locator('[data-action=add-support]').click();expect(page.locator('.records-support')).to_be_visible();page.locator('#support-evidence').set_input_files([dict(name='long-'+('a'*100)+'.png',mimeType='image/png',buffer=(ROOT/'frontend/assets/auth-logo.png').read_bytes()),dict(name='proof-two.png',mimeType='image/png',buffer=(ROOT/'frontend/assets/auth-logo.png').read_bytes())]);no_overflow('support-editor')
                                 save=page.locator('.records-support [type=submit]');save.scroll_into_view_if_needed();b=save.bounding_box();assert b['y']+b['height']<=height+1;shot('support-editor')
                                 page.locator('.records-support [data-close]').click();expect(page.locator('.lh-feedback')).to_have_count(0)
                             if tab=='images':

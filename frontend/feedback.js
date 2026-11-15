@@ -14,3 +14,5 @@ window.LighthouseFeedback=(()=>{
 })();
 
 for(const event of ['input','change'])document.addEventListener(event,e=>{const field=e.target,form=field.closest?.('form');if(!form||!field.name)return;field.removeAttribute('aria-invalid');field.classList.remove('invalid');for(const error of form.querySelectorAll('[data-error]'))if(error.dataset.error===field.name)error.textContent='';const error=form.querySelector('#error-'+CSS.escape(field.name));if(error)error.textContent='';});
+
+new MutationObserver(()=>{for(const input of document.querySelectorAll('.search input'))if(input.placeholder!=='Nhập thông tin để tìm kiếm')input.placeholder='Nhập thông tin để tìm kiếm';}).observe(document.documentElement,{childList:true,subtree:true});
