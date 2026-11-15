@@ -1,5 +1,5 @@
 const fs=require('fs'),path=require('path'),crypto=require('crypto');
-const dir=path.resolve(process.env.LIGHTHOUSE_DATA_DIR||path.join(__dirname,'data')),file=path.join(dir,'lighthouse.json');
+const {comparison,dataDir:dir,dataFile:file}=require('./storage');
 const hash=pass=>{const salt=crypto.randomBytes(16).toString('hex');return salt+':'+crypto.scryptSync(pass,salt,64).toString('hex')};
 const users=[
  ['ND001','Quản lý Lighthouse','quanly@lighthouse.test','QuanLy',null,['*']],
@@ -21,11 +21,41 @@ const registrations=[
  {id:'HS004',name:'Phạm Ngọc Lan',email:'teststudent4@example.test',phone:'0900000004',dob:'2001-09-17',cccd:'',hometown:'Quảng Bình',address:'Đà Nẵng',school:'Đại học Ngoại ngữ - Đại học Đà Nẵng',major:'Ngôn ngữ Anh',family:'Hộ khó khăn',description:'',files:[],status:'Đã tiếp nhận',note:'',created:'2020-09-01'},
  {id:'HS005',name:'Đỗ Mai Chi',email:'maychi@example.test',phone:'0900000005',dob:'2006-05-05',cccd:'',hometown:'Quảng Trị',address:'Đà Nẵng',school:'Đại học Kinh tế - Đại học Đà Nẵng',major:'Kế toán',family:'Hộ khó khăn',description:'Cần hỗ trợ chỗ ở',files:[],status:'Chờ kiểm tra',note:'',created:now.slice(0,10)}
 ];
-const db={users,students,registrations,rooms:[{id:'A101',capacity:4},{id:'A102',capacity:4},{id:'B101',capacity:4}],images:[],
+const db={users,students,registrations,rooms:[{id:'A101',capacity:6},{id:'A102',capacity:6},{id:'B101',capacity:6}],images:[],
  goals:[{id:'MT001',studentId:'LH001',name:'Hoàn thành các học phần',detail:'Đạt GPA tối thiểu 3.0 trong học kỳ tới',sent:'2026-09-20',status:'Chờ đánh giá',feedback:''},{id:'MT002',studentId:'LH002',name:'Tiếng Anh B1',detail:'Ôn luyện và thi chứng chỉ tiếng Anh B1',sent:'2026-09-22',status:'Chờ đánh giá',feedback:''}],
  grades:[{id:'KQ001',studentId:'LH001',term:'1',year:'2025-2026',gpa:3.45,rank:'Giỏi',debts:0,certificates:'Tiếng Anh B1',evidence:'',status:'Chờ xét duyệt',requestNote:'',sent:'2026-09-21'},{id:'KQ002',studentId:'LH002',term:'2',year:'2025-2026',gpa:3.2,rank:'Giỏi',debts:0,certificates:'Tin học',evidence:'',status:'Chờ xét duyệt',requestNote:'',sent:'2026-09-25'}],
  supports:[{id:'HT001',studentId:'LH001',name:'Học phí',type:'Tài chính',amount:3000000,date:'2026-06-10',evidence:''},{id:'HT002',studentId:'LH003',name:'Sách vở',type:'Học tập',amount:450000,date:'2026-08-21',evidence:''}],
  reports:[{id:'BC001',type:'Báo cáo tháng',from:'2026-10-01',to:'2026-10-31',content:'Tổng hợp hoạt động hỗ trợ sinh viên trong tháng.',notes:'Báo cáo minh họa với dữ liệu giả lập.',files:[],status:'Đã lưu',author:'ND001',created:now,updated:now}],
  history:[{id:'LS001',userId:'ND001',actor:'Quản lý Lighthouse',action:'Tạo phòng',subject:'A101',time:now}],otps:[]};
-fs.mkdirSync(dir,{recursive:true});if(!fs.existsSync(file)||process.argv.includes('--reset'))fs.writeFileSync(file,JSON.stringify(db,null,2)+'\n');
+fs.mkdirSync(dir,{recursive:true});if(!fs.existsSync(file)||process.argv.includes('--reset')){
+ if(comparison)require('./fixtures/figma').applyFigmaFixture(db);
+ if(comparison)require('./fixtures/uc05-06').upgradeUC56(db);
+ if(comparison)require('./fixtures/uc07-08').upgradeUC78(db);
+ if(comparison)require('./fixtures/uc03-04-update').upgradeUC34(db);
+ fs.writeFileSync(file,JSON.stringify(db,null,2)+'\n');
+}
+if(comparison){
+ const existing=JSON.parse(fs.readFileSync(file,'utf8'));
+ if(require('./fixtures/uc05-06').upgradeUC56(existing)){
+  const backup=file+'.before-uc05-06.bak';if(!fs.existsSync(backup))fs.copyFileSync(file,backup);
+  fs.writeFileSync(file+'.tmp',JSON.stringify(existing,null,2)+'\n');fs.renameSync(file+'.tmp',file);
+ }
+ if(require('./fixtures/uc07-08').upgradeUC78(existing)){
+  const backup=file+'.before-uc07-08.bak';if(!fs.existsSync(backup))fs.copyFileSync(file,backup);
+  fs.writeFileSync(file+'.tmp',JSON.stringify(existing,null,2)+'\n');fs.renameSync(file+'.tmp',file);
+ }
+ if(require('./fixtures/uc03-04-update').upgradeUC34(existing)){
+  const backup=file+'.before-uc03-04-update.bak';if(!fs.existsSync(backup))fs.copyFileSync(file,backup);
+  fs.writeFileSync(file+'.tmp',JSON.stringify(existing,null,2)+'\n');fs.renameSync(file+'.tmp',file);
+ }
+ const uploads=path.resolve(process.env.LIGHTHOUSE_UPLOADS_DIR||path.join(__dirname,'uploads'));
+ fs.mkdirSync(uploads,{recursive:true});
+ for(const name of fs.readdirSync(path.join(__dirname,'fixtures')).filter(n=>/^alumni-.*\.png$/.test(n))){
+  const dest=path.join(uploads,name);if(!fs.existsSync(dest))fs.copyFileSync(path.join(__dirname,'fixtures',name),dest);
+ }
+ for(const kind of ['family','grades','invoice']){
+  const dest=path.join(uploads,`figma-${kind}.png`);
+  if(!fs.existsSync(dest))fs.copyFileSync(path.join(__dirname,'fixtures',`figma-${kind}.png`),dest);
+ }
+}
 console.log('Đã chuẩn bị dữ liệu demo ở',file); 

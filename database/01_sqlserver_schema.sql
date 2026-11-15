@@ -66,7 +66,7 @@ CREATE TABLE GiayToMinhChung (
 GO
 CREATE TABLE Phong (
   maPhong VARCHAR(20) NOT NULL PRIMARY KEY,
-  sucChua INT NOT NULL CHECK (sucChua > 0),
+  sucChua INT NOT NULL DEFAULT 6 CHECK (sucChua = 6),
   trangThaiPhong NVARCHAR(50) NOT NULL DEFAULT N'Trống'
 );
 GO

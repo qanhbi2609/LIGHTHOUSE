@@ -7,6 +7,13 @@
 - Page `final` (`66:258`): có màn hình đăng nhập/quên mật khẩu và các Frame cũ.
 - Kích thước Frame chính: **1920 × 1080 px**, Sidebar **260 px**, màu xanh chủ đạo Lighthouse, Roboto.
 
+## Cập nhật UC01 sau khi người dùng bổ sung ảnh
+
+Đã bổ sung nguyên bản ảnh nền 1920×1080 và logo trong suốt 120×120 từ `Downloads.zip`,
+đổi chữ LIGHTHOUSE sang Ribeye và tách các trạng thái xác thực. Chi tiết và giới hạn kiểm thử
+ở [UC01](docs/UC01.md). Mục thiếu asset UC01 bên dưới là ghi chép cũ, nay đã được xử lý;
+việc đối chiếu pixel đầy đủ với Figma và các UC khác vẫn chưa nghiệm thu.
+
 ## Các phần đã đổi trong source so với prototype trước
 1. Bỏ trang “Tổng quan”, dải nhãn `TEST BUILD` và phần nội dung giới thiệu demo tự thêm ở màn hình quản lý.
 2. Bố cục Sidebar/Header, nền gradient, cỡ chữ, bảng, nút, thẻ thống kê, thẻ phòng được điều chỉnh theo các Frame nguồn.

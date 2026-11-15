@@ -1,0 +1,102 @@
+name: LIGHTHOUSE checks
+on:
+  push:
+    branches: [main, staging, 'codex/**']
+  pull_request:
+    branches: [main, staging]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    name: API and browser smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: API integration tests
+        working-directory: backend
+        env:
+          LIGHTHOUSE_UPLOADS_DIR: ${{ runner.temp }}/lighthouse-test-uploads
+        run: npm test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser test tools
+        run: |
+          python -m pip install playwright==1.62.0
+          python -m playwright install --with-deps chromium
+      - name: Browser — browser
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/browser_smoke.py 2>&1 | tee artifacts/logs/browser.log
+      - name: Browser — auth
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/auth_browser_smoke.py 2>&1 | tee artifacts/logs/auth.log
+      - name: Browser — registration
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/registration_browser_smoke.py 2>&1 | tee artifacts/logs/registration.log
+      - name: Browser — records
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/records_browser_smoke.py 2>&1 | tee artifacts/logs/records.log
+      - name: Browser — figma_data
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/figma_data_browser_smoke.py 2>&1 | tee artifacts/logs/figma_data.log
+      - name: Browser — management
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/management_browser_smoke.py 2>&1 | tee artifacts/logs/management.log
+      - name: Browser — people
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/people_browser_smoke.py 2>&1 | tee artifacts/logs/people.log
+      - name: Browser — reports
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/reports_browser_smoke.py 2>&1 | tee artifacts/logs/reports.log
+      - name: Browser — student_history
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/student_history_browser_smoke.py 2>&1 | tee artifacts/logs/student_history.log
+      - name: Browser — ui_fixes
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/ui_fixes_browser_smoke.py 2>&1 | tee artifacts/logs/ui_fixes.log
+      - name: Browser — round2
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/round2_browser_smoke.py 2>&1 | tee artifacts/logs/round2.log
+      - name: Browser — round3
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/round3_browser_smoke.py 2>&1 | tee artifacts/logs/round3.log
+      - name: Browser — responsive
+        run: |
+          mkdir -p artifacts/logs
+          python scripts/responsive_browser_smoke.py 2>&1 | tee artifacts/logs/responsive.log
+      - name: Browser failure details
+        if: failure()
+        run: |
+          python - <<'PYTHON'
+          import os
+          from pathlib import Path
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as output:
+              for log in Path('artifacts/logs').glob('*.log'):
+                  output.write('### '+log.stem+'\n\n```text\n'+'\n'.join(log.read_text() .splitlines()[-100:])+'\n```\n')
+          PYTHON
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence
+          path: artifacts/
+          if-no-files-found: ignore

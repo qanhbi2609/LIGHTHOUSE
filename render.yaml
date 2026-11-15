@@ -4,9 +4,12 @@
 services:
   - type: web
     name: lighthouse-uc11-test
+    branch: staging
+    autoDeploy: false # Enable only after CI gating is configured and verified.
+    healthCheckPath: /api/health
     runtime: node
     rootDir: backend
-    buildCommand: npm install --omit=dev
+    buildCommand: node --check server.js
     startCommand: npm start
     envVars:
       - key: NODE_ENV
